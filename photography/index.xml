@@ -2,7 +2,7 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Photography on Dimitri Bohlender</title>
-    <link>https://bohlender.github.io/photography/</link>
+    <link>http://bohlender.github.io/photography/</link>
     <description>Recent content in Photography on Dimitri Bohlender</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-gb</language>
@@ -11,7 +11,7 @@
     <copyright>© Dimitri Bohlender</copyright>
     <lastBuildDate>Tue, 27 Aug 2019 17:05:05 +0200</lastBuildDate>
     
-	<atom:link href="https://bohlender.github.io/photography/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="http://bohlender.github.io/photography/index.xml" rel="self" type="application/rss+xml" />
     
     
   </channel>
