@@ -2,7 +2,7 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Projects on Dimitri Bohlender</title>
-    <link>http://bohlender.github.io/projects/</link>
+    <link>https://bohlender.github.io/projects/</link>
     <description>Recent content in Projects on Dimitri Bohlender</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-gb</language>
@@ -11,65 +11,65 @@
     <copyright>© Dimitri Bohlender</copyright>
     <lastBuildDate>Mon, 02 Sep 2019 13:33:18 +0200</lastBuildDate>
     
-	<atom:link href="http://bohlender.github.io/projects/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://bohlender.github.io/projects/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Personal Website</title>
-      <link>http://bohlender.github.io/projects/personal-website/</link>
+      <link>https://bohlender.github.io/projects/personal-website/</link>
       <pubDate>Thu, 05 Sep 2019 21:07:25 +0200</pubDate>
       <author>contact@bohlender.pro (Dimitri Bohlender)</author>
-      <guid>http://bohlender.github.io/projects/personal-website/</guid>
+      <guid>https://bohlender.github.io/projects/personal-website/</guid>
       <description>With the end of my PhD looming on the horizon, I wanted to get a short CV and some information about me online. However, I wasn&amp;rsquo;t interested in generic, impersonal solutions, such as the services of career-oriented social networking sites.
 I used this opportunity to learn some web development basics, and build a static website that serves as both a portfolio and an outlet for all things creative. It&amp;rsquo;s the site you&amp;rsquo;re looking at right now.</description>
     </item>
     
     <item>
       <title>Arcade.PLC</title>
-      <link>http://bohlender.github.io/projects/arcade/</link>
+      <link>https://bohlender.github.io/projects/arcade/</link>
       <pubDate>Tue, 01 Jan 2019 00:00:00 +0000</pubDate>
       <author>contact@bohlender.pro (Dimitri Bohlender)</author>
-      <guid>http://bohlender.github.io/projects/arcade/</guid>
+      <guid>https://bohlender.github.io/projects/arcade/</guid>
       <description>I worked on Arcade.PLC on two occasions: during my bachelor&amp;rsquo;s thesis, and my time as research associate at Embedded Software. Arcade.PLC is both a tool and a framework for formal verification of industrial control software, featuring procedures for static analysis, automated test generation and model checking.
 It started out as explicit state-space exploration based on abstract interpretation, which is what I&amp;rsquo;ve been integrating abstractions into during my bachelor&amp;rsquo;s thesis, but was extended with various SMT-based methods during my PhD.</description>
     </item>
     
     <item>
       <title>vim-smt2</title>
-      <link>http://bohlender.github.io/projects/vim-smt2/</link>
+      <link>https://bohlender.github.io/projects/vim-smt2/</link>
       <pubDate>Tue, 10 Oct 2017 00:00:00 +0000</pubDate>
       <author>contact@bohlender.pro (Dimitri Bohlender)</author>
-      <guid>http://bohlender.github.io/projects/vim-smt2/</guid>
+      <guid>https://bohlender.github.io/projects/vim-smt2/</guid>
       <description>Although SMT-LIB is the standard language supported by most SMT solvers, some of them introduce custom language extensions. Such extensions may range from syntactical sugar to fine-grained control over the underlying solver-procedure.
 Since I&amp;rsquo;m an avid user of Z3, I started vim-smt2 to have a plugin for the Vim editor that supports both the base SMT-LIB language and the extensions provided by Z3. Besides the basic syntax highlighting I&amp;rsquo;m implementing convenient features, such as querying satisfiability or the solver&amp;rsquo;s version, when I find myself repeatedly doing automatable tasks manually.</description>
     </item>
     
     <item>
       <title>Storm</title>
-      <link>http://bohlender.github.io/projects/storm/</link>
+      <link>https://bohlender.github.io/projects/storm/</link>
       <pubDate>Tue, 02 Sep 2014 00:00:00 +0000</pubDate>
       <author>contact@bohlender.pro (Dimitri Bohlender)</author>
-      <guid>http://bohlender.github.io/projects/storm/</guid>
+      <guid>https://bohlender.github.io/projects/storm/</guid>
       <description>In the context of my master&amp;rsquo;s thesis I&amp;rsquo;ve worked on the Storm probabilistic model checker. In particular, I developed a fully symbolic variant of the partially explicit procedure used in PASS for probabilistic reachability checking of Markov decision processes.
 I used SMT-solving to compute a menu-based abstraction, and refine it in a counterexample-guided fashion. The abstraction was stored in terms of MTBDDs, for which I developed both the actual symbolic value iteration and symbolic static analyses for preprocessing.</description>
     </item>
     
     <item>
       <title>HASDEL</title>
-      <link>http://bohlender.github.io/projects/hasdel/</link>
+      <link>https://bohlender.github.io/projects/hasdel/</link>
       <pubDate>Mon, 01 Apr 2013 00:00:00 +0000</pubDate>
       <author>contact@bohlender.pro (Dimitri Bohlender)</author>
-      <guid>http://bohlender.github.io/projects/hasdel/</guid>
+      <guid>https://bohlender.github.io/projects/hasdel/</guid>
       <description>When I was a research assistant at MOVES, I was involved in the HASDEL project. This was an ESA project, aiming to provide RAMS analyses tailored to the specific needs of launcher systems. Since this was a successor of the COMPASS project, the original COMPASS toolset had to be extended.
 In COMPASS, the system specification is written in the SLIM language. I was mainly responsible for adapting the SLIM compiler front and middle end, to support the language extensions proposed for HASDEL.</description>
     </item>
     
     <item>
       <title>Signal-Flow Analysis for MATLAB Simulink</title>
-      <link>http://bohlender.github.io/projects/signal-flow/</link>
+      <link>https://bohlender.github.io/projects/signal-flow/</link>
       <pubDate>Sun, 01 Apr 2012 00:00:00 +0000</pubDate>
       <author>contact@bohlender.pro (Dimitri Bohlender)</author>
-      <guid>http://bohlender.github.io/projects/signal-flow/</guid>
+      <guid>https://bohlender.github.io/projects/signal-flow/</guid>
       <description>When I was a research assistant at Embedded Software, I was involved in a research project with Daimler AG. With MATLAB Simulink being a popular choice for the development of embedded software in the automotive domain, this project aimed to develop model-based analyses to aid developers of Simulink models.
 Tracking a signal&amp;rsquo;s (potential) flow manually, given the highly modular and hierarchical models, is prone to error. To simplify this, I adapted standard dataflow analyses for programs to this domain.</description>
     </item>
