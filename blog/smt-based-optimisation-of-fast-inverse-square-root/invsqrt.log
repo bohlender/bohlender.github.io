@@ -1,0 +1,101 @@
+===========[ Test encoding ]===========
+sat
+f (should be 0x016EB3C0):
+(fp #b0 #x02 #b11011101011001111000000)
+true
+
+fSqrt (should be 0x20773327):
+(fp #b0 #x40 #b11101110011001100100111)
+true
+
+fFast (should be 0x5E84530F):
+(fp #b0 #xbd #b00001000101001100001111)
+true
+
+relErr (should be 0x3AE5B000):
+(fp #b0 #x75 #b11001011011000000000000)
+true
+
+======[ Correct for all floats? ]======
+sat
+SAT means that a violation is possible
+Problematic float:
+(_ +oo 8 24)
+#x7f800000
+
+===[ When excluding +/- infinity? ]====
+sat
+SAT means that a violation is possible
+Problematic float:
+(_ +zero 8 24)
+#x00000000
+
+==[ When also excluding +/- zero? ]====
+sat
+SAT means that a violation is possible
+Problematic float:
+(fp #b0 #x00 #b00000000000000000000001)
+#x00000001
+
+==[ When also excluding subnormals? ]==
+unsat
+UNSAT means that no violation is possible
+For normal floats the relative error stays below 1%
+
+===[ Max. relative error <= 0.001? ]===
+sat
+SAT means that a violation is possible
+Problematic float:
+(fp #b0 #x82 #b00101000011111000101100)
+#x41143e2c
+relErr:
+(/ 22665.0 16777216.0)
+(fp #b0 #x75 #b01100010001001000000000)
+
+==[ Max. relative error <= 0.0015? ]===
+sat
+SAT means that a violation is possible
+Problematic float:
+(fp #b0 #xd8 #b11100101011001100000000)
+#x6c72b300
+relErr:
+(/ 28637.0 16777216.0)
+(fp #b0 #x75 #b10111111011101000000000)
+
+=[ Max. relative error <= 0.00175..? ]=
+sat
+SAT means that a violation is possible
+Problematic float:
+(fp #b0 #x56 #b11011101011001111000000)
+#x2b6eb3c0
+relErr:
+(/ 3675.0 2097152.0)
+(fp #b0 #x75 #b11001011011000000000000)
+This is in fact the worst possible float, causing the maximal relative error
+Increasing the bound will render the constraints UNSAT
+
+====[ Check with increased bound ]=====
+unsat
+The relative error can indeed not grow further
+The maximal relative error is exactly 0.0017523765563964844 (0x3AE5B000)
+
+==[ Is there a better magic number? ]==
+sat
+
+SAT means that a better one exists (max rel err < 0.001752)
+magic:
+#x5f375a4c
+
+=[ Magic with rel. err < 0x3AE58E00? ]=
+sat
+
+SAT means that a better one exists (max rel err < 0.00175133)
+magic:
+#x5f375a81
+This is in fact an optimal constant, minimising the maximal relative error to 0.0017513036.. (0x3AE58C00)
+Decreasing the bound will render the constraints UNSAT
+
+=[ Magic with rel. err < 0x3AE58C00? ]=
+unsat
+
+For no magic number is the maximal relative error below 0.0017513036.. (0x3AE58C00)

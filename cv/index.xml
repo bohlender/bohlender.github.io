@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>About on Dimitri Bohlender</title>
+    <link>https://bohlender.github.io/cv/</link>
+    <description>Recent content in About on Dimitri Bohlender</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-gb</language>
+    <managingEditor>contact@bohlender.pro (Dimitri Bohlender)</managingEditor>
+    <webMaster>contact@bohlender.pro (Dimitri Bohlender)</webMaster>
+    <copyright>© Dimitri Bohlender</copyright>
+    <lastBuildDate>Tue, 27 Aug 2019 00:14:04 +0200</lastBuildDate>
+    
+	<atom:link href="https://bohlender.github.io/cv/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Leveraging Horn Clause Solving for Compositional Verification of PLC Software</title>
+      <link>https://bohlender.github.io/cv/publications/2020-deds/</link>
+      <pubDate>Wed, 01 Jan 2020 00:00:00 +0000</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/cv/publications/2020-deds/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Explainability as a Non-Functional Requirement</title>
+      <link>https://bohlender.github.io/cv/publications/2019-re/</link>
+      <pubDate>Mon, 23 Sep 2019 00:00:00 +0000</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/cv/publications/2019-re/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Viability of BDDs in Property Directed Reachability</title>
+      <link>https://bohlender.github.io/cv/work/supervision/2018-ma2/</link>
+      <pubDate>Sun, 21 Oct 2018 00:00:00 +0000</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/cv/work/supervision/2018-ma2/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Abstraction Refinement in Incremental Cycle-bounded Model Checking</title>
+      <link>https://bohlender.github.io/cv/work/supervision/2018-ma/</link>
+      <pubDate>Tue, 02 Oct 2018 00:00:00 +0000</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/cv/work/supervision/2018-ma/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Design and Verification of Restart-robust Industrial Control Software</title>
+      <link>https://bohlender.github.io/cv/publications/2018-ifm/</link>
+      <pubDate>Wed, 05 Sep 2018 00:00:00 +0000</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/cv/publications/2018-ifm/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Verification Technology, Systems &amp; Applications</title>
+      <link>https://bohlender.github.io/cv/education/summer-schools/2018-vtsa/</link>
+      <pubDate>Mon, 27 Aug 2018 00:00:00 +0000</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/cv/education/summer-schools/2018-vtsa/</guid>
+      <description>Applied for this edition to learn about both deductive verification and what to look out for when implementing BMC for LLVM IR.</description>
+    </item>
+    
+    <item>
+      <title>Compositional Verification of PLC Software using Horn Clauses and Mode Abstraction</title>
+      <link>https://bohlender.github.io/cv/publications/2018-wodes/</link>
+      <pubDate>Fri, 01 Jun 2018 00:00:00 +0000</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/cv/publications/2018-wodes/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Cycle-bounded Model Checking of PLC Software via Dynamic Large-Block Encoding</title>
+      <link>https://bohlender.github.io/cv/publications/2018-sac/</link>
+      <pubDate>Mon, 09 Apr 2018 00:00:00 +0000</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/cv/publications/2018-sac/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>A Priori Test Coverage Estimation for Automated Production Systems: Using Generated Behavior Models for Coverage Calculation</title>
+      <link>https://bohlender.github.io/cv/publications/2017-etfa/</link>
+      <pubDate>Tue, 12 Sep 2017 00:00:00 +0000</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/cv/publications/2017-etfa/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Logical Methods for Safety and Security of Software Systems</title>
+      <link>https://bohlender.github.io/cv/education/summer-schools/2017-marktoberdorf/</link>
+      <pubDate>Wed, 02 Aug 2017 00:00:00 +0000</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/cv/education/summer-schools/2017-marktoberdorf/</guid>
+      <description>Attended the summer school for all things formal. I applied for this edition since it had a particularly strong lineup of lecturers in the domain of software verification.</description>
+    </item>
+    
+    <item>
+      <title>A Unifying Formalism for PDR-based Software Verification</title>
+      <link>https://bohlender.github.io/cv/work/supervision/2017-ma/</link>
+      <pubDate>Thu, 23 Mar 2017 00:00:00 +0000</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/cv/work/supervision/2017-ma/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Cycle-bounded Model Checking of Reactive Programs</title>
+      <link>https://bohlender.github.io/cv/work/supervision/2016-ma/</link>
+      <pubDate>Tue, 06 Sep 2016 00:00:00 +0000</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/cv/work/supervision/2016-ma/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Concolic Test Generation for PLC Programs using Coverage Metrics</title>
+      <link>https://bohlender.github.io/cv/publications/2016-wodes/</link>
+      <pubDate>Mon, 30 May 2016 00:00:00 +0000</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/cv/publications/2016-wodes/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Symbolic Verification of PLC Safety-Applications based on PLCopen Automata</title>
+      <link>https://bohlender.github.io/cv/publications/2016-mbmv/</link>
+      <pubDate>Tue, 01 Mar 2016 00:00:00 +0000</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/cv/publications/2016-mbmv/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Formal and semi-formal Methods for Embedded Software (Seminar)</title>
+      <link>https://bohlender.github.io/cv/work/teaching/2015-seminar/</link>
+      <pubDate>Thu, 01 Oct 2015 00:00:00 +0000</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/cv/work/teaching/2015-seminar/</guid>
+      <description>Taught scientific writing and giving a talk on the basis of recent publications in the formal methods community.</description>
+    </item>
+    
+    <item>
+      <title>Formal Methods for Logic Control Software (Lecture &amp; Exercises)</title>
+      <link>https://bohlender.github.io/cv/work/teaching/2015-fmlcs/</link>
+      <pubDate>Thu, 01 Oct 2015 00:00:00 +0000</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/cv/work/teaching/2015-fmlcs/</guid>
+      <description>Proposed the lecture and was reponsible for its design and all related materials. The lecture covers state-of-the-art techniques in static analysis and model checking of logic control software.</description>
+    </item>
+    
+    <item>
+      <title>IC3-based Model Checking for PLC Programs</title>
+      <link>https://bohlender.github.io/cv/work/supervision/2015-ma/</link>
+      <pubDate>Mon, 16 Mar 2015 00:00:00 +0000</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/cv/work/supervision/2015-ma/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Efficient Encoding of PLC Programs for nuXmv</title>
+      <link>https://bohlender.github.io/cv/work/supervision/2015-ba/</link>
+      <pubDate>Wed, 11 Mar 2015 00:00:00 +0000</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/cv/work/supervision/2015-ba/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>PhD candidate</title>
+      <link>https://bohlender.github.io/cv/education/2014-phd/</link>
+      <pubDate>Sat, 01 Nov 2014 00:00:00 +0000</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/cv/education/2014-phd/</guid>
+      <description>Working on formal verification of control software from the automation domain. I leverage SAT/SMT solving and abstract interpretation to develop techniques for proving a program&amp;rsquo;s compliance with various specifications, synthesis of safe parameters and automated test generation.</description>
+    </item>
+    
+    <item>
+      <title>Research Associate</title>
+      <link>https://bohlender.github.io/cv/work/2014-research-associate/</link>
+      <pubDate>Sat, 01 Nov 2014 00:00:00 +0000</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/cv/work/2014-research-associate/</guid>
+      <description>Teaching and working on Arcade.PLC, a platform for verification of software for industrial controllers, featuring model checking procedures and static analyses. The work on this project involves abstracting the concrete program semantics to avoid exhaustive exploration of the program&amp;rsquo;s state space, and formalising and exploiting peculiarities of both the properties of interest and the domain.</description>
+    </item>
+    
+    <item>
+      <title>A Review of Statistical Model Checking Pitfalls on Real-Time Stochastic Models</title>
+      <link>https://bohlender.github.io/cv/publications/2014-isola/</link>
+      <pubDate>Wed, 08 Oct 2014 00:00:00 +0000</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/cv/publications/2014-isola/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Teaching Assistant</title>
+      <link>https://bohlender.github.io/cv/work/2014-ta/</link>
+      <pubDate>Tue, 01 Apr 2014 00:00:00 +0000</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/cv/work/2014-ta/</guid>
+      <description>Assisted students in &amp;ldquo;Data Structures and Algorithms&amp;rdquo;.</description>
+    </item>
+    
+    <item>
+      <title>Boolean and Modular Abstractions for Programmable Logic Controllers</title>
+      <link>https://bohlender.github.io/cv/publications/2013-dcds/</link>
+      <pubDate>Wed, 04 Sep 2013 00:00:00 +0000</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/cv/publications/2013-dcds/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Research Assistant</title>
+      <link>https://bohlender.github.io/cv/work/2013-ra/</link>
+      <pubDate>Mon, 01 Apr 2013 00:00:00 +0000</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/cv/work/2013-ra/</guid>
+      <description>Worked on the compiler for the SLIM language in the HASDEL research project with the European Space Agency.</description>
+    </item>
+    
+    <item>
+      <title>MSc in Computer Science</title>
+      <link>https://bohlender.github.io/cv/education/2012-msc/</link>
+      <pubDate>Mon, 01 Oct 2012 00:00:00 +0000</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/cv/education/2012-msc/</guid>
+      <description>I picked electrical engineering as minor subject and graduated with distinction. My thesis &amp;ldquo;Accelerating Predicate Abstraction for Probabilistic Automata&amp;rdquo; proposes a fully symbolic approach to probabilistic reachability checking for Markov decision processes. The results are implemented in the Storm model checker.</description>
+    </item>
+    
+    <item>
+      <title>Research Assistant</title>
+      <link>https://bohlender.github.io/cv/work/2012-ra/</link>
+      <pubDate>Sun, 01 Apr 2012 00:00:00 +0000</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/cv/work/2012-ra/</guid>
+      <description>Developed static analyses and visualisations of signal-flow in Matlab/Simulink in a research project with Daimler AG.</description>
+    </item>
+    
+    <item>
+      <title>Teaching Assistant</title>
+      <link>https://bohlender.github.io/cv/work/2011-ta/</link>
+      <pubDate>Tue, 04 Oct 2011 00:00:00 +0000</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/cv/work/2011-ta/</guid>
+      <description>Assisted students in &amp;ldquo;Programming Concepts&amp;rdquo;.</description>
+    </item>
+    
+    <item>
+      <title>Teaching Assistant</title>
+      <link>https://bohlender.github.io/cv/work/2011-ta2/</link>
+      <pubDate>Fri, 01 Apr 2011 00:00:00 +0000</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/cv/work/2011-ta2/</guid>
+      <description>Assisted students in &amp;ldquo;Formal Systems, Automata, Processes&amp;rdquo;.</description>
+    </item>
+    
+    <item>
+      <title>Teaching Assistant</title>
+      <link>https://bohlender.github.io/cv/work/2010-ta/</link>
+      <pubDate>Thu, 01 Apr 2010 00:00:00 +0000</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/cv/work/2010-ta/</guid>
+      <description>Assisted students in &amp;ldquo;Programming Concepts&amp;rdquo;.</description>
+    </item>
+    
+    <item>
+      <title>BSc in Computer Science</title>
+      <link>https://bohlender.github.io/cv/education/2009-bsc/</link>
+      <pubDate>Thu, 01 Oct 2009 00:00:00 +0000</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/cv/education/2009-bsc/</guid>
+      <description>My thesis &amp;ldquo;Modular and Boolean Abstraction of PLC-Programs&amp;rdquo; implements counterexample-guided abstraction refinement of procedures and control flow for PLC software model checking in the Arcade.PLC tool.</description>
+    </item>
+    
+    <item>
+      <title>Compulsory Social Service</title>
+      <link>https://bohlender.github.io/cv/work/other/2008-social/</link>
+      <pubDate>Fri, 01 Aug 2008 00:00:00 +0000</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/cv/work/other/2008-social/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Certified Youth Leader</title>
+      <link>https://bohlender.github.io/cv/work/other/2005-ymca/</link>
+      <pubDate>Sat, 01 Jan 2005 00:00:00 +0000</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/cv/work/other/2005-ymca/</guid>
+      <description>Joint lead of YMCA-based youth work with boys at about eight years of age.</description>
+    </item>
+    
+    <item>
+      <title>Abitur</title>
+      <link>https://bohlender.github.io/cv/education/1999-abi/</link>
+      <pubDate>Wed, 01 Sep 1999 00:00:00 +0000</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/cv/education/1999-abi/</guid>
+      <description>Being enthusiastic about game programming, and the school not teaching anything related to computers, I brought a voluntary course into being where I taught programming to like-minded.</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>SMT-LIB on Dimitri Bohlender</title>
+    <link>https://bohlender.github.io/tags/smt-lib/</link>
+    <description>Recent content in SMT-LIB on Dimitri Bohlender</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-gb</language>
+    <managingEditor>contact@bohlender.pro (Dimitri Bohlender)</managingEditor>
+    <webMaster>contact@bohlender.pro (Dimitri Bohlender)</webMaster>
+    <copyright>© Dimitri Bohlender</copyright>
+    <lastBuildDate>Thu, 12 Sep 2019 09:31:28 +0200</lastBuildDate>
+    
+	<atom:link href="https://bohlender.github.io/tags/smt-lib/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>SMT-based Reasoning About the Fast Inverse Square Root</title>
+      <link>https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/</link>
+      <pubDate>Thu, 12 Sep 2019 09:31:28 +0200</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/</guid>
+      <description>&lt;p&gt;While there is a &lt;a href=&#34;https://web.archive.org/web/20160308091758/http://www.daxia.com/bibis/upload/406Fast_Inverse_Square_Root.pdf&#34;&gt;mathematical explanation&lt;/a&gt; for the choice of &lt;code&gt;0x5F3759DF&lt;/code&gt; in the &lt;a href=&#34;https://en.wikipedia.org/wiki/Fast_inverse_square_root&#34;&gt;famous bit-level hack&lt;/a&gt; for approximating the multiplicative inverse of the square root of a 32-bit floating-point number, it is not immediately clear to what extent the reasoning is really applicable in the context of machine data types and their peculiarities.
+This post illustrates how this, and related aspects, can be investigated with &lt;a href=&#34;https://en.wikipedia.org/wiki/Satisfiability_modulo_theories&#34;&gt;SMT&lt;/a&gt;-based reasoning about the actual implementation.&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>
