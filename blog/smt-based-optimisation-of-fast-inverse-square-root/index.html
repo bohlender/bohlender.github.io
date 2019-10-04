@@ -472,10 +472,10 @@ There is no branching of control flow, making the characterisation pretty straig
 )
 
 (<span style="color:#a6e22e">define-fun</span> relErr ((<span style="color:#a6e22e">%0</span> Float32) (<span style="color:#a6e22e">%1</span> Float32)) Float32
-    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%3</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>mul RNE %0 %1)))     <span style="color:#75715e">; %3 = fmul float %0, %1</span>
-    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%4</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>sub RNE f1<span style="color:#f92672">.</span><span style="color:#ae81ff">0</span> %3)))   <span style="color:#75715e">; %4 = fsub float 1.000000e+00, %3</span>
-    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%5</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>abs %4)))            <span style="color:#75715e">; %5 = tail call float @llvm.fabs.f32(float %4)</span>
-        %5                             <span style="color:#75715e">; ret float %5</span>
+    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%3</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>mul RNE %0 %1)))    <span style="color:#75715e">; %3 = fmul float %0, %1</span>
+    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%4</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>sub RNE f1<span style="color:#f92672">.</span><span style="color:#ae81ff">0</span> %3)))  <span style="color:#75715e">; %4 = fsub float 1.000000e+00, %3</span>
+    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%5</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>abs %4)))           <span style="color:#75715e">; %5 = tail call float @llvm.fabs.f32(float %4)</span>
+        %5                            <span style="color:#75715e">; ret float %5</span>
     )))
 )</code></pre></td></tr></table>
 </div>
@@ -1165,7 +1165,7 @@ To determine whether the characterised functions actually compute the expected v
     ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) <span style="color:#f92672">#</span>x3AE5B000)
 ))</code></pre></div>
 <p>However, all these assertions do is evaluate whether applying various functions to the values picked by the solver for <code>f</code> and <code>b</code> yields the expected values.
-Instead of adding these unnecessary assertions, making it harder for the solver to find a solution, it is more appropriate to use Z3&rsquo;s <code>eval</code> command, to do these evaluations <em>after</em> <code>check-sat</code>:</p>
+Instead of adding these unnecessary assertions, and making it harder for the solver to find a solution, it is more appropriate to use Z3&rsquo;s <code>eval</code> command, to do these evaluations <em>after</em> <code>check-sat</code>:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(eval (= f ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) <span style="color:#f92672">#</span>x016EB3C0))) <span style="color:#75715e">; f = (float)0x016EB3C0</span>
 (eval (=                                 <span style="color:#75715e">; fSqrt = (float)0x20773327</span>
     (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>sqrt RNE f)				 
@@ -1492,11 +1492,11 @@ To prove that the relative error never exceeds 1% for any float, we leave the in
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">96
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (= magic <span style="color:#f92672">#</span>x5F3759DF))      <span style="color:#75715e">; original magic number</span>
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (= magic <span style="color:#f92672">#</span>x5F3759DF))     <span style="color:#75715e">; original magic number</span>
 
-(<span style="color:#a6e22e">declare-const</span> f Float32)          <span style="color:#75715e">; input float</span>
-(<span style="color:#a6e22e">declare-const</span> b (<span style="color:#a6e22e">_</span> BitVec <span style="color:#ae81ff">32</span>))    <span style="color:#75715e">; input float&#39;s bitvector representation (asserted below)</span>
-(<span style="color:#a6e22e">assert</span> (= ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) b) f))  <span style="color:#75715e">; %3 = bitcast float %0 to i32 // originally in Q_rsqrt</span>
+(<span style="color:#a6e22e">declare-const</span> f Float32)         <span style="color:#75715e">; input float</span>
+(<span style="color:#a6e22e">declare-const</span> b (<span style="color:#a6e22e">_</span> BitVec <span style="color:#ae81ff">32</span>))   <span style="color:#75715e">; input float&#39;s bitvector representation (asserted below)</span>
+(<span style="color:#a6e22e">assert</span> (= ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) b) f)) <span style="color:#75715e">; %3 = bitcast float %0 to i32 // originally in Q_rsqrt</span>
 
 <span style="color:#75715e">; Let the approximation be correct, if the relative error never exceeds 0.01 (1% deviation)</span>
 (<span style="color:#a6e22e">assert</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>gt
@@ -1832,13 +1832,13 @@ To determine whether <code>NaN</code> can ever be returned by <code>relErr</code
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">145
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (= magic <span style="color:#f92672">#</span>x5F3759DF))      <span style="color:#75715e">; original magic number</span>
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (= magic <span style="color:#f92672">#</span>x5F3759DF))     <span style="color:#75715e">; original magic number</span>
 
-(<span style="color:#a6e22e">declare-const</span> f Float32)          <span style="color:#75715e">; input float</span>
-(<span style="color:#a6e22e">declare-const</span> b (<span style="color:#a6e22e">_</span> BitVec <span style="color:#ae81ff">32</span>))    <span style="color:#75715e">; input float&#39;s bitvector representation (asserted below)</span>
-(<span style="color:#a6e22e">assert</span> (= ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) b) f))  <span style="color:#75715e">; %3 = bitcast float %0 to i32 // originally in Q_rsqrt</span>
+(<span style="color:#a6e22e">declare-const</span> f Float32)         <span style="color:#75715e">; input float</span>
+(<span style="color:#a6e22e">declare-const</span> b (<span style="color:#a6e22e">_</span> BitVec <span style="color:#ae81ff">32</span>))   <span style="color:#75715e">; input float&#39;s bitvector representation (asserted below)</span>
+(<span style="color:#a6e22e">assert</span> (= ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) b) f)) <span style="color:#75715e">; %3 = bitcast float %0 to i32 // originally in Q_rsqrt</span>
 
-(<span style="color:#a6e22e">assert</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>isNormal f))           <span style="color:#75715e">; only consider normal floats</span>
+(<span style="color:#a6e22e">assert</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>isNormal f))          <span style="color:#75715e">; only consider normal floats</span>
 
 (<span style="color:#a6e22e">echo</span> <span style="color:#e6db74">&#34;&#34;</span>)
 (<span style="color:#a6e22e">echo</span> <span style="color:#e6db74">&#34;======[ Can the result be NaN? ]=======&#34;</span>)
@@ -2138,18 +2138,7 @@ Unfortunately this machinery does not support floating-point constraints, which 
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-zsh" data-lang="zsh"><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">51
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">52
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">53
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-zsh" data-lang="zsh"><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">58
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">59
@@ -2174,6 +2163,17 @@ Unfortunately this machinery does not support floating-point constraints, which 
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">78
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">79
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">80
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">81
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">82
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">83
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">84
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">85
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">86
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">87
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">88
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">89
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">90
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">91
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;">
 <pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-zsh" data-lang="zsh"><span style="color:#f92672">===[</span> Max. relative error &lt;<span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>.001? <span style="color:#f92672">]===</span>
@@ -2596,18 +2596,7 @@ We, instead, follow the conceptually simpler approach of letting the SMT solver 
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-zsh" data-lang="zsh"><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">82
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">83
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">84
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">85
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">86
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">87
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">88
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">89
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">90
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">91
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">92
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">93
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-zsh" data-lang="zsh"><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">93
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">94
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">95
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">96
@@ -2616,6 +2605,17 @@ We, instead, follow the conceptually simpler approach of letting the SMT solver 
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">99
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">100
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">101
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">102
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">103
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">104
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">105
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">106
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">107
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">108
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">109
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">110
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">111
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">112
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;">
 <pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-zsh" data-lang="zsh"><span style="color:#f92672">==[</span> Is there a better magic number? <span style="color:#f92672">]==</span>
@@ -2646,7 +2646,7 @@ For no magic number is the maximal relative error below <span style="color:#ae81
     </figcaption>
 </figure>
 
-<p>Solving these instances takes about <strong>two days</strong> on an i5-4210M, but Z3 eventually determines that the <code>magic</code> constant <code>0x5f375a81</code> achieves a maximum relative error of <code>0x3ae58c00</code> (~0.0017513).
+<p>Solving these instances takes about <strong>two days</strong> on an i5-4210M, but Z3 (v4.8.5) eventually determines that the <code>magic</code> constant <code>0x5f375a81</code> achieves a maximum relative error of <code>0x3ae58c00</code> (~0.0017513).
 Furthermore, we find that <strong>no constant can achieve an even lower maximum relative error</strong>.</p>
 
 <h2 id="do-try-this-at-home"><a href="#do-try-this-at-home" class="hanchor" ariaLabel="Anchor">Do Try This at Home!</a> </h2>

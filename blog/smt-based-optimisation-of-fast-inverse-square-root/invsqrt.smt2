@@ -30,10 +30,10 @@
 )
 
 (define-fun relErr ((%0 Float32) (%1 Float32)) Float32
-    (let ((%3 (fp.mul RNE %0 %1)))     ; %3 = fmul float %0, %1
-    (let ((%4 (fp.sub RNE f1.0 %3)))   ; %4 = fsub float 1.000000e+00, %3
-    (let ((%5 (fp.abs %4)))            ; %5 = tail call float @llvm.fabs.f32(float %4)
-        %5                             ; ret float %5
+    (let ((%3 (fp.mul RNE %0 %1)))    ; %3 = fmul float %0, %1
+    (let ((%4 (fp.sub RNE f1.0 %3)))  ; %4 = fsub float 1.000000e+00, %3
+    (let ((%5 (fp.abs %4)))           ; %5 = tail call float @llvm.fabs.f32(float %4)
+        %5                            ; ret float %5
     )))
 )
 
@@ -82,11 +82,11 @@
 (push)
     (echo "")
     (echo "======[ Correct for all floats? ]======")
-    (assert (= magic #x5F3759DF))      ; original magic number
+    (assert (= magic #x5F3759DF))     ; original magic number
 
-    (declare-const f Float32)          ; input float
-    (declare-const b (_ BitVec 32))    ; input float's bitvector representation (asserted below)
-    (assert (= ((_ to_fp 8 24) b) f))  ; %3 = bitcast float %0 to i32 // originally in Q_rsqrt
+    (declare-const f Float32)         ; input float
+    (declare-const b (_ BitVec 32))   ; input float's bitvector representation (asserted below)
+    (assert (= ((_ to_fp 8 24) b) f)) ; %3 = bitcast float %0 to i32 // originally in Q_rsqrt
 
     ; Let the approximation be correct, if the relative error never exceeds 0.01 (1% deviation)
     (assert (fp.gt
@@ -100,7 +100,7 @@
     (eval f)
     (eval b)
 
-        (echo "")
+    (echo "")
     (echo "===[ When excluding +/- infinity? ]====")
     (assert (not (fp.isInfinite f)))
     (check-sat)
@@ -131,13 +131,13 @@
 
 ; Quake checks for the result becoming NaN -- can this really happen?
 (push)
-    (assert (= magic #x5F3759DF))      ; original magic number
+    (assert (= magic #x5F3759DF))     ; original magic number
 
-    (declare-const f Float32)          ; input float
-    (declare-const b (_ BitVec 32))    ; input float's bitvector representation (asserted below)
-    (assert (= ((_ to_fp 8 24) b) f))  ; %3 = bitcast float %0 to i32 // originally in Q_rsqrt
+    (declare-const f Float32)         ; input float
+    (declare-const b (_ BitVec 32))   ; input float's bitvector representation (asserted below)
+    (assert (= ((_ to_fp 8 24) b) f)) ; %3 = bitcast float %0 to i32 // originally in Q_rsqrt
 
-    (assert (fp.isNormal f))           ; only consider normal floats
+    (assert (fp.isNormal f))          ; only consider normal floats
 
     (echo "")
     (echo "======[ Can the result be NaN? ]=======")
@@ -263,7 +263,7 @@
     (eval magic)
 
     ; Is there a even better one? The best one can again be found by iteratively refining the bound.
-	(echo "")
+    (echo "")
     (echo "=[ Magic with rel. err < 0x3AE58E00? ]=")
     (assert (forall ((f Float32) (b (_ BitVec 32)))
         (=>

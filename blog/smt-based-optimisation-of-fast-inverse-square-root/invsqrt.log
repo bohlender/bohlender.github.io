@@ -42,6 +42,17 @@ unsat
 UNSAT means that no violation is possible
 For normal floats the relative error stays below 1%
 
+======[ Can the result be NaN? ]=======
+sat
+SAT means that it can
+Problematic float:
+(fp #b1 #x7e #b11011101011001110111110)
+(- (/ 7821791.0 8388608.0))
+
+===[ NaN if input is non-negative? ]===
+unsat
+UNSAT means that NaN cannot occur
+
 ===[ Max. relative error <= 0.001? ]===
 sat
 SAT means that a violation is possible
