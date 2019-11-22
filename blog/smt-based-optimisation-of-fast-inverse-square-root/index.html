@@ -466,18 +466,18 @@ There is no branching of control flow, making the characterisation pretty straig
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme"><span style="color:#75715e">; Auxiliary function to keep notation of 1.0f short</span>
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme"><span style="color:#75715e">; Auxiliary function to keep notation of 1.0f short</span>
 (<span style="color:#a6e22e">define-fun</span> f1<span style="color:#f92672">.</span><span style="color:#ae81ff">0</span> () Float32
     ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) RNE <span style="color:#ae81ff">1</span>)
 )
 
 (<span style="color:#a6e22e">define-fun</span> relErr ((<span style="color:#a6e22e">%0</span> Float32) (<span style="color:#a6e22e">%1</span> Float32)) Float32
-    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%3</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>mul RNE %0 %1)))    <span style="color:#75715e">; %3 = fmul float %0, %1</span>
-    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%4</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>sub RNE f1<span style="color:#f92672">.</span><span style="color:#ae81ff">0</span> %3)))  <span style="color:#75715e">; %4 = fsub float 1.000000e+00, %3</span>
-    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%5</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>abs %4)))           <span style="color:#75715e">; %5 = tail call float @llvm.fabs.f32(float %4)</span>
-        %5                            <span style="color:#75715e">; ret float %5</span>
+    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%3</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>mul RNE %0 %1)))    <span style="color:#75715e">; %3 = fmul float %0, %1</span>
+    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%4</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>sub RNE f1<span style="color:#f92672">.</span><span style="color:#ae81ff">0</span> %3)))  <span style="color:#75715e">; %4 = fsub float 1.000000e+00, %3</span>
+    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%5</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>abs %4)))           <span style="color:#75715e">; %5 = tail call float @llvm.fabs.f32(float %4)</span>
+        %5                            <span style="color:#75715e">; ret float %5</span>
     )))
-)</code></pre></td></tr></table>
+)</code></pre></td></tr></table>
 </div>
 </div>
     <figcaption>
@@ -972,9 +972,9 @@ As before, we introduce auxiliary functions <code>f0.5</code> and <code>f1.5</co
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">declare-const</span> magic (<span style="color:#a6e22e">_</span> BitVec <span style="color:#ae81ff">32</span>)) <span style="color:#75715e">; magic number used in hack</span>
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">declare-const</span> magic (<span style="color:#a6e22e">_</span> BitVec <span style="color:#ae81ff">32</span>)) <span style="color:#75715e">; magic number used in hack</span>
 
-<span style="color:#75715e">; Auxiliary functions to keep notation short</span>
+<span style="color:#75715e">; Auxiliary functions to keep notation short</span>
 (<span style="color:#a6e22e">define-fun</span> f0<span style="color:#f92672">.</span><span style="color:#ae81ff">5</span> () Float32
     ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) RNE <span style="color:#ae81ff">0.5</span>)
 )
@@ -982,21 +982,21 @@ As before, we introduce auxiliary functions <code>f0.5</code> and <code>f1.5</co
     ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) RNE <span style="color:#ae81ff">1.5</span>)
 )
 
-<span style="color:#75715e">; Note that the input&#39;s (%0) bitvector representation (%2) is not computed in the characterisation of Q_rsqrt,</span>
-<span style="color:#75715e">; but expected to be passed as additional argument since there is no _function_ for reinterpreting floats as bitvectors.</span>
-<span style="color:#75715e">; Therefore, we _relate_ b and f outside of Q_rsqrt (asserted below)</span>
+<span style="color:#75715e">; Note that the input&#39;s (%0) bitvector representation (%2) is not computed in the characterisation of Q_rsqrt,</span>
+<span style="color:#75715e">; but expected to be passed as additional argument since there is no _function_ for reinterpreting floats as bitvectors.</span>
+<span style="color:#75715e">; Therefore, we _relate_ b and f outside of Q_rsqrt (asserted below)</span>
 (<span style="color:#a6e22e">define-fun</span> Q_rsqrt ((<span style="color:#a6e22e">%0</span> Float32) (<span style="color:#a6e22e">%2</span> (<span style="color:#a6e22e">_</span> BitVec <span style="color:#ae81ff">32</span>))) Float32
-    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%3</span> (<span style="color:#a6e22e">bvashr</span> %2 (<span style="color:#a6e22e">_</span> bv1 <span style="color:#ae81ff">32</span>)))) <span style="color:#75715e">; %3 = ashr i32 %2, 1</span>
-    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%4</span> (<span style="color:#a6e22e">bvsub</span> magic %3)))       <span style="color:#75715e">; %4 = sub nsw i32 1597463007, %3 // magic instead of 0x5F3759DF</span>
-    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%5</span> ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) %4)))    <span style="color:#75715e">; %5 = bitcast i32 %4 to float</span>
-    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%6</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>mul RNE %0 f0<span style="color:#f92672">.</span><span style="color:#ae81ff">5</span>)))   <span style="color:#75715e">; %6 = fmul float %0, 5.000000e-01</span>
-    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%7</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>mul RNE %6 %5)))     <span style="color:#75715e">; %7 = fmul float %6, %5</span>
-    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%8</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>mul RNE %7 %5)))     <span style="color:#75715e">; %8 = fmul float %7, %5</span>
-    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%9</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>sub RNE f1<span style="color:#f92672">.</span><span style="color:#ae81ff">5</span> %8)))   <span style="color:#75715e">; %9 = fsub float 1.500000e+00, %8</span>
-    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%10</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>mul RNE %9 %5)))    <span style="color:#75715e">; %10 = fmul float %9, %5</span>
-        %10                            <span style="color:#75715e">; ret float %10</span>
+    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%3</span> (<span style="color:#a6e22e">bvashr</span> %2 (<span style="color:#a6e22e">_</span> bv1 <span style="color:#ae81ff">32</span>)))) <span style="color:#75715e">; %3 = ashr i32 %2, 1</span>
+    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%4</span> (<span style="color:#a6e22e">bvsub</span> magic %3)))       <span style="color:#75715e">; %4 = sub nsw i32 1597463007, %3 // magic instead of 0x5F3759DF</span>
+    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%5</span> ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) %4)))    <span style="color:#75715e">; %5 = bitcast i32 %4 to float</span>
+    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%6</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>mul RNE %0 f0<span style="color:#f92672">.</span><span style="color:#ae81ff">5</span>)))   <span style="color:#75715e">; %6 = fmul float %0, 5.000000e-01</span>
+    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%7</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>mul RNE %6 %5)))     <span style="color:#75715e">; %7 = fmul float %6, %5</span>
+    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%8</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>mul RNE %7 %5)))     <span style="color:#75715e">; %8 = fmul float %7, %5</span>
+    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%9</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>sub RNE f1<span style="color:#f92672">.</span><span style="color:#ae81ff">5</span> %8)))   <span style="color:#75715e">; %9 = fsub float 1.500000e+00, %8</span>
+    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%10</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>mul RNE %9 %5)))    <span style="color:#75715e">; %10 = fmul float %9, %5</span>
+        %10                            <span style="color:#75715e">; ret float %10</span>
     ))))))))
-)</code></pre></td></tr></table>
+)</code></pre></td></tr></table>
 </div>
 </div>
     <figcaption>
@@ -1059,65 +1059,51 @@ The naïve reference implementation finds the <strong>input <code>0x016EB3C0</co
 
     
     
-
-    
-    
-
-    
-    
-
-    
-    
-
-    
-    
-
-    
-    
-
-    
-    
-
-
-
-
-    
         
     
-    
 
-    
-        
     
     
 
     
-        
+    
+
     
     
 
     
-        
+    
+
     
     
 
     
-        
+    
+
+
+
+
     
     
 
     
-        
+    
+
     
     
 
     
-        
+    
+
     
     
 
     
-        
+    
+
+    
+    
+
     
     
 
@@ -1134,14 +1120,14 @@ The naïve reference implementation finds the <strong>input <code>0x016EB3C0</co
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (= magic <span style="color:#f92672">#</span>x5F3759DF))     <span style="color:#75715e">; original magic number</span>
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">    (<span style="color:#a6e22e">assert</span> (= magic <span style="color:#f92672">#</span>x5F3759DF))     <span style="color:#75715e">; original magic number</span>
 
-(<span style="color:#a6e22e">declare-const</span> f Float32)         <span style="color:#75715e">; input float</span>
-(<span style="color:#a6e22e">declare-const</span> b (<span style="color:#a6e22e">_</span> BitVec <span style="color:#ae81ff">32</span>))   <span style="color:#75715e">; input float&#39;s bitvector representation (asserted below)</span>
-(<span style="color:#a6e22e">assert</span> (= ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) b) f)) <span style="color:#75715e">; %3 = bitcast float %0 to i32 // originally in Q_rsqrt</span>
+    (<span style="color:#a6e22e">declare-const</span> f Float32)         <span style="color:#75715e">; input float</span>
+    (<span style="color:#a6e22e">declare-const</span> b (<span style="color:#a6e22e">_</span> BitVec <span style="color:#ae81ff">32</span>))   <span style="color:#75715e">; input float&#39;s bitvector representation (asserted below)</span>
+    (<span style="color:#a6e22e">assert</span> (= ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) b) f)) <span style="color:#75715e">; %3 = bitcast float %0 to i32 // originally in Q_rsqrt</span>
 
-(<span style="color:#a6e22e">assert</span> (= b <span style="color:#f92672">#</span>x016EB3C0))         <span style="color:#75715e">; worst float/bit-string for that magic number</span>
-(<span style="color:#a6e22e">check-sat</span>)</code></pre></td></tr></table>
+    (<span style="color:#a6e22e">assert</span> (= b <span style="color:#f92672">#</span>x016EB3C0))         <span style="color:#75715e">; worst float/bit-string for that magic number</span>
+    (<span style="color:#a6e22e">check-sat</span>)</code></pre></td></tr></table>
 </div>
 </div>
     <figcaption>
@@ -1342,7 +1328,7 @@ true
 
 relErr <span style="color:#f92672">(</span>should be 0x3AE5B000<span style="color:#f92672">)</span>:
 <span style="color:#f92672">(</span>fp <span style="color:#75715e">#b0 #x75 #b11001011011000000000000)</span>
-true</code></pre></td></tr></table>
+true</code></pre></td></tr></table>
 </div>
 </div>
     <figcaption>
@@ -1381,97 +1367,75 @@ To prove that the relative error never exceeds 1% for any float, we leave the in
 
     
     
-
-    
-    
-
-    
-    
-
-    
-    
-
-    
-    
-
-    
-    
-
-    
-    
-
-    
-    
-
-    
-    
-
-    
-    
-
-    
-    
-
-
-
-
-    
         
     
-    
 
-    
-        
     
     
 
     
-        
+    
+
     
     
 
     
-        
+    
+
     
     
 
     
-        
+    
+
     
     
 
     
-        
+    
+
     
     
 
     
-        
+    
+
+
+
+
     
     
 
     
-        
+    
+
     
     
 
     
-        
+    
+
     
     
 
     
-        
+    
+
     
     
 
     
-        
+    
+
     
     
 
     
-        
+    
+
+    
+    
+
     
     
 
@@ -1492,18 +1456,18 @@ To prove that the relative error never exceeds 1% for any float, we leave the in
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">96
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (= magic <span style="color:#f92672">#</span>x5F3759DF))     <span style="color:#75715e">; original magic number</span>
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">    (<span style="color:#a6e22e">assert</span> (= magic <span style="color:#f92672">#</span>x5F3759DF))     <span style="color:#75715e">; original magic number</span>
 
-(<span style="color:#a6e22e">declare-const</span> f Float32)         <span style="color:#75715e">; input float</span>
-(<span style="color:#a6e22e">declare-const</span> b (<span style="color:#a6e22e">_</span> BitVec <span style="color:#ae81ff">32</span>))   <span style="color:#75715e">; input float&#39;s bitvector representation (asserted below)</span>
-(<span style="color:#a6e22e">assert</span> (= ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) b) f)) <span style="color:#75715e">; %3 = bitcast float %0 to i32 // originally in Q_rsqrt</span>
+    (<span style="color:#a6e22e">declare-const</span> f Float32)         <span style="color:#75715e">; input float</span>
+    (<span style="color:#a6e22e">declare-const</span> b (<span style="color:#a6e22e">_</span> BitVec <span style="color:#ae81ff">32</span>))   <span style="color:#75715e">; input float&#39;s bitvector representation (asserted below)</span>
+    (<span style="color:#a6e22e">assert</span> (= ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) b) f)) <span style="color:#75715e">; %3 = bitcast float %0 to i32 // originally in Q_rsqrt</span>
 
-<span style="color:#75715e">; Let the approximation be correct, if the relative error never exceeds 0.01 (1% deviation)</span>
-(<span style="color:#a6e22e">assert</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>gt
-    (<span style="color:#a6e22e">relErr</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>sqrt RNE f) (<span style="color:#a6e22e">Q_rsqrt</span> f b))
-    ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) RNE <span style="color:#ae81ff">0.01</span>)
-))
-(<span style="color:#a6e22e">check-sat</span>)</code></pre></td></tr></table>
+    <span style="color:#75715e">; Let the approximation be correct, if the relative error never exceeds 0.01 (1% deviation)</span>
+    (<span style="color:#a6e22e">assert</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>gt
+        (<span style="color:#a6e22e">relErr</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>sqrt RNE f) (<span style="color:#a6e22e">Q_rsqrt</span> f b))
+        ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) RNE <span style="color:#ae81ff">0.01</span>)
+    ))
+    (<span style="color:#a6e22e">check-sat</span>)</code></pre></td></tr></table>
 </div>
 </div>
     <figcaption>
@@ -1562,7 +1526,7 @@ Indeed, the hack turns out to not be applicable to all floating point numbers.</
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;">
 <pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (not (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>isInfinite f)))
-(<span style="color:#a6e22e">check-sat</span>)</code></pre></td></tr></table>
+(<span style="color:#a6e22e">check-sat</span>)</code></pre></td></tr></table>
 </div>
 </div>
     <figcaption>
@@ -1619,7 +1583,7 @@ Granted, this is a rather special input, so what about restricting the input to 
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;">
 <pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (not (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>isZero f)))
-(<span style="color:#a6e22e">check-sat</span>)</code></pre></td></tr></table>
+(<span style="color:#a6e22e">check-sat</span>)</code></pre></td></tr></table>
 </div>
 </div>
     <figcaption>
@@ -1677,7 +1641,7 @@ When also requiring the input to <strong>not be subnormal</strong>, the SMT solv
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;">
 <pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (not (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>isSubnormal f)))
-(<span style="color:#a6e22e">check-sat</span>)</code></pre></td></tr></table>
+(<span style="color:#a6e22e">check-sat</span>)</code></pre></td></tr></table>
 </div>
 </div>
     <figcaption>
@@ -1721,97 +1685,75 @@ To determine whether <code>NaN</code> can ever be returned by <code>relErr</code
 
     
     
-
-    
-    
-
-    
-    
-
-    
-    
-
-    
-    
-
-    
-    
-
-    
-    
-
-    
-    
-
-    
-    
-
-    
-    
-
-    
-    
-
-
-
-
-    
         
     
-    
 
-    
-        
     
     
 
     
-        
+    
+
     
     
 
     
-        
+    
+
     
     
 
     
-        
+    
+
     
     
 
     
-        
+    
+
     
     
 
     
-        
+    
+
+
+
+
     
     
 
     
-        
+    
+
     
     
 
     
-        
+    
+
     
     
 
     
-        
+    
+
     
     
 
     
-        
+    
+
     
     
 
     
-        
+    
+
+    
+    
+
     
     
 
@@ -1832,18 +1774,18 @@ To determine whether <code>NaN</code> can ever be returned by <code>relErr</code
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">145
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (= magic <span style="color:#f92672">#</span>x5F3759DF))     <span style="color:#75715e">; original magic number</span>
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">    (<span style="color:#a6e22e">assert</span> (= magic <span style="color:#f92672">#</span>x5F3759DF))     <span style="color:#75715e">; original magic number</span>
 
-(<span style="color:#a6e22e">declare-const</span> f Float32)         <span style="color:#75715e">; input float</span>
-(<span style="color:#a6e22e">declare-const</span> b (<span style="color:#a6e22e">_</span> BitVec <span style="color:#ae81ff">32</span>))   <span style="color:#75715e">; input float&#39;s bitvector representation (asserted below)</span>
-(<span style="color:#a6e22e">assert</span> (= ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) b) f)) <span style="color:#75715e">; %3 = bitcast float %0 to i32 // originally in Q_rsqrt</span>
+    (<span style="color:#a6e22e">declare-const</span> f Float32)         <span style="color:#75715e">; input float</span>
+    (<span style="color:#a6e22e">declare-const</span> b (<span style="color:#a6e22e">_</span> BitVec <span style="color:#ae81ff">32</span>))   <span style="color:#75715e">; input float&#39;s bitvector representation (asserted below)</span>
+    (<span style="color:#a6e22e">assert</span> (= ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) b) f)) <span style="color:#75715e">; %3 = bitcast float %0 to i32 // originally in Q_rsqrt</span>
 
-(<span style="color:#a6e22e">assert</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>isNormal f))          <span style="color:#75715e">; only consider normal floats</span>
+    (<span style="color:#a6e22e">assert</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>isNormal f))          <span style="color:#75715e">; only consider normal floats</span>
 
-(<span style="color:#a6e22e">echo</span> <span style="color:#e6db74">&#34;&#34;</span>)
-(<span style="color:#a6e22e">echo</span> <span style="color:#e6db74">&#34;======[ Can the result be NaN? ]=======&#34;</span>)
-(<span style="color:#a6e22e">assert</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>isNaN (<span style="color:#a6e22e">relErr</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>sqrt RNE f) (<span style="color:#a6e22e">Q_rsqrt</span> f b))))
-(<span style="color:#a6e22e">check-sat</span>)</code></pre></td></tr></table>
+    (<span style="color:#a6e22e">echo</span> <span style="color:#e6db74">&#34;&#34;</span>)
+    (<span style="color:#a6e22e">echo</span> <span style="color:#e6db74">&#34;======[ Can the result be NaN? ]=======&#34;</span>)
+    (<span style="color:#a6e22e">assert</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>isNaN (<span style="color:#a6e22e">relErr</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>sqrt RNE f) (<span style="color:#a6e22e">Q_rsqrt</span> f b))))
+    (<span style="color:#a6e22e">check-sat</span>)</code></pre></td></tr></table>
 </div>
 </div>
     <figcaption>
@@ -2211,7 +2153,7 @@ Increasing the bound will render the constraints UNSAT
 <span style="color:#f92672">====[</span> Check with increased bound <span style="color:#f92672">]=====</span>
 unsat
 The relative error can indeed not grow further
-The maximal relative error is exactly <span style="color:#ae81ff">0</span>.0017523765563964844 <span style="color:#f92672">(</span>0x3AE5B000<span style="color:#f92672">)</span></code></pre></td></tr></table>
+The maximal relative error is exactly <span style="color:#ae81ff">0</span>.0017523765563964844 <span style="color:#f92672">(</span>0x3AE5B000<span style="color:#f92672">)</span></code></pre></td></tr></table>
 </div>
 </div>
     <figcaption>
@@ -2426,19 +2368,19 @@ We, instead, follow the conceptually simpler approach of letting the SMT solver 
 <pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (<span style="color:#a6e22e">forall</span> ((<span style="color:#a6e22e">f</span> Float32) (<span style="color:#a6e22e">b</span> (<span style="color:#a6e22e">_</span> BitVec <span style="color:#ae81ff">32</span>)))
     (<span style="color:#a6e22e">=&gt;</span>
         (<span style="color:#a6e22e">and</span>
-            (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>isNormal f)          <span style="color:#75715e">; only consider normal floats</span>
-            (not (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>isNegative f )) <span style="color:#75715e">; only consider non-negative floats</span>
-            (= ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) b) f) <span style="color:#75715e">; %3 = bitcast float %0 to i32 // in Q_rsqrt</span>
+            (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>isNormal f)          <span style="color:#75715e">; only consider normal floats</span>
+            (not (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>isNegative f )) <span style="color:#75715e">; only consider non-negative floats</span>
+            (= ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) b) f) <span style="color:#75715e">; %3 = bitcast float %0 to i32 // in Q_rsqrt</span>
         )
         (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">fSqrt</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>sqrt RNE f)) (<span style="color:#a6e22e">fFast</span> (<span style="color:#a6e22e">Q_rsqrt</span> f b)))
             (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>lt
                 (<span style="color:#a6e22e">relErr</span> fSqrt fFast)
-                ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) RNE <span style="color:#ae81ff">0.001752</span>) <span style="color:#75715e">; Original magic number had a max. rel. err of ~0.001752</span>
+                ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) RNE <span style="color:#ae81ff">0.001752</span>) <span style="color:#75715e">; Original magic number had a max. rel. err of ~0.001752</span>
             )
         )
     )
 ))
-(<span style="color:#a6e22e">check-sat</span>)</code></pre></td></tr></table>
+(<span style="color:#a6e22e">check-sat</span>)</code></pre></td></tr></table>
 </div>
 </div>
     <figcaption>
@@ -2671,11 +2613,11 @@ Does the solver come up with the same instructions that were used in the origina
 <hr style="margin-top: 2em">
 <div class="links">
 
+    <a href="/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.log" class="button">invsqrt.log</a>
+
     <a href="/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.smt2" class="button">invsqrt.smt2</a>
 
     <a href="/blog/smt-based-optimisation-of-fast-inverse-square-root/maxRelErr.ll" class="button">maxRelErr.ll</a>
-
-    <a href="/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.log" class="button">invsqrt.log</a>
 
     <a href="/blog/smt-based-optimisation-of-fast-inverse-square-root/maxRelErr.c" class="button">maxRelErr.c</a>
 
