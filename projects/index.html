@@ -77,7 +77,11 @@ Some of them are <!-- raw HTML omitted -->work-related<!-- raw HTML omitted -->,
             </header>
             <div class="flex-wrapper">
                 <div class="project-description">
-                    <!-- raw HTML omitted -->
+                    <p>With the end of my PhD looming on the horizon, I wanted to get a short CV and some information about me online.
+However, I wasn't interested in generic, impersonal solutions, such as the services of career-oriented social networking sites.</p>
+<p>I used this opportunity to learn some web development basics, and build a <a href="https://en.wikipedia.org/wiki/Static_web_page">static website</a> that serves as both a portfolio and an outlet for all things creative.
+It's the site you're looking at right now.</p>
+
                 </div>
                 
                 <div class="figures">
@@ -132,7 +136,18 @@ Some of them are <!-- raw HTML omitted -->work-related<!-- raw HTML omitted -->,
             </header>
             <div class="flex-wrapper">
                 <div class="project-description">
-                    <!-- raw HTML omitted -->
+                    <p>I worked on <a href="https://arcade.embedded.rwth-aachen.de/">Arcade.PLC</a> on two occasions: during my bachelor's thesis, and my time as research associate at <a href="https://embedded.rwth-aachen.de/">Embedded Software</a>.
+Arcade.PLC is both a tool and a framework for <a href="https://en.wikipedia.org/wiki/Formal_verification">formal verification</a> of industrial control software, featuring procedures for static analysis, automated test generation and model checking.</p>
+<p>It started out as explicit state-space exploration based on <a href="https://en.wikipedia.org/wiki/Abstract_interpretation">abstract interpretation</a>, which is what I've been integrating abstractions into during my bachelor's thesis, but was extended with various <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a>-based methods during my PhD.
+In contrast to general purpose verifier backends, it is tailored to aid in the analysis of issues specific to the domain of industrial control.
+For some properties, like the analysis of restart-behaviour, it even is the only tool in existence.</p>
+<p>I was involved in <strong>parsing &amp; compiling</strong> source code to intermediate representations, and all parts of the verification pipeline:</p>
+<ol>
+<li><strong>preprocessing &amp; optimisation</strong> in the front end,</li>
+<li><strong>translation and formalisation</strong> of semantics in the middle end, and</li>
+<li>the actual <strong>analysis</strong> of formal models in the back end.</li>
+</ol>
+
                 </div>
                 
                 <div class="figures">
@@ -175,7 +190,11 @@ Some of them are <!-- raw HTML omitted -->work-related<!-- raw HTML omitted -->,
             </header>
             <div class="flex-wrapper">
                 <div class="project-description">
-                    <!-- raw HTML omitted -->
+                    <p>Although <a href="http://smtlib.cs.uiowa.edu/">SMT-LIB</a> is the standard language supported by most <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a> solvers, some of them introduce custom language extensions.
+Such extensions may range from syntactical sugar to fine-grained control over the underlying solver-procedure.</p>
+<p>Since I'm an avid user of <a href="https://github.com/Z3Prover/z3">Z3</a>, I started <a href="https://github.com/bohlender/vim-smt2">vim-smt2</a> to have a plugin for the <a href="https://github.com/vim/vim">Vim</a> editor that supports both the base SMT-LIB language and the extensions provided by Z3.
+Besides the basic syntax highlighting I'm implementing convenient features, such as querying satisfiability or the solver's version, when I find myself repeatedly doing automatable tasks manually.</p>
+
                 </div>
                 
                 <div class="figures">
@@ -226,7 +245,11 @@ Some of them are <!-- raw HTML omitted -->work-related<!-- raw HTML omitted -->,
             </header>
             <div class="flex-wrapper">
                 <div class="project-description">
-                    <!-- raw HTML omitted -->
+                    <p>In the context of my master's thesis I've worked on the <a href="https://github.com/moves-rwth/storm">Storm</a> probabilistic <a href="https://en.wikipedia.org/wiki/Model_checking">model checker</a>.
+In particular, I developed a fully symbolic variant of the partially explicit procedure used in <a href="https://depend.cs.uni-saarland.de/tools/pass/">PASS</a> for probabilistic reachability checking of Markov decision processes.</p>
+<p>I used <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a>-solving to compute a <a href="http://d-nb.info/1009497642">menu-based abstraction</a>, and refine it in a counterexample-guided fashion.
+The abstraction was stored in terms of <!-- raw HTML omitted -->MTBDDs<!-- raw HTML omitted -->, for which I developed both the actual symbolic value iteration and symbolic static analyses for preprocessing.</p>
+
                 </div>
                 
                 <div class="figures">
@@ -273,7 +296,13 @@ Some of them are <!-- raw HTML omitted -->work-related<!-- raw HTML omitted -->,
             </header>
             <div class="flex-wrapper">
                 <div class="project-description">
-                    <!-- raw HTML omitted -->
+                    <p>When I was a research assistant at <a href="https://moves.rwth-aachen.de">MOVES</a>, I was involved in the <a href="http://www.compass-toolset.org/projects/hasdel/">HASDEL</a> project.
+This was an ESA project, aiming to provide <a href="https://en.wikipedia.org/wiki/RAMS">RAMS</a> analyses tailored to the specific needs of launcher systems.
+Since this was a successor of the <a href="http://www.compass-toolset.org/projects/compass/">COMPASS</a> project, the original COMPASS toolset had to be extended.</p>
+<p>In COMPASS, the system specification is written in the <a href="http://www.compass-toolset.org/projects/compass/about/#slim-language">SLIM</a> language.
+I was mainly responsible for adapting the SLIM compiler front and middle end, to support the language extensions proposed for HASDEL.
+In line with this, I also handled arising change requests concerning the <!-- raw HTML omitted -->GUI<!-- raw HTML omitted -->, and automated the creation of a minimal Linux image for showcasing HASDEL.</p>
+
                 </div>
                 
                 <div class="figures">
@@ -324,7 +353,12 @@ Some of them are <!-- raw HTML omitted -->work-related<!-- raw HTML omitted -->,
             </header>
             <div class="flex-wrapper">
                 <div class="project-description">
-                    <!-- raw HTML omitted -->
+                    <p>When I was a research assistant at <a href="https://embedded.rwth-aachen.de/">Embedded Software</a>, I was involved in a research project with Daimler AG.
+With <a href="https://www.mathworks.com/products/simulink.html">MATLAB Simulink</a> being a popular choice for the development of embedded software in the automotive domain, this project aimed to develop model-based analyses to aid developers of Simulink models.</p>
+<p>Tracking a signal's (potential) flow manually, given the highly modular and hierarchical models, is prone to error.
+To simplify this, I adapted standard dataflow analyses for programs to this domain.
+I was also responsible for visualising results of such analyses in both Simulink and external frameworks.</p>
+
                 </div>
                 
             </div>

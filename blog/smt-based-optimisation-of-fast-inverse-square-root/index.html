@@ -2161,7 +2161,7 @@ In particular, the computation of the maximum relative error for a given <code>m
 <p>To approach this with SMT, we first of all need a way of checking whether a <code>magic</code> constant exists that yields a maximum relative error below a given bound.
 The actual minimisation of the bound can then be achieved as above, by using the check as an oracle and refining the bound iteratively.
 More formally, we are primarily interested in solving</p>
-<p>$$ \underset{\mathit{magic}}{\exists}, \underset{x\geq 0}{\forall}, \mathit{normal}(x) \rightarrow \eta(x) &lt; 0.001752,$$</p>
+<p>$$ \underset{\mathit{magic}}{\exists} ~ \underset{x\geq 0}{\forall} ~ \mathit{normal}(x) \rightarrow \eta(x) &lt; 0.001752,$$</p>
 <p>that is finding a <code>magic</code> constant which returns a smaller maximum relative error than the original constant <code>0x5F3759DF</code> does for normal, non-negative inputs.
 Such a search for parameters that make a system adhere to certain constraints is known as <strong>parameter synthesis</strong>.
 Although dedicated techniques for solving such problems exist, they are out of the scope of this post.
