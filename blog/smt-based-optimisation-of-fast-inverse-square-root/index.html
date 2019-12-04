@@ -87,34 +87,26 @@ This post illustrates how this, and related aspects, can be investigated with SM
 			</header>
 			<p>While there is a <a href="https://web.archive.org/web/20160308091758/http://www.daxia.com/bibis/upload/406Fast_Inverse_Square_Root.pdf">mathematical explanation</a> for the choice of <code>0x5F3759DF</code> in the <a href="https://en.wikipedia.org/wiki/Fast_inverse_square_root">famous bit-level hack</a> for approximating the multiplicative inverse of the square root of a 32-bit floating-point number, it is not immediately clear to what extent the reasoning is really applicable in the context of machine data types and their peculiarities.
 This post illustrates how this, and related aspects, can be investigated with <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a>-based reasoning about the actual implementation.</p>
-
 <h2 id="introduction"><a href="#introduction" class="hanchor" ariaLabel="Anchor">Introduction</a> </h2>
-
 <p>Computing the &ldquo;inverse&rdquo; square root $1/\sqrt{x}$ is a common operation in 3D computer graphics since it occurs naturally during <a href="https://en.wikipedia.org/wiki/Unit_vector">vector normalisation</a>.
 However, in the &lsquo;90s, its precise computation was computationally expensive, and high numbers of such computations in every frame of a real-time graphics application could lead to stuttering and dropping of the framerate.
 With this in mind, it is not surprising that the &ldquo;fast inverse square root&rdquo; is often associated with <a href="https://en.wikipedia.org/wiki/Quake_III_Arena">Quake III Arena</a> &ndash; a multiplayer-player focussed first-person shooter from 1999 that made use of this approximation to avoid the computational cost of the real thing, without losing &ldquo;too much&rdquo; precision.</p>
-
 <p>While Quake did not invent the approximation, the publishing of its source code brought many developers into contact with this technique.
 And although modern CPUs provide native support for approximating $1/\sqrt{x}$ quickly &ndash; rendering the approximation mostly irrelevant nowadays &ndash; the general approach taken in this post is still applicable to many modern day questions.</p>
-
 <aside>
     
     <p>With the introduction of <a href="https://en.wikipedia.org/wiki/Streaming_SIMD_Extensions">SSE</a>, every x86_64 CPU since the Pentium III features a native instruction for computing $\sqrt{x}$ and its reciprocal via <code>SQRTSS</code> and <code>RSQRTSS</code>, respectively.</p>
-
 <p>More recent extensions, such as <a href="https://en.wikipedia.org/wiki/AVX-512">AVX-512</a>, provide even better approximations w.r.t. the relative error, and also support 64-bit floats.</p>
 
     
 </aside>
-
 <h3 id="the-fast-inverse-square-root"><a href="#the-fast-inverse-square-root" class="hanchor" ariaLabel="Anchor">The Fast Inverse Square Root</a> </h3>
-
 <p>The following C code is a condensed version of the <a href="https://github.com/id-Software/Quake-III-Arena/blob/master/code/game/q_math.c#L552">approximation used in Quake</a>.
 It boils down to treating the float as a 32-bit integer, and performing the trickery shown in line 3.
-The result could be returned after line 4, but adding a subsequent iteration of <a href="https://en.wikipedia.org/wiki/Newton%27s_method">Newton&rsquo;s method</a> improves the precision significantly, while being computationally cheap.</p>
-
+The result could be returned after line 4, but adding a subsequent iteration of <a href="https://en.wikipedia.org/wiki/Newton%27s_method">Newton's method</a> improves the precision significantly, while being computationally cheap.</p>
 <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
@@ -124,10 +116,10 @@ The result could be returned after line 4, but adding a subsequent iteration of 
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">9
 </span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;">
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
 <pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#66d9ef">float</span> <span style="color:#a6e22e">Q_rsqrt</span>(<span style="color:#66d9ef">float</span> f) {
 	int32_t b <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>(int32_t<span style="color:#f92672">*</span>)<span style="color:#f92672">&amp;</span>f;
-	b <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x5f3759df</span> <span style="color:#f92672">-</span> (b <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">1</span>); <span style="color:#75715e">// The actual bit-level hack
+	b <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x5f3759df</span> <span style="color:#f92672">-</span> (b <span style="color:#f92672">&gt;</span><span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">1</span>); <span style="color:#75715e">// The actual bit-level hack
 </span><span style="color:#75715e"></span>	<span style="color:#66d9ef">float</span> res <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>(<span style="color:#66d9ef">float</span><span style="color:#f92672">*</span>)<span style="color:#f92672">&amp;</span>b;
 
     <span style="color:#75715e">// Run one iteration of Newton&#39;s method to improve precision
@@ -136,17 +128,13 @@ The result could be returned after line 4, but adding a subsequent iteration of 
 }</code></pre></td></tr></table>
 </div>
 </div>
-
 <p>When presented with such a bit-level hack, one cannot help but wonder whether it really does what it is supposed to do in all cases.
-As you will see, we do not have to understand the approximation&rsquo;s inner workings to assess its correctness, but merely be able to formalise it.
+As you will see, we do not have to understand the approximation's inner workings to assess its correctness, but merely be able to formalise it.
 To this end, let us first look at how to express the expected behaviour of <code>Q_rsqrt</code>.</p>
-
 <h3 id="correctness-of-an-approximation"><a href="#correctness-of-an-approximation" class="hanchor" ariaLabel="Anchor">Correctness of an Approximation</a> </h3>
-
 <p>To asses the quality of an approximation, the employed measure should incorporate the discrepancy between the exact value $f(x)$ and its approximation $\hat{f}(x)$, that is, be based on the <a href="https://en.wikipedia.org/wiki/Approximation_error">absolute error</a> $\epsilon(x) = |f(x) - \hat{f}(x)|$.
 Depending on the context, various measures come into question, and it is often not obvious what the most sensible choice is.
 However, a clear disadvantage of sticking with the absolute error is that it ignores the magnitude of the exact value.</p>
-
 <p>For example consider finding that some approximation yields $\epsilon(42) = 1000$.
 Without knowing the magnitude this may sound like a big error, but might actually be off by just 1% if $f(42) = 100000$.
 For this reason, it is often advantageous to use the <a href="https://en.wikipedia.org/wiki/Approximation_error">relative error</a>
@@ -155,20 +143,16 @@ which takes the magnitude into consideration.
 In the context of Quake, the quality of the approximation should not fluctuate but keep the relative error reasonably small for all inputs.
 Therefore it is <a href="https://web.archive.org/web/20160308091758/http://www.daxia.com/bibis/upload/406Fast_Inverse_Square_Root.pdf">common</a> to analyse the fast inverse square root  w.r.t. the <strong>maximum relative error</strong> it may cause.
 The smaller this value is, the better the approximation is considered to be.</p>
-
 <aside>
     
     <p>Depending on the context, it might be more reasonable to use the <a href="https://en.wikipedia.org/wiki/Least_squares">least squares</a> criterion &ndash; a standard tool in regression analysis.</p>
-
 <p><a href="http://rrrola.wz.cz/inv_sqrt.html">J. Kadlec</a> has experimented with both measures in the context of <code>Q_rsqrt</code>, and provides accordingly optimised alternatives to <code>0x5f3759df</code>.</p>
 
     
 </aside>
-
 <p>Accordingly, correctness of an approximation can be specified as the requirement that $\eta(x)$ stays below a &ldquo;sufficiently&rdquo; small value for all inputs $x$.
 Of course, the definition of when an error is negligible is governed by the context the approximation is used in.
 For this post, let <code>Q_rsqrt</code> be correct if it achieves a maximum relative error of less than 1%:</p>
-
 <div>$$ 
 \tag{1}\begin{aligned}
 \eta(x) &= \left|1-\frac{\mathit{Q\_rsqrt}(x)}{\frac{1}{\sqrt{x}}}\right|\\
@@ -176,24 +160,17 @@ For this post, let <code>Q_rsqrt</code> be correct if it achieves a maximum rela
 &< 0.01
 \end{aligned}
  $$</div>
-
 <h2 id="logical-characterisation-of-program-semantics"><a href="#logical-characterisation-of-program-semantics" class="hanchor" ariaLabel="Anchor">Logical Characterisation of Program Semantics</a> </h2>
-
 <p>Instead of investigating the property of interest through testing, or exhaustive exploration of possible in- and outputs, symbolic verification is based on characterising semantics in terms of constraints in <a href="https://en.wikipedia.org/wiki/First-order_logic">first-order logic</a>, and reasoning about their satisfiability.</p>
-
 <p>Just as $x^2+y^2 = 1$ characterises all points on the <a href="https://en.wikipedia.org/wiki/Unit_circle">unit circle</a>, we will establish constraints to characterise all realisable executions of <code>Q_rsqrt</code> &ndash; the essential difference to our use-case being that program variables are ultimately just fixed-size bit vectors, while $x,y\in \mathbb{R}$.
 A percise characterisation of program semantics has to take all the peculiarities of machine represented numbers into account, such as overflows, rounding errors and exceptions.</p>
-
 <p>The actual heavy lifting, that is checking the constraints&rsquo; satisfiability, is typically accomplished with an <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a> solver.
 Providing a proper characterisation of program semantics and properties of interest is up to us.
 Luckily the <a href="http://smtlib.cs.uiowa.edu/">SMT-LIB</a> standard provides a common language and interface that most SMT solvers are compliant with.
 In particular, it specifies the types and operations relevant for software verification.</p>
-
 <p>In the following we characterise both $\eta(x)$ and <code>Q_rsqrt</code> in SMT-LIB, using <a href="maxRelErr.c">this brute force search for the maximum relative error</a> as a reference for the functions&rsquo; expected outputs.
-The characterisation is standard so feel free to skip it if you&rsquo;re just interested in finding out whether SMT solvers can handle the arising floating-point and bit vector constraints.</p>
-
+The characterisation is standard so feel free to skip it if you're just interested in finding out whether SMT solvers can handle the arising floating-point and bit vector constraints.</p>
 <h3 id="characterising-the-relative-error"><a href="#characterising-the-relative-error" class="hanchor" ariaLabel="Anchor">Characterising the Relative Error</a> </h3>
-
 <p>To start with a simple function, consider the following implementation of $\eta$ taken from our reference implementation.
 Just as in $(1)$, it computes $\eta(x)$ from $\sqrt x$ and $\mathit{Q\_rsqrt}(x)$.
 
@@ -239,11 +216,11 @@ Just as in $(1)$, it computes $\eta(x)$ from $\sqrt x$ and $\mathit{Q\_rsqrt}(x)
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
 </span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;">
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
 <pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#66d9ef">float</span> <span style="color:#a6e22e">relErr</span>(<span style="color:#66d9ef">float</span> fSqrt, <span style="color:#66d9ef">float</span> fFast) {
     <span style="color:#66d9ef">return</span> fabs(<span style="color:#ae81ff">1.0f</span> <span style="color:#f92672">-</span> fFast<span style="color:#f92672">*</span>fSqrt);
 }</code></pre></td></tr></table>
@@ -253,16 +230,11 @@ Just as in $(1)$, it computes $\eta(x)$ from $\sqrt x$ and $\mathit{Q\_rsqrt}(x)
         <a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/maxRelErr.c">maxRelErr.c</a>
     </figcaption>
 </figure></p>
-
 <p>This already looks pretty much like a constraint that relates inputs and outputs, but what is wrong with something along the lines of</p>
-
 <p>$$\tag{2} \mathit{relErr} = |1 - \mathit{fFast}\cdot\mathit{fSqrt}|,$$</p>
-
 <p>where $\mathit{relErr},\mathit{fFast},\mathit{fSqrt}\in\mathbb{F}_{32}$ (32-bit floats)?</p>
-
 <p>While the general idea is sensible, going directly from source to characterisation bypasses the compiler.
 As a result, subtleties like type promotion and architecture-specifics may be missing in the characterisation, e.g. the target architecture might not be using 32-bit floats.</p>
-
 <p>To capture program semantics faithfully, but avoid dealing with assembly and tons of opcodes, many verifiers are based on <a href="https://en.wikipedia.org/wiki/Intermediate_representation">intermediate representations</a> (IRs).
 In the context of verification these will typically be higher level than machine-specific assembly, and use a reduced set of instructions, but have fixed semantics and be devoid of syntactic sugar.
 Such decoupling of progamming languages and IRs, that all reasoning is actually based on, also enables verifiers to implicitly support several programming languages if these can be compiled to the one IR supported by the verifier.
@@ -276,7 +248,6 @@ Such decoupling of progamming languages and IRs, that all reasoning is actually 
 
 
 
-
     
 
 
@@ -330,15 +301,15 @@ Such decoupling of progamming languages and IRs, that all reasoning is actually 
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-llvm" data-lang="llvm"><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
 </span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-llvm" data-lang="llvm"><span style="color:#66d9ef">define</span> <span style="color:#960050;background-color:#1e0010">dso_local</span> <span style="color:#66d9ef">float</span> @relErr(<span style="color:#66d9ef">float</span>, <span style="color:#66d9ef">float</span>) <span style="color:#66d9ef">local_unnamed_addr</span> #1 {
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-llvm" data-lang="llvm"><span style="color:#66d9ef">define</span> <span style="color:#960050;background-color:#1e0010">d</span><span style="color:#960050;background-color:#1e0010">s</span><span style="color:#960050;background-color:#1e0010">o</span><span style="color:#960050;background-color:#1e0010">_</span><span style="color:#960050;background-color:#1e0010">l</span><span style="color:#960050;background-color:#1e0010">o</span><span style="color:#960050;background-color:#1e0010">c</span><span style="color:#960050;background-color:#1e0010">a</span><span style="color:#960050;background-color:#1e0010">l</span> <span style="color:#66d9ef">float</span> @relErr(<span style="color:#66d9ef">float</span>, <span style="color:#66d9ef">float</span>) <span style="color:#66d9ef">local_unnamed_addr</span> #1 {
   %3 = <span style="color:#66d9ef">fmul</span> <span style="color:#66d9ef">float</span> %0, %1
   %4 = <span style="color:#66d9ef">fsub</span> <span style="color:#66d9ef">float</span> <span style="color:#ae81ff">1.000000e+00</span>, %3
   %5 = <span style="color:#66d9ef">tail</span> <span style="color:#66d9ef">call</span> <span style="color:#66d9ef">float</span> @llvm.fabs.f32(<span style="color:#66d9ef">float</span> %4)
@@ -350,11 +321,9 @@ Such decoupling of progamming languages and IRs, that all reasoning is actually 
         <a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/maxRelErr.ll">maxRelErr.ll</a>
     </figcaption>
 </figure>
-
 <p>Given this representation, all potential subtleties become explicit.
 The function expects two 32-bit floats, denoted by %0 and %1, and returns a 32-bit floating-point number, too.
 There is no branching of control flow, making the characterisation pretty straight forward:</p>
-
 
 
 
@@ -452,7 +421,7 @@ There is no branching of control flow, making the characterisation pretty straig
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme"><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
@@ -465,53 +434,46 @@ There is no branching of control flow, making the characterisation pretty straig
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
 </span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme"><span style="color:#75715e">; Auxiliary function to keep notation of 1.0f short</span>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme"><span style="color:#75715e">; Auxiliary function to keep notation of 1.0f short</span>
 (<span style="color:#a6e22e">define-fun</span> f1<span style="color:#f92672">.</span><span style="color:#ae81ff">0</span> () Float32
     ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) RNE <span style="color:#ae81ff">1</span>)
 )
 
 (<span style="color:#a6e22e">define-fun</span> relErr ((<span style="color:#a6e22e">%0</span> Float32) (<span style="color:#a6e22e">%1</span> Float32)) Float32
-    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%3</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>mul RNE %0 %1)))    <span style="color:#75715e">; %3 = fmul float %0, %1</span>
-    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%4</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>sub RNE f1<span style="color:#f92672">.</span><span style="color:#ae81ff">0</span> %3)))  <span style="color:#75715e">; %4 = fsub float 1.000000e+00, %3</span>
-    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%5</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>abs %4)))           <span style="color:#75715e">; %5 = tail call float @llvm.fabs.f32(float %4)</span>
-        %5                            <span style="color:#75715e">; ret float %5</span>
+    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%3</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>mul RNE %0 %1)))    <span style="color:#75715e">; %3 = fmul float %0, %1</span>
+    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%4</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>sub RNE f1<span style="color:#f92672">.</span><span style="color:#ae81ff">0</span> %3)))  <span style="color:#75715e">; %4 = fsub float 1.000000e+00, %3</span>
+    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%5</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>abs %4)))           <span style="color:#75715e">; %5 = tail call float @llvm.fabs.f32(float %4)</span>
+        %5                            <span style="color:#75715e">; ret float %5</span>
     )))
-)</code></pre></td></tr></table>
+)</code></pre></td></tr></table>
 </div>
 </div>
     <figcaption>
         <a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.smt2">invsqrt.smt2</a>
     </figcaption>
 </figure>
-
 <p>While this post is not a tutorial on the <a href="http://smtlib.cs.uiowa.edu/papers/smt-lib-reference-v2.6-r2017-07-18.pdf">SMT-LIB language</a>, it should still be pretty easy to get the general idea and intuition.
 For the most part, the characterisation boils down to expressing the LLVM IR in terms of <a href="https://en.wikipedia.org/wiki/S-expression">symbolic expressions</a> written in <a href="https://en.wikipedia.org/wiki/Polish_notation">prefix notation</a>.</p>
-
 <aside>
     
     <p>For an interactive introduction to the SMT-LIB language I recommend the <a href="https://rise4fun.com/Z3/tutorial/guide">Z3 tutorial</a>.
 <a href="https://github.com/Z3Prover/z3/">Z3</a> is a feature-packed, MIT licensed and SMT-LIB compliant SMT solver.
 Besides supporting the SMT-LIB language it also features non-standard extensions, such as the <code>eval</code> command, which improve various aspects of working with SMT-LIB.</p>
-
-<p>For example prior to SMT-LIB v2.6, <code>(declare-const f Float32)</code> was Z3&rsquo;s syntactic sugar for <code>(declare-fun x () Float32)</code>.
+<p>For example prior to SMT-LIB v2.6, <code>(declare-const f Float32)</code> was Z3's syntactic sugar for <code>(declare-fun x () Float32)</code>.
 This handy command stresses the fact that 0-ary functions are just constants, and has made it into the standard.</p>
 
     
 </aside>
-
 <p><code>relErr</code> is the logical characterisation of the eponymous function, using the same names for intermediate values as the LLVM IR.
 As in the IR, the symbols <code>%0</code> to <code>%5</code> only exist within the scope of the function, and the returned value <code>%5</code> is just an alias for <code>(fp.abs %4)</code>.
 In contrast to the handwaving in $(2)$, SMT-LIB is explicit about the operations and disinguishes between <code>fp.abs</code> and <code>abs</code>, for floats and integers, respectively.
 The language is also aware of the fact that floats cannot represent every real number precisely, which is why <code>fp.mul</code>, and many other operations, require the underlying rounding mode to be specified.
-Our example&rsquo;s IR does not make use of specific rounding modes, which is why we use the default <a href="https://en.wikipedia.org/wiki/Floating-point_arithmetic#Rounding_modes">rounding to nearest</a> (RNE), where ties round to the nearest even digit.
+Our example's IR does not make use of specific rounding modes, which is why we use the default <a href="https://en.wikipedia.org/wiki/Floating-point_arithmetic#Rounding_modes">rounding to nearest</a> (RNE), where ties round to the nearest even digit.
 This is also the reason why the verbosity in the auxiliary (0-ary) function <code>f1.0</code> is needed, just to specify a IEEE 754 compliant <code>1.0f</code>.</p>
-
 <h3 id="characterising-the-fast-inverse-square-root"><a href="#characterising-the-fast-inverse-square-root" class="hanchor" ariaLabel="Anchor">Characterising the Fast Inverse Square Root</a> </h3>
-
 <p>Similar to the relative error function, <code>Q_rsqrt</code> features no branching of control flow but is merely a sequence of instructions.
 To be able to experiment with different constants in the hack later, we introduce an identifier <code>magic</code> that exists outside of the function.</p>
-
 
 
 
@@ -603,7 +565,7 @@ To be able to experiment with different constants in the hack later, we introduc
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
@@ -615,12 +577,12 @@ To be able to experiment with different constants in the hack later, we introduc
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
 </span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;">
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
 <pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#66d9ef">const</span> int32_t magic <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x5f3759df</span>;
 
 <span style="color:#66d9ef">float</span> <span style="color:#a6e22e">Q_rsqrt</span>(<span style="color:#66d9ef">float</span> f) {
     int32_t b <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>(int32_t<span style="color:#f92672">*</span>)<span style="color:#f92672">&amp;</span>f;
-    b <span style="color:#f92672">=</span> magic <span style="color:#f92672">-</span> (b <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">1</span>); <span style="color:#75715e">// The actual bit-level hack
+    b <span style="color:#f92672">=</span> magic <span style="color:#f92672">-</span> (b <span style="color:#f92672">&gt;</span><span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">1</span>); <span style="color:#75715e">// The actual bit-level hack
 </span><span style="color:#75715e"></span>    <span style="color:#66d9ef">float</span> res <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>(<span style="color:#66d9ef">float</span><span style="color:#f92672">*</span>)<span style="color:#f92672">&amp;</span>b;
 
     <span style="color:#75715e">// Run one iteration of Newton&#39;s method to improve precision
@@ -633,9 +595,7 @@ To be able to experiment with different constants in the hack later, we introduc
         <a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/maxRelErr.c">maxRelErr.c</a>
     </figcaption>
 </figure>
-
 <p>Compiling this to LLVM IR yields the following for both 32 and 64-bit targets:</p>
-
 
 
 
@@ -733,7 +693,7 @@ To be able to experiment with different constants in the hack later, we introduc
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-llvm" data-lang="llvm"><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
@@ -746,8 +706,8 @@ To be able to experiment with different constants in the hack later, we introduc
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
 </span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-llvm" data-lang="llvm"><span style="color:#66d9ef">define</span> <span style="color:#960050;background-color:#1e0010">dso_local</span> <span style="color:#66d9ef">float</span> @Q_rsqrt(<span style="color:#66d9ef">float</span>) <span style="color:#66d9ef">local_unnamed_addr</span> #0 {
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-llvm" data-lang="llvm"><span style="color:#66d9ef">define</span> <span style="color:#960050;background-color:#1e0010">d</span><span style="color:#960050;background-color:#1e0010">s</span><span style="color:#960050;background-color:#1e0010">o</span><span style="color:#960050;background-color:#1e0010">_</span><span style="color:#960050;background-color:#1e0010">l</span><span style="color:#960050;background-color:#1e0010">o</span><span style="color:#960050;background-color:#1e0010">c</span><span style="color:#960050;background-color:#1e0010">a</span><span style="color:#960050;background-color:#1e0010">l</span> <span style="color:#66d9ef">float</span> @Q_rsqrt(<span style="color:#66d9ef">float</span>) <span style="color:#66d9ef">local_unnamed_addr</span> #0 {
   %2 = <span style="color:#66d9ef">bitcast</span> <span style="color:#66d9ef">float</span> %0 <span style="color:#66d9ef">to</span> <span style="color:#66d9ef">i32</span>
   %3 = <span style="color:#66d9ef">ashr</span> <span style="color:#66d9ef">i32</span> %2, <span style="color:#ae81ff">1</span>
   %4 = <span style="color:#66d9ef">sub</span> <span style="color:#66d9ef">nsw</span> <span style="color:#66d9ef">i32</span> <span style="color:#ae81ff">1597463007</span>, %3
@@ -765,13 +725,10 @@ To be able to experiment with different constants in the hack later, we introduc
         <a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/maxRelErr.ll">maxRelErr.ll</a>
     </figcaption>
 </figure>
-
 <p>This example illustrates another advantage of characterising an IR over directly translating the source code.
 In contrast to many operations on real numbers, floating-point operations are <a href="https://en.wikipedia.org/wiki/Floating-point_arithmetic#Accuracy_problems">not associative</a>, but the IR makes the order, in which subexpressions will be evaluated on the target architecture, explicit.</p>
-
 <p>As with <code>relErr</code>, the characterisation of <code>Q_rsqrt</code> is essentialy a reformulation of the returned value <code>%10</code> in terms of the operations specified in SMT-LIB.
 As before, we introduce auxiliary functions <code>f0.5</code> and <code>f1.5</code> to keep the notation of these float constants short and readable.</p>
-
 
 
 
@@ -945,7 +902,7 @@ As before, we introduce auxiliary functions <code>f0.5</code> and <code>f1.5</co
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme"><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
@@ -971,10 +928,10 @@ As before, we introduce auxiliary functions <code>f0.5</code> and <code>f1.5</co
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
 </span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">declare-const</span> magic (<span style="color:#a6e22e">_</span> BitVec <span style="color:#ae81ff">32</span>)) <span style="color:#75715e">; magic number used in hack</span>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">declare-const</span> magic (<span style="color:#a6e22e">_</span> BitVec <span style="color:#ae81ff">32</span>)) <span style="color:#75715e">; magic number used in hack</span>
 
-<span style="color:#75715e">; Auxiliary functions to keep notation short</span>
+<span style="color:#75715e">; Auxiliary functions to keep notation short</span>
 (<span style="color:#a6e22e">define-fun</span> f0<span style="color:#f92672">.</span><span style="color:#ae81ff">5</span> () Float32
     ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) RNE <span style="color:#ae81ff">0.5</span>)
 )
@@ -982,37 +939,34 @@ As before, we introduce auxiliary functions <code>f0.5</code> and <code>f1.5</co
     ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) RNE <span style="color:#ae81ff">1.5</span>)
 )
 
-<span style="color:#75715e">; Note that the input&#39;s (%0) bitvector representation (%2) is not computed in the characterisation of Q_rsqrt,</span>
-<span style="color:#75715e">; but expected to be passed as additional argument since there is no _function_ for reinterpreting floats as bitvectors.</span>
-<span style="color:#75715e">; Therefore, we _relate_ b and f outside of Q_rsqrt (asserted below)</span>
+<span style="color:#75715e">; Note that the input&#39;s (%0) bitvector representation (%2) is not computed in the characterisation of Q_rsqrt,</span>
+<span style="color:#75715e">; but expected to be passed as additional argument since there is no _function_ for reinterpreting floats as bitvectors.</span>
+<span style="color:#75715e">; Therefore, we _relate_ b and f outside of Q_rsqrt (asserted below)</span>
 (<span style="color:#a6e22e">define-fun</span> Q_rsqrt ((<span style="color:#a6e22e">%0</span> Float32) (<span style="color:#a6e22e">%2</span> (<span style="color:#a6e22e">_</span> BitVec <span style="color:#ae81ff">32</span>))) Float32
-    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%3</span> (<span style="color:#a6e22e">bvashr</span> %2 (<span style="color:#a6e22e">_</span> bv1 <span style="color:#ae81ff">32</span>)))) <span style="color:#75715e">; %3 = ashr i32 %2, 1</span>
-    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%4</span> (<span style="color:#a6e22e">bvsub</span> magic %3)))       <span style="color:#75715e">; %4 = sub nsw i32 1597463007, %3 // magic instead of 0x5F3759DF</span>
-    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%5</span> ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) %4)))    <span style="color:#75715e">; %5 = bitcast i32 %4 to float</span>
-    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%6</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>mul RNE %0 f0<span style="color:#f92672">.</span><span style="color:#ae81ff">5</span>)))   <span style="color:#75715e">; %6 = fmul float %0, 5.000000e-01</span>
-    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%7</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>mul RNE %6 %5)))     <span style="color:#75715e">; %7 = fmul float %6, %5</span>
-    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%8</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>mul RNE %7 %5)))     <span style="color:#75715e">; %8 = fmul float %7, %5</span>
-    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%9</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>sub RNE f1<span style="color:#f92672">.</span><span style="color:#ae81ff">5</span> %8)))   <span style="color:#75715e">; %9 = fsub float 1.500000e+00, %8</span>
-    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%10</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>mul RNE %9 %5)))    <span style="color:#75715e">; %10 = fmul float %9, %5</span>
-        %10                            <span style="color:#75715e">; ret float %10</span>
+    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%3</span> (<span style="color:#a6e22e">bvashr</span> %2 (<span style="color:#a6e22e">_</span> bv1 <span style="color:#ae81ff">32</span>)))) <span style="color:#75715e">; %3 = ashr i32 %2, 1</span>
+    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%4</span> (<span style="color:#a6e22e">bvsub</span> magic %3)))       <span style="color:#75715e">; %4 = sub nsw i32 1597463007, %3 // magic instead of 0x5F3759DF</span>
+    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%5</span> ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) %4)))    <span style="color:#75715e">; %5 = bitcast i32 %4 to float</span>
+    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%6</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>mul RNE %0 f0<span style="color:#f92672">.</span><span style="color:#ae81ff">5</span>)))   <span style="color:#75715e">; %6 = fmul float %0, 5.000000e-01</span>
+    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%7</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>mul RNE %6 %5)))     <span style="color:#75715e">; %7 = fmul float %6, %5</span>
+    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%8</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>mul RNE %7 %5)))     <span style="color:#75715e">; %8 = fmul float %7, %5</span>
+    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%9</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>sub RNE f1<span style="color:#f92672">.</span><span style="color:#ae81ff">5</span> %8)))   <span style="color:#75715e">; %9 = fsub float 1.500000e+00, %8</span>
+    (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">%10</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>mul RNE %9 %5)))    <span style="color:#75715e">; %10 = fmul float %9, %5</span>
+        %10                            <span style="color:#75715e">; ret float %10</span>
     ))))))))
-)</code></pre></td></tr></table>
+)</code></pre></td></tr></table>
 </div>
 </div>
     <figcaption>
         <a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.smt2">invsqrt.smt2</a>
     </figcaption>
 </figure>
-
 <p>Two points may need further clarification though:</p>
-
 <aside>
     <p>
     Just like LLVM IR, SMT-LIB does not distinguish between signed and unsigned bit vectors.
 Instead, operations whose semantics depends on the signedness come in two flavours, e.g. both <code>bvugt</code> and <code>bvsgt</code> express &ldquo;greater than&rdquo;.
     </p>
 </aside>
-
 <ol>
 <li>The <code>magic</code> constant is declared as a 32-bit integer that exists in global scope.
 Unlike in the source code, its value is currently unconstrained but will be restricted later, depending on the property of interest.</li>
@@ -1020,19 +974,17 @@ Unlike in the source code, its value is currently unconstrained but will be rest
 The reason is that <a href="http://smtlib.cs.uiowa.edu/theories-FloatingPoint.shtml">there is no <em>function</em></a> for converting floats to their IEEE 754 binary format, e.g. <code>NaN</code> has multiple representations.
 Therefore we feed both the float <code>%0%</code> and its bit vector representation <code>%2</code> into <code>Q_rsqrt</code>, and will assert this relation for every call site.</li>
 </ol>
-
 <h2 id="checking-properties-of-interest"><a href="#checking-properties-of-interest" class="hanchor" ariaLabel="Anchor">Checking Properties of Interest</a> </h2>
-
 <p>Having defined both functions, we can start checking the satisfiability of constraints that involve them.
 Although we are pretty sure that our logical characterisation is correct, we may have mixed things up or introduced typos.
 It is a good idea to first test whether it performs the same computations as the <a href="maxRelErr.c">reference implementation</a>:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-zsh" data-lang="zsh">arch: <span style="color:#ae81ff">64</span>-bit
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-zsh" data-lang="zsh">arch: 64-bit
 magic: 0x5F3759DF
-worst: 0x016EB3C0 <span style="color:#f92672">(</span><span style="color:#ae81ff">0</span>.000000000000<span style="color:#f92672">)</span>
-fSqrt: 0x20773327 <span style="color:#f92672">(</span><span style="color:#ae81ff">0</span>.000000000000<span style="color:#f92672">)</span>
-fFast: 0x5E84530F <span style="color:#f92672">(</span><span style="color:#ae81ff">4767490664373944320</span>.000000000000<span style="color:#f92672">)</span>
-maxRelErr: 0x3AE5B000 <span style="color:#f92672">(</span><span style="color:#ae81ff">0</span>.0017523765563964844<span style="color:#f92672">)</span></code></pre></div>
-<p>To this end, we assert that <code>magic</code> should be the original constant <code>0x5F3759DF</code>, and that <code>b</code> is the bit vector representation of the float <code>f</code>.
+worst: 0x016EB3C0 <span style="color:#f92672">(</span>0.000000000000<span style="color:#f92672">)</span>
+fSqrt: 0x20773327 <span style="color:#f92672">(</span>0.000000000000<span style="color:#f92672">)</span>
+fFast: 0x5E84530F <span style="color:#f92672">(</span>4767490664373944320.000000000000<span style="color:#f92672">)</span>
+maxRelErr: 0x3AE5B000 <span style="color:#f92672">(</span>0.0017523765563964844<span style="color:#f92672">)</span>
+</code></pre></div><p>To this end, we assert that <code>magic</code> should be the original constant <code>0x5F3759DF</code>, and that <code>b</code> is the bit vector representation of the float <code>f</code>.
 The naïve reference implementation finds the <strong>input <code>0x016EB3C0</code></strong> (interpreted as float) to cause a relative error of <code>0x3AE5B000</code>, so we experiment with <code>b</code> taking this value:</p>
 
 
@@ -1042,7 +994,6 @@ The naïve reference implementation finds the <strong>input <code>0x016EB3C0</co
 
 
 
-
     
 
 
@@ -1059,58 +1010,72 @@ The naïve reference implementation finds the <strong>input <code>0x016EB3C0</co
 
     
     
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
         
     
-
-    
     
 
     
-    
-
+        
     
     
 
     
-    
-
-    
-    
-
-    
-    
-
-
-
-
+        
     
     
 
     
-    
-
-    
-    
-
+        
     
     
 
     
-    
-
-    
-    
-
+        
     
     
 
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
     
     
 
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme"><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
@@ -1119,22 +1084,21 @@ The naïve reference implementation finds the <strong>input <code>0x016EB3C0</co
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
 </span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">    (<span style="color:#a6e22e">assert</span> (= magic <span style="color:#f92672">#</span>x5F3759DF))     <span style="color:#75715e">; original magic number</span>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (= magic <span style="color:#f92672">#</span>x5F3759DF))     <span style="color:#75715e">; original magic number</span>
 
-    (<span style="color:#a6e22e">declare-const</span> f Float32)         <span style="color:#75715e">; input float</span>
-    (<span style="color:#a6e22e">declare-const</span> b (<span style="color:#a6e22e">_</span> BitVec <span style="color:#ae81ff">32</span>))   <span style="color:#75715e">; input float&#39;s bitvector representation (asserted below)</span>
-    (<span style="color:#a6e22e">assert</span> (= ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) b) f)) <span style="color:#75715e">; %3 = bitcast float %0 to i32 // originally in Q_rsqrt</span>
+(<span style="color:#a6e22e">declare-const</span> f Float32)         <span style="color:#75715e">; input float</span>
+(<span style="color:#a6e22e">declare-const</span> b (<span style="color:#a6e22e">_</span> BitVec <span style="color:#ae81ff">32</span>))   <span style="color:#75715e">; input float&#39;s bitvector representation (asserted below)</span>
+(<span style="color:#a6e22e">assert</span> (= ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) b) f)) <span style="color:#75715e">; %3 = bitcast float %0 to i32 // originally in Q_rsqrt</span>
 
-    (<span style="color:#a6e22e">assert</span> (= b <span style="color:#f92672">#</span>x016EB3C0))         <span style="color:#75715e">; worst float/bit-string for that magic number</span>
-    (<span style="color:#a6e22e">check-sat</span>)</code></pre></td></tr></table>
+(<span style="color:#a6e22e">assert</span> (= b <span style="color:#f92672">#</span>x016EB3C0))         <span style="color:#75715e">; worst float/bit-string for that magic number</span>
+(<span style="color:#a6e22e">check-sat</span>)</code></pre></td></tr></table>
 </div>
 </div>
     <figcaption>
         <a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.smt2">invsqrt.smt2</a>
     </figcaption>
 </figure>
-
 <p>Feeding these constraints into an SMT solver, such as <a href="https://github.com/Z3Prover/z3/">Z3</a>, will return that they are indeed satisfiable.
 To determine whether the characterised functions actually compute the expected values, we could also have added the following assertions (prior to <code>check-sat</code>):</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (= f ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) <span style="color:#f92672">#</span>x016EB3C0))) <span style="color:#75715e">; f = (float)0x016EB3C0</span>
@@ -1149,9 +1113,9 @@ To determine whether the characterised functions actually compute the expected v
 (<span style="color:#a6e22e">assert</span> (=                                 <span style="color:#75715e">; relErr = (float)0x3AE5B000</span>
     (<span style="color:#a6e22e">relErr</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>sqrt RNE f) (<span style="color:#a6e22e">Q_rsqrt</span> f b))
     ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) <span style="color:#f92672">#</span>x3AE5B000)
-))</code></pre></div>
-<p>However, all these assertions do is evaluate whether applying various functions to the values picked by the solver for <code>f</code> and <code>b</code> yields the expected values.
-Instead of adding these unnecessary assertions, and making it harder for the solver to find a solution, it is more appropriate to use Z3&rsquo;s <code>eval</code> command, to do these evaluations <em>after</em> <code>check-sat</code>:</p>
+))
+</code></pre></div><p>However, all these assertions do is evaluate whether applying various functions to the values picked by the solver for <code>f</code> and <code>b</code> yields the expected values.
+Instead of adding these unnecessary assertions, and making it harder for the solver to find a solution, it is more appropriate to use Z3's <code>eval</code> command, to do these evaluations <em>after</em> <code>check-sat</code>:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(eval (= f ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) <span style="color:#f92672">#</span>x016EB3C0))) <span style="color:#75715e">; f = (float)0x016EB3C0</span>
 (eval (=                                 <span style="color:#75715e">; fSqrt = (float)0x20773327</span>
     (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>sqrt RNE f)				 
@@ -1164,10 +1128,9 @@ Instead of adding these unnecessary assertions, and making it harder for the sol
 (eval (=                                 <span style="color:#75715e">; relErr = (float)0x3AE5B000</span>
     (<span style="color:#a6e22e">relErr</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>sqrt RNE f) (<span style="color:#a6e22e">Q_rsqrt</span> f b))
     ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) <span style="color:#f92672">#</span>x3AE5B000)
-))</code></pre></div>
-<p>Using this variant in <a href="invsqrt.smt2">our characterisation</a>, instead of the additional assertions, a solution is found immediately.
+))
+</code></pre></div><p>Using this variant in <a href="invsqrt.smt2">our characterisation</a>, instead of the additional assertions, a solution is found immediately.
 The computed <strong>values do indeed match those of the executable</strong>:</p>
-
 
 
 
@@ -1293,7 +1256,7 @@ The computed <strong>values do indeed match those of the executable</strong>:</p
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-zsh" data-lang="zsh"><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
@@ -1311,8 +1274,8 @@ The computed <strong>values do indeed match those of the executable</strong>:</p
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
 </span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-zsh" data-lang="zsh"><span style="color:#f92672">===========[</span> Test encoding <span style="color:#f92672">]===========</span>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-zsh" data-lang="zsh"><span style="color:#f92672">=</span><span style="color:#f92672">=</span><span style="color:#f92672">=</span><span style="color:#f92672">=</span><span style="color:#f92672">=</span><span style="color:#f92672">=</span><span style="color:#f92672">=</span><span style="color:#f92672">=</span><span style="color:#f92672">=</span><span style="color:#f92672">=</span><span style="color:#f92672">=</span><span style="color:#f92672">[</span> Test encoding <span style="color:#f92672">]</span><span style="color:#f92672">=</span><span style="color:#f92672">=</span><span style="color:#f92672">=</span><span style="color:#f92672">=</span><span style="color:#f92672">=</span><span style="color:#f92672">=</span><span style="color:#f92672">=</span><span style="color:#f92672">=</span><span style="color:#f92672">=</span><span style="color:#f92672">=</span><span style="color:#f92672">=</span>
 sat
 f <span style="color:#f92672">(</span>should be 0x016EB3C0<span style="color:#f92672">)</span>:
 <span style="color:#f92672">(</span>fp <span style="color:#75715e">#b0 #x02 #b11011101011001111000000)</span>
@@ -1328,18 +1291,15 @@ true
 
 relErr <span style="color:#f92672">(</span>should be 0x3AE5B000<span style="color:#f92672">)</span>:
 <span style="color:#f92672">(</span>fp <span style="color:#75715e">#b0 #x75 #b11001011011000000000000)</span>
-true</code></pre></td></tr></table>
+true</code></pre></td></tr></table>
 </div>
 </div>
     <figcaption>
         <a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.log">invsqrt.log</a>
     </figcaption>
 </figure>
-
 <h3 id="checking-correctness"><a href="#checking-correctness" class="hanchor" ariaLabel="Anchor">Checking Correctness</a> </h3>
-
 <p>Having confirmed that there is nothing obviously wrong with our characterisation, we can now investigate the properties we are actually interested in.</p>
-
 <p>We already established in the introduction that correctness of an approximation can be specified by constraining the maximum relative error.
 To prove that the relative error never exceeds 1% for any float, we leave the input to <code>Q_rsqrt</code> <strong>unconstrained</strong>, and check whether it is possible for <code>relErr</code> to return anything greater than 0.01.</p>
 
@@ -1350,7 +1310,6 @@ To prove that the relative error never exceeds 1% for any float, we leave the in
 
 
 
-
     
 
 
@@ -1367,82 +1326,104 @@ To prove that the relative error never exceeds 1% for any float, we leave the in
 
     
     
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
         
     
-
-    
     
 
     
-    
-
+        
     
     
 
     
-    
-
-    
-    
-
+        
     
     
 
     
-    
-
-    
-    
-
+        
     
     
 
     
-    
-
-
-
-
+        
     
     
 
     
-    
-
-    
-    
-
+        
     
     
 
     
-    
-
-    
-    
-
+        
     
     
 
     
-    
-
-    
-    
-
+        
     
     
 
     
+        
+    
     
 
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
     
     
 
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme"><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">85
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">85
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">86
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">87
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">88
@@ -1455,31 +1436,28 @@ To prove that the relative error never exceeds 1% for any float, we leave the in
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">95
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">96
 </span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">    (<span style="color:#a6e22e">assert</span> (= magic <span style="color:#f92672">#</span>x5F3759DF))     <span style="color:#75715e">; original magic number</span>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (= magic <span style="color:#f92672">#</span>x5F3759DF))     <span style="color:#75715e">; original magic number</span>
 
-    (<span style="color:#a6e22e">declare-const</span> f Float32)         <span style="color:#75715e">; input float</span>
-    (<span style="color:#a6e22e">declare-const</span> b (<span style="color:#a6e22e">_</span> BitVec <span style="color:#ae81ff">32</span>))   <span style="color:#75715e">; input float&#39;s bitvector representation (asserted below)</span>
-    (<span style="color:#a6e22e">assert</span> (= ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) b) f)) <span style="color:#75715e">; %3 = bitcast float %0 to i32 // originally in Q_rsqrt</span>
+(<span style="color:#a6e22e">declare-const</span> f Float32)         <span style="color:#75715e">; input float</span>
+(<span style="color:#a6e22e">declare-const</span> b (<span style="color:#a6e22e">_</span> BitVec <span style="color:#ae81ff">32</span>))   <span style="color:#75715e">; input float&#39;s bitvector representation (asserted below)</span>
+(<span style="color:#a6e22e">assert</span> (= ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) b) f)) <span style="color:#75715e">; %3 = bitcast float %0 to i32 // originally in Q_rsqrt</span>
 
-    <span style="color:#75715e">; Let the approximation be correct, if the relative error never exceeds 0.01 (1% deviation)</span>
-    (<span style="color:#a6e22e">assert</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>gt
-        (<span style="color:#a6e22e">relErr</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>sqrt RNE f) (<span style="color:#a6e22e">Q_rsqrt</span> f b))
-        ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) RNE <span style="color:#ae81ff">0.01</span>)
-    ))
-    (<span style="color:#a6e22e">check-sat</span>)</code></pre></td></tr></table>
+<span style="color:#75715e">; Let the approximation be correct, if the relative error never exceeds 0.01 (1% deviation)</span>
+(<span style="color:#a6e22e">assert</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>gt
+    (<span style="color:#a6e22e">relErr</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>sqrt RNE f) (<span style="color:#a6e22e">Q_rsqrt</span> f b))
+    ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) RNE <span style="color:#ae81ff">0.01</span>)
+))
+(<span style="color:#a6e22e">check-sat</span>)</code></pre></td></tr></table>
 </div>
 </div>
     <figcaption>
         <a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.smt2">invsqrt.smt2</a>
     </figcaption>
 </figure>
-
 <p>Here the solver returns <code>sat</code>, finding that picking infinity (<code>#x7f800000</code>) as input results in a greater relative error.
 Indeed, the hack turns out to not be applicable to all floating point numbers.</p>
-
 <p>To find out whether it will work &ldquo;correctly&rdquo; for the remaining inputs, we can additionally require the input to be <strong>not infinite</strong>:</p>
-
 
 
 
@@ -1521,19 +1499,18 @@ Indeed, the hack turns out to not be applicable to all floating point numbers.</
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme"><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">105
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">105
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">106
 </span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;">
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
 <pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (not (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>isInfinite f)))
-(<span style="color:#a6e22e">check-sat</span>)</code></pre></td></tr></table>
+(<span style="color:#a6e22e">check-sat</span>)</code></pre></td></tr></table>
 </div>
 </div>
     <figcaption>
         <a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.smt2">invsqrt.smt2</a>
     </figcaption>
 </figure>
-
 <p>However, the solver returns <code>sat</code> again, finding that picking zero (<code>0x00000000</code>) as input results in a greater relative error, too.
 Granted, this is a rather special input, so what about restricting the input to be <strong>not zero</strong> either?</p>
 
@@ -1544,7 +1521,6 @@ Granted, this is a rather special input, so what about restricting the input to 
 
 
 
-
     
 
 
@@ -1578,19 +1554,18 @@ Granted, this is a rather special input, so what about restricting the input to 
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme"><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">115
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">115
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">116
 </span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;">
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
 <pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (not (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>isZero f)))
-(<span style="color:#a6e22e">check-sat</span>)</code></pre></td></tr></table>
+(<span style="color:#a6e22e">check-sat</span>)</code></pre></td></tr></table>
 </div>
 </div>
     <figcaption>
         <a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.smt2">invsqrt.smt2</a>
     </figcaption>
 </figure>
-
 <p>Again, the solver finds the constraints to be satisfiable.
 It turns out that picking a <a href="https://en.wikipedia.org/wiki/Denormal_number">subnormal</a> input (<code>#x00000001</code>) can result in a relative error above 1%, too.
 When also requiring the input to <strong>not be subnormal</strong>, the SMT solver finally determines the resulting set of constraints to be unsatisfiable:</p>
@@ -1602,7 +1577,6 @@ When also requiring the input to <strong>not be subnormal</strong>, the SMT solv
 
 
 
-
     
 
 
@@ -1636,28 +1610,24 @@ When also requiring the input to <strong>not be subnormal</strong>, the SMT solv
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme"><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">125
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">125
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">126
 </span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;">
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
 <pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (not (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>isSubnormal f)))
-(<span style="color:#a6e22e">check-sat</span>)</code></pre></td></tr></table>
+(<span style="color:#a6e22e">check-sat</span>)</code></pre></td></tr></table>
 </div>
 </div>
     <figcaption>
         <a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.smt2">invsqrt.smt2</a>
     </figcaption>
 </figure>
-
 <p>Since normal floats are not zero, infinite, or subnormal, the unsatisfiability of the accumulated set of constraints <strong>proves that for all normal floats</strong>, the predicate <code>relErr(..) &gt; 0.01</code> is not satisfiable.</p>
-
 <h3 id="can-the-result-be-nan"><a href="#can-the-result-be-nan" class="hanchor" ariaLabel="Anchor">Can the Result be NaN?</a> </h3>
-
 <p>Why do I state the result in such an indirect way, instead of just saying that we have proof of correctness for all normal floats?
 Because there is still a minor issue with the previous result.
 While we have indeed proven that the result of <code>relErr</code> can not exceed 0.01, the result may potentially not even be a number (<code>NaN</code>).
 Since <code>NaN</code> is neither greater nor less than 1%, even an implementation of <code>Q_rsqrt</code> that always returns <code>NaN</code> will satisfy our current specification of correctness.</p>
-
 <p>The authors of Quake were aware of the issue, and had an <a href="https://github.com/id-Software/Quake-III-Arena/blob/dbe4ddb10315479fc00086f08e25d968b4b43c49/code/game/q_math.c#L568">according check</a> in place.
 To determine whether <code>NaN</code> can ever be returned by <code>relErr</code> for a normal float, we simplify the previously accumulated constraints to just <code>(fp.isNormal f)</code> and assert <code>fp.isNaN</code> for the result of <code>relErr</code>:</p>
 
@@ -1668,7 +1638,6 @@ To determine whether <code>NaN</code> can ever be returned by <code>relErr</code
 
 
 
-
     
 
 
@@ -1685,82 +1654,104 @@ To determine whether <code>NaN</code> can ever be returned by <code>relErr</code
 
     
     
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
         
     
-
-    
     
 
     
-    
-
+        
     
     
 
     
-    
-
-    
-    
-
+        
     
     
 
     
-    
-
-    
-    
-
+        
     
     
 
     
-    
-
-
-
-
+        
     
     
 
     
-    
-
-    
-    
-
+        
     
     
 
     
-    
-
-    
-    
-
+        
     
     
 
     
-    
-
-    
-    
-
+        
     
     
 
     
+        
+    
     
 
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
     
     
 
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme"><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">134
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">134
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">135
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">136
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">137
@@ -1773,38 +1764,35 @@ To determine whether <code>NaN</code> can ever be returned by <code>relErr</code
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">144
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">145
 </span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">    (<span style="color:#a6e22e">assert</span> (= magic <span style="color:#f92672">#</span>x5F3759DF))     <span style="color:#75715e">; original magic number</span>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (= magic <span style="color:#f92672">#</span>x5F3759DF))     <span style="color:#75715e">; original magic number</span>
 
-    (<span style="color:#a6e22e">declare-const</span> f Float32)         <span style="color:#75715e">; input float</span>
-    (<span style="color:#a6e22e">declare-const</span> b (<span style="color:#a6e22e">_</span> BitVec <span style="color:#ae81ff">32</span>))   <span style="color:#75715e">; input float&#39;s bitvector representation (asserted below)</span>
-    (<span style="color:#a6e22e">assert</span> (= ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) b) f)) <span style="color:#75715e">; %3 = bitcast float %0 to i32 // originally in Q_rsqrt</span>
+(<span style="color:#a6e22e">declare-const</span> f Float32)         <span style="color:#75715e">; input float</span>
+(<span style="color:#a6e22e">declare-const</span> b (<span style="color:#a6e22e">_</span> BitVec <span style="color:#ae81ff">32</span>))   <span style="color:#75715e">; input float&#39;s bitvector representation (asserted below)</span>
+(<span style="color:#a6e22e">assert</span> (= ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) b) f)) <span style="color:#75715e">; %3 = bitcast float %0 to i32 // originally in Q_rsqrt</span>
 
-    (<span style="color:#a6e22e">assert</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>isNormal f))          <span style="color:#75715e">; only consider normal floats</span>
+(<span style="color:#a6e22e">assert</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>isNormal f))          <span style="color:#75715e">; only consider normal floats</span>
 
-    (<span style="color:#a6e22e">echo</span> <span style="color:#e6db74">&#34;&#34;</span>)
-    (<span style="color:#a6e22e">echo</span> <span style="color:#e6db74">&#34;======[ Can the result be NaN? ]=======&#34;</span>)
-    (<span style="color:#a6e22e">assert</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>isNaN (<span style="color:#a6e22e">relErr</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>sqrt RNE f) (<span style="color:#a6e22e">Q_rsqrt</span> f b))))
-    (<span style="color:#a6e22e">check-sat</span>)</code></pre></td></tr></table>
+(<span style="color:#a6e22e">echo</span> <span style="color:#e6db74">&#34;&#34;</span>)
+(<span style="color:#a6e22e">echo</span> <span style="color:#e6db74">&#34;======[ Can the result be NaN? ]=======&#34;</span>)
+(<span style="color:#a6e22e">assert</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>isNaN (<span style="color:#a6e22e">relErr</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>sqrt RNE f) (<span style="color:#a6e22e">Q_rsqrt</span> f b))))
+(<span style="color:#a6e22e">check-sat</span>)</code></pre></td></tr></table>
 </div>
 </div>
     <figcaption>
         <a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.smt2">invsqrt.smt2</a>
     </figcaption>
 </figure>
-
 <p>The result is sobering.
 The constraints are trivially satisfiable by any normal, negative floating-point number.
 After all, we are not approximating an arbitrary function $f(x)$ but $1/\sqrt x$, and the square root for negative numbers is not defined &ndash; at least not for floats.
 This should really have been part of our correctness criterion from the start.</p>
-
 <aside>
     <p>
     Knowing that $\sqrt x$ is not defined for negative $x$, we restrict the analysis to non-negative floats, such that <code>relErr</code> never returns <code>NaN</code>.
 However, even if $f(x)$ were an arbitrary function, we could have achieved the same by simply asserting <code>relErr</code> to not be <code>NaN</code>.
     </p>
 </aside>
-
 <p>With the assertion <code>(not (fp.isNegative f))</code> added, <code>relErr</code> cannot return <code>NaN</code> anymore, and the previous proof that <code>relErr(..) &gt; 0.01</code> is never satisfied becomes a proper proof of correctness.
 The following constraints are not satisfiable, proving <strong>within seconds</strong> that for all normal, non-negative floats <strong>the relative error never exceeds 1%</strong>.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (= magic <span style="color:#f92672">#</span>x5F3759DF))     <span style="color:#75715e">; original magic number</span>
@@ -1820,25 +1808,20 @@ The following constraints are not satisfiable, proving <strong>within seconds</s
     (<span style="color:#a6e22e">relErr</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>sqrt RNE f) (<span style="color:#a6e22e">Q_rsqrt</span> f b))
     ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) RNE <span style="color:#ae81ff">0.01</span>)
 ))
-(<span style="color:#a6e22e">check-sat</span>)</code></pre></div>
-<h3 id="bounding-the-maximum-relative-error"><a href="#bounding-the-maximum-relative-error" class="hanchor" ariaLabel="Anchor">Bounding the Maximum Relative Error</a> </h3>
-
+(<span style="color:#a6e22e">check-sat</span>)
+</code></pre></div><h3 id="bounding-the-maximum-relative-error"><a href="#bounding-the-maximum-relative-error" class="hanchor" ariaLabel="Anchor">Bounding the Maximum Relative Error</a> </h3>
 <p>Having established that the fast inverse square root really works for normal, non-negative floats, it would be nice to have a tighter bound on the relative error.
 The maximum relative error might be significantly lower than 1%.</p>
-
 <p>With the current set of constraints, SMT solving can take the role of an <a href="https://en.wikipedia.org/wiki/Oracle_machine">oracle</a> for checking whether the maximum relative error is below some bound, and be used to <strong>refine this bound iteratively</strong>, e.g. via binary search.
 While the solver returns <code>sat</code>, the maximum relative error is greater than the currently assumed bound, and a greater bound must be picked.
 However, if the solver returns <code>unsat</code>, the bound can be decreased.</p>
-
 <aside>
     <p>
     Z3 is not just an SMT solver but can also solve <a href="https://rise4fun.com/Z3/tutorial/optimization">optimisation problems over SMT formulas</a>.
 Unfortunately this machinery does not support floating-point constraints, which is why we do the minimisation manually.
     </p>
 </aside>
-
 <p>A possible refinement sequence is evaluated in <a href="invsqrt.smt2"><code>invsqrt.smt2</code></a>, outputting the following:</p>
-
 
 
 
@@ -2080,7 +2063,7 @@ Unfortunately this machinery does not support floating-point constraints, which 
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-zsh" data-lang="zsh"><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">58
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">59
@@ -2117,83 +2100,73 @@ Unfortunately this machinery does not support floating-point constraints, which 
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">90
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">91
 </span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-zsh" data-lang="zsh"><span style="color:#f92672">===[</span> Max. relative error &lt;<span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>.001? <span style="color:#f92672">]===</span>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-zsh" data-lang="zsh"><span style="color:#f92672">=</span><span style="color:#f92672">=</span><span style="color:#f92672">=</span><span style="color:#f92672">[</span> Max. relative error &lt;<span style="color:#f92672">=</span> 0.001? <span style="color:#f92672">]</span><span style="color:#f92672">=</span><span style="color:#f92672">=</span><span style="color:#f92672">=</span>
 sat
 SAT means that a violation is possible
 Problematic float:
 <span style="color:#f92672">(</span>fp <span style="color:#75715e">#b0 #x82 #b00101000011111000101100)</span>
 <span style="color:#75715e">#x41143e2c</span>
 relErr:
-<span style="color:#f92672">(</span>/ <span style="color:#ae81ff">22665</span>.0 <span style="color:#ae81ff">16777216</span>.0<span style="color:#f92672">)</span>
+<span style="color:#f92672">(</span>/ 22665.0 16777216.0<span style="color:#f92672">)</span>
 <span style="color:#f92672">(</span>fp <span style="color:#75715e">#b0 #x75 #b01100010001001000000000)</span>
 
-<span style="color:#f92672">==[</span> Max. relative error &lt;<span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>.0015? <span style="color:#f92672">]===</span>
+<span style="color:#f92672">=</span><span style="color:#f92672">=</span><span style="color:#f92672">[</span> Max. relative error &lt;<span style="color:#f92672">=</span> 0.0015? <span style="color:#f92672">]</span><span style="color:#f92672">=</span><span style="color:#f92672">=</span><span style="color:#f92672">=</span>
 sat
 SAT means that a violation is possible
 Problematic float:
 <span style="color:#f92672">(</span>fp <span style="color:#75715e">#b0 #xd8 #b11100101011001100000000)</span>
 <span style="color:#75715e">#x6c72b300</span>
 relErr:
-<span style="color:#f92672">(</span>/ <span style="color:#ae81ff">28637</span>.0 <span style="color:#ae81ff">16777216</span>.0<span style="color:#f92672">)</span>
+<span style="color:#f92672">(</span>/ 28637.0 16777216.0<span style="color:#f92672">)</span>
 <span style="color:#f92672">(</span>fp <span style="color:#75715e">#b0 #x75 #b10111111011101000000000)</span>
 
-<span style="color:#f92672">=[</span> Max. relative error &lt;<span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>.00175..? <span style="color:#f92672">]=</span>
+<span style="color:#f92672">=</span><span style="color:#f92672">[</span> Max. relative error &lt;<span style="color:#f92672">=</span> 0.00175..? <span style="color:#f92672">]</span><span style="color:#f92672">=</span>
 sat
 SAT means that a violation is possible
 Problematic float:
 <span style="color:#f92672">(</span>fp <span style="color:#75715e">#b0 #x56 #b11011101011001111000000)</span>
 <span style="color:#75715e">#x2b6eb3c0</span>
 relErr:
-<span style="color:#f92672">(</span>/ <span style="color:#ae81ff">3675</span>.0 <span style="color:#ae81ff">2097152</span>.0<span style="color:#f92672">)</span>
+<span style="color:#f92672">(</span>/ 3675.0 2097152.0<span style="color:#f92672">)</span>
 <span style="color:#f92672">(</span>fp <span style="color:#75715e">#b0 #x75 #b11001011011000000000000)</span>
 This is in fact the worst possible float, causing the maximal relative error
 Increasing the bound will render the constraints UNSAT
 
-<span style="color:#f92672">====[</span> Check with increased bound <span style="color:#f92672">]=====</span>
+<span style="color:#f92672">=</span><span style="color:#f92672">=</span><span style="color:#f92672">=</span><span style="color:#f92672">=</span><span style="color:#f92672">[</span> Check with increased bound <span style="color:#f92672">]</span><span style="color:#f92672">=</span><span style="color:#f92672">=</span><span style="color:#f92672">=</span><span style="color:#f92672">=</span><span style="color:#f92672">=</span>
 unsat
 The relative error can indeed not grow further
-The maximal relative error is exactly <span style="color:#ae81ff">0</span>.0017523765563964844 <span style="color:#f92672">(</span>0x3AE5B000<span style="color:#f92672">)</span></code></pre></td></tr></table>
+The maximal relative error is exactly 0.0017523765563964844 <span style="color:#f92672">(</span>0x3AE5B000<span style="color:#f92672">)</span></code></pre></td></tr></table>
 </div>
 </div>
     <figcaption>
         <a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.log">invsqrt.log</a>
     </figcaption>
 </figure>
-
 <p>Unlike the previous constraints, these checks take a while (<strong>hours</strong>), but eventually <strong>prove the maximum relative error to be <code>0x3AE5B000</code></strong> (~0.00175237).
 This matches the results of our <a href="maxRelErr.c">brute force search</a>.</p>
-
 <h3 id="in-search-of-better-magic"><a href="#in-search-of-better-magic" class="hanchor" ariaLabel="Anchor">In Search of Better Magic</a> </h3>
-
-<p>While we could analyse some interesting properties of the implementation with SMT solving, it didn&rsquo;t really pay off in this particular case, as the <a href="maxRelErr.c">naïve enumeration</a> of all possible inputs and outputs takes just a few seconds.
+<p>While we could analyse some interesting properties of the implementation with SMT solving, it didn't really pay off in this particular case, as the <a href="maxRelErr.c">naïve enumeration</a> of all possible inputs and outputs takes just a few seconds.
 It is when the problem space grows, and exhaustive testing becomes unfeasible, that formal verification starts to pay off.
 One such task is finding a better <code>magic</code> constant, which reduces the maximum relative error even further.</p>
-
 <p>When approaching this without any insight into the problem, finding the best constant boils down to computing the maximum relative error achieved by each of the $2^{32}$ possible constants.
 The evaluation of each constant, in turn, requires checking the relative error resulting from each of the $2^{32}$ possible input floats.
 Overall, exhaustive testing would involve $2^{32}\cdot 2^{32}$ computations of the relative error and is clearly not feasible.</p>
-
 <aside>
     <p>
     An exhaustive exploration of the maximum relative error resulting from each of the $2^{32}$ constants in question <strong>can be made feasible</strong> by exploiting peculiarities of $\eta(x)$.
 In particular, the computation of the maximum relative error for a given <code>magic</code> can be sped up, as it is sufficient to compute the error for $x\in[1,4)$ only &ndash; the <a href="http://rrrola.wz.cz/inv_sqrt.html">error wraps around</a>.
     </p>
 </aside>
-
 <p>To approach this with SMT, we first of all need a way of checking whether a <code>magic</code> constant exists that yields a maximum relative error below a given bound.
 The actual minimisation of the bound can then be achieved as above, by using the check as an oracle and refining the bound iteratively.
 More formally, we are primarily interested in solving</p>
-
-<p>$$ \underset{\mathit{magic}}{\exists}\, \underset{x\geq 0}{\forall}\, \mathit{normal}(x) \rightarrow \eta(x) &lt; 0.001752,$$</p>
-
+<p>$$ \underset{\mathit{magic}}{\exists}, \underset{x\geq 0}{\forall}, \mathit{normal}(x) \rightarrow \eta(x) &lt; 0.001752,$$</p>
 <p>that is finding a <code>magic</code> constant which returns a smaller maximum relative error than the original constant <code>0x5F3759DF</code> does for normal, non-negative inputs.
 Such a search for parameters that make a system adhere to certain constraints is known as <strong>parameter synthesis</strong>.
 Although dedicated techniques for solving such problems exist, they are out of the scope of this post.
 We, instead, follow the conceptually simpler approach of letting the SMT solver deal with the alternating quantifiers on its own.</p>
-
 <p>Since all <a href="https://en.wikipedia.org/wiki/Free_variables_and_bound_variables">free constants</a> that occur in an SMT instance are implicitly existentially quantified, the SMT-LIB characterisation of the upper constraint only involves an explicit <code>forall</code> quantifier:</p>
-
 
 
 
@@ -2347,7 +2320,7 @@ We, instead, follow the conceptually simpler approach of letting the SMT solver 
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme"><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">243
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">243
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">244
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">245
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">246
@@ -2364,32 +2337,30 @@ We, instead, follow the conceptually simpler approach of letting the SMT solver 
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">257
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">258
 </span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;">
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
 <pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (<span style="color:#a6e22e">forall</span> ((<span style="color:#a6e22e">f</span> Float32) (<span style="color:#a6e22e">b</span> (<span style="color:#a6e22e">_</span> BitVec <span style="color:#ae81ff">32</span>)))
     (<span style="color:#a6e22e">=&gt;</span>
         (<span style="color:#a6e22e">and</span>
-            (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>isNormal f)          <span style="color:#75715e">; only consider normal floats</span>
-            (not (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>isNegative f )) <span style="color:#75715e">; only consider non-negative floats</span>
-            (= ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) b) f) <span style="color:#75715e">; %3 = bitcast float %0 to i32 // in Q_rsqrt</span>
+            (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>isNormal f)          <span style="color:#75715e">; only consider normal floats</span>
+            (not (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>isNegative f )) <span style="color:#75715e">; only consider non-negative floats</span>
+            (= ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) b) f) <span style="color:#75715e">; %3 = bitcast float %0 to i32 // in Q_rsqrt</span>
         )
         (<span style="color:#66d9ef">let </span>((<span style="color:#a6e22e">fSqrt</span> (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>sqrt RNE f)) (<span style="color:#a6e22e">fFast</span> (<span style="color:#a6e22e">Q_rsqrt</span> f b)))
             (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>lt
                 (<span style="color:#a6e22e">relErr</span> fSqrt fFast)
-                ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) RNE <span style="color:#ae81ff">0.001752</span>) <span style="color:#75715e">; Original magic number had a max. rel. err of ~0.001752</span>
+                ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) RNE <span style="color:#ae81ff">0.001752</span>) <span style="color:#75715e">; Original magic number had a max. rel. err of ~0.001752</span>
             )
         )
     )
 ))
-(<span style="color:#a6e22e">check-sat</span>)</code></pre></td></tr></table>
+(<span style="color:#a6e22e">check-sat</span>)</code></pre></td></tr></table>
 </div>
 </div>
     <figcaption>
         <a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.smt2">invsqrt.smt2</a>
     </figcaption>
 </figure>
-
 <p>Using these constraints, and the initial bound 0.001752, Z3 will output the following for the refinement sequence chosen in our <a href="invsqrt.smt2">SMT-LIB script</a>:</p>
-
 
 
 
@@ -2538,7 +2509,7 @@ We, instead, follow the conceptually simpler approach of letting the SMT solver 
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-zsh" data-lang="zsh"><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">93
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">93
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">94
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">95
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">96
@@ -2559,27 +2530,27 @@ We, instead, follow the conceptually simpler approach of letting the SMT solver 
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">111
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">112
 </span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-zsh" data-lang="zsh"><span style="color:#f92672">==[</span> Is there a better magic number? <span style="color:#f92672">]==</span>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-zsh" data-lang="zsh"><span style="color:#f92672">=</span><span style="color:#f92672">=</span><span style="color:#f92672">[</span> Is there a better magic number? <span style="color:#f92672">]</span><span style="color:#f92672">=</span><span style="color:#f92672">=</span>
 sat
 
-SAT means that a better one exists <span style="color:#f92672">(</span>max rel err &lt; <span style="color:#ae81ff">0</span>.001752<span style="color:#f92672">)</span>
+SAT means that a better one exists <span style="color:#f92672">(</span>max rel err &lt; 0.001752<span style="color:#f92672">)</span>
 magic:
 <span style="color:#75715e">#x5f375a4c</span>
 
-<span style="color:#f92672">=[</span> Magic with rel. err &lt; 0x3AE58E00? <span style="color:#f92672">]=</span>
+<span style="color:#f92672">=</span><span style="color:#f92672">[</span> Magic with rel. err &lt; 0x3AE58E00? <span style="color:#f92672">]</span><span style="color:#f92672">=</span>
 sat
 
-SAT means that a better one exists <span style="color:#f92672">(</span>max rel err &lt; <span style="color:#ae81ff">0</span>.00175133<span style="color:#f92672">)</span>
+SAT means that a better one exists <span style="color:#f92672">(</span>max rel err &lt; 0.00175133<span style="color:#f92672">)</span>
 magic:
 <span style="color:#75715e">#x5f375a81</span>
-This is in fact an optimal constant, minimising the maximal relative error to <span style="color:#ae81ff">0</span>.0017513036.. <span style="color:#f92672">(</span>0x3AE58C00<span style="color:#f92672">)</span>
+This is in fact an optimal constant, minimising the maximal relative error to 0.0017513036.. <span style="color:#f92672">(</span>0x3AE58C00<span style="color:#f92672">)</span>
 Decreasing the bound will render the constraints UNSAT
 
-<span style="color:#f92672">=[</span> Magic with rel. err &lt; 0x3AE58C00? <span style="color:#f92672">]=</span>
+<span style="color:#f92672">=</span><span style="color:#f92672">[</span> Magic with rel. err &lt; 0x3AE58C00? <span style="color:#f92672">]</span><span style="color:#f92672">=</span>
 unsat
 
-For no magic number is the maximal relative error below <span style="color:#ae81ff">0</span>.0017513036.. <span style="color:#f92672">(</span>0x3AE58C00<span style="color:#f92672">)</span>
+For no magic number is the maximal relative error below 0.0017513036.. <span style="color:#f92672">(</span>0x3AE58C00<span style="color:#f92672">)</span>
 </code></pre></td></tr></table>
 </div>
 </div>
@@ -2587,15 +2558,11 @@ For no magic number is the maximal relative error below <span style="color:#ae81
         <a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.log">invsqrt.log</a>
     </figcaption>
 </figure>
-
 <p>Solving these instances takes about <strong>two days</strong> on an i5-4210M, but Z3 (v4.8.5) eventually determines that the <code>magic</code> constant <code>0x5f375a81</code> achieves a maximum relative error of <code>0x3ae58c00</code> (~0.0017513).
 Furthermore, we find that <strong>no constant can achieve an even lower maximum relative error</strong>.</p>
-
 <h2 id="do-try-this-at-home"><a href="#do-try-this-at-home" class="hanchor" ariaLabel="Anchor">Do Try This at Home!</a> </h2>
-
 <p>Having read this far, and understood how to get from source code to a logical characterisation of the semantics and various properties, you should be able to investigate related issues on you own.
 The following ideas come to mind (easiest first):</p>
-
 <ul>
 <li>Find out whether the optimised <code>magic</code> constant is unique, or there are others that achieve the same maximum relative error.</li>
 <li>Quake uses <a href="https://github.com/id-Software/Quake-III-Arena/blob/dbe4ddb10315479fc00086f08e25d968b4b43c49/code/game/q_math.c#L574">another hack</a> for computing the absolute value of a floating-point number.
@@ -2609,15 +2576,14 @@ Try to find optimal values for those.</li>
 <li>Tweak the characterisation to let the solver not only choose the <code>magic</code> constant but also a (bounded) number of instructions from a fixed set.
 Does the solver come up with the same instructions that were used in the original hack, or does an even better hack exist?</li>
 </ul>
-
 <hr style="margin-top: 2em">
 <div class="links">
-
-    <a href="/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.log" class="button">invsqrt.log</a>
 
     <a href="/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.smt2" class="button">invsqrt.smt2</a>
 
     <a href="/blog/smt-based-optimisation-of-fast-inverse-square-root/maxRelErr.ll" class="button">maxRelErr.ll</a>
+
+    <a href="/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.log" class="button">invsqrt.log</a>
 
     <a href="/blog/smt-based-optimisation-of-fast-inverse-square-root/maxRelErr.c" class="button">maxRelErr.c</a>
 
