@@ -2,8 +2,28 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://bohlender.github.io/tags/logic-synthesis/</loc>
+    <lastmod>2019-11-30T22:54:10+01:00</lastmod>
+  </url>
+  <url>
+    <loc>https://bohlender.github.io/tags/puzzle/</loc>
+    <lastmod>2019-11-30T22:54:10+01:00</lastmod>
+  </url>
+  <url>
+    <loc>https://bohlender.github.io/tags/sat/</loc>
+    <lastmod>2019-11-30T22:54:10+01:00</lastmod>
+  </url>
+  <url>
     <loc>https://bohlender.github.io/tags/smt/</loc>
-    <lastmod>2019-09-12T09:31:28+02:00</lastmod>
+    <lastmod>2019-11-30T22:54:10+01:00</lastmod>
+  </url>
+  <url>
+    <loc>https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/</loc>
+    <lastmod>2019-11-30T22:54:10+01:00</lastmod>
+  </url>
+  <url>
+    <loc>https://bohlender.github.io/tags/</loc>
+    <lastmod>2019-11-30T22:54:10+01:00</lastmod>
   </url>
   <url>
     <loc>https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/</loc>
@@ -15,10 +35,6 @@
   </url>
   <url>
     <loc>https://bohlender.github.io/tags/software-verification/</loc>
-    <lastmod>2019-09-12T09:31:28+02:00</lastmod>
-  </url>
-  <url>
-    <loc>https://bohlender.github.io/tags/</loc>
     <lastmod>2019-09-12T09:31:28+02:00</lastmod>
   </url>
   <url>

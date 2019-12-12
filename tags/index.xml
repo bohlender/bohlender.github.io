@@ -9,15 +9,42 @@
     <managingEditor>contact@bohlender.pro (Dimitri Bohlender)</managingEditor>
     <webMaster>contact@bohlender.pro (Dimitri Bohlender)</webMaster>
     <copyright>© Dimitri Bohlender</copyright>
-    <lastBuildDate>Thu, 12 Sep 2019 09:31:28 +0200</lastBuildDate>
+    <lastBuildDate>Sat, 30 Nov 2019 22:54:10 +0100</lastBuildDate>
     
 	<atom:link href="https://bohlender.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
+      <title>Logic Synthesis</title>
+      <link>https://bohlender.github.io/tags/logic-synthesis/</link>
+      <pubDate>Sat, 30 Nov 2019 22:54:10 +0100</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/tags/logic-synthesis/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Puzzle</title>
+      <link>https://bohlender.github.io/tags/puzzle/</link>
+      <pubDate>Sat, 30 Nov 2019 22:54:10 +0100</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/tags/puzzle/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>SAT</title>
+      <link>https://bohlender.github.io/tags/sat/</link>
+      <pubDate>Sat, 30 Nov 2019 22:54:10 +0100</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/tags/sat/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>SMT</title>
       <link>https://bohlender.github.io/tags/smt/</link>
-      <pubDate>Thu, 12 Sep 2019 09:31:28 +0200</pubDate>
+      <pubDate>Sat, 30 Nov 2019 22:54:10 +0100</pubDate>
       <author>contact@bohlender.pro (Dimitri Bohlender)</author>
       <guid>https://bohlender.github.io/tags/smt/</guid>
       <description></description>

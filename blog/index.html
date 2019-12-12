@@ -64,13 +64,35 @@
         
         <article>
     <header>
+        <h2><a href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/">Solving a Logic Synthesis Puzzle via SAT/SMT</a></h2>
+        <div class="metadata">
+    <time datetime="2019-12-12">December 12, 2019</time>
+    <ul>
+        <li><a class="tag-block" href="/tags/sat">sat</a></li>
+        <li><a class="tag-block" href="/tags/smt">smt</a></li>
+        <li><a class="tag-block" href="/tags/logic-synthesis">logic synthesis</a></li>
+        <li><a class="tag-block" href="/tags/puzzle">puzzle</a></li>
+    </ul>
+</div>
+    </header><!-- TODO: full_adder.log -->
+<p>A few weeks ago, I was asked the following riddle:
+<q>Design a logic circuit with three inputs and three outputs, such that the outputs are the inverted inputs. You may use arbitrary many AND and OR gates, but at most two NOT gates</q>.
+Although the characterisation of this problem as an <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a> instance is straightforward, I found it necessary to reduce it to <a href="https://en.wikipedia.org/wiki/Satisfiability">SAT</a> and incorporate further assumptions to achieve reasonable performance.
+This post illustrates said process, ranging from the original idea via a standard formulation of SAT-based logic synthesis to a problem-specific and more constrained instance.</p>
+	<a class="read-more" href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/">
+        &raquo; Read more
+    </a>
+</article>
+        
+        <article>
+    <header>
         <h2><a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/">SMT-based Reasoning About the Fast Inverse Square Root</a></h2>
         <div class="metadata">
-    <time datetime="2019-09-12">September 12, 2019</time>
+    <time datetime="2019-09-26">September 26, 2019</time>
     <ul>
-        <li><a class="tag-block" href="/tags/smt">SMT</a></li>
-        <li><a class="tag-block" href="/tags/smt-lib">SMT-LIB</a></li>
-        <li><a class="tag-block" href="/tags/software-verification">Software Verification</a></li>
+        <li><a class="tag-block" href="/tags/smt">smt</a></li>
+        <li><a class="tag-block" href="/tags/smt-lib">smt-lib</a></li>
+        <li><a class="tag-block" href="/tags/software-verification">software verification</a></li>
     </ul>
 </div>
     </header><p>While there is a <a href="https://web.archive.org/web/20160308091758/http://www.daxia.com/bibis/upload/406Fast_Inverse_Square_Root.pdf">mathematical explanation</a> for the choice of <code>0x5F3759DF</code> in the <a href="https://en.wikipedia.org/wiki/Fast_inverse_square_root">famous bit-level hack</a> for approximating the multiplicative inverse of the square root of a 32-bit floating-point number, it is not immediately clear to what extent the reasoning is really applicable in the context of machine data types and their peculiarities.
@@ -94,6 +116,19 @@ This post illustrates how this, and related aspects, can be investigated with <a
         
             <article>
                 <header>
+                    <h2><a href="https://yurichev.com/news/20191212_progcalc/">Programmer's calculator</a></h2>
+                    <div class="metadata">
+                        <time datetime="December 12, 2019">December 12, 2019</time>
+                        <ul><li>
+                            <a class="source" href="https://yurichev.com/blog/">Dennis Yurichev</a>
+                        </li></ul>
+                    </div>
+                </header>
+                <p>Programmer's calculator</p>
+            </article>
+        
+            <article>
+                <header>
                     <h2><a href="https://zipcpu.com/quiz/2019/11/29/quiz08.html">Quiz #8: Will this pass a bounded model check?</a></h2>
                     <div class="metadata">
                         <time datetime="November 29, 2019">November 29, 2019</time>
@@ -103,19 +138,6 @@ This post illustrates how this, and related aspects, can be investigated with <a
                     </div>
                 </header>
                 <p>As always, if you are unsure, I would encourage you to try this proof yourself.</p>
-            </article>
-        
-            <article>
-                <header>
-                    <h2><a href="https://yurichev.com/blog/qsort/">Yet another explanation of the Quicksort algorithm</a></h2>
-                    <div class="metadata">
-                        <time datetime="November 212, 2019">November 23, 2019</time>
-                        <ul><li>
-                            <a class="source" href="https://yurichev.com/blog/">Dennis Yurichev</a>
-                        </li></ul>
-                    </div>
-                </header>
-                <p>Yet another explanation of the Quicksort algorithm</p>
             </article>
         
             <article>

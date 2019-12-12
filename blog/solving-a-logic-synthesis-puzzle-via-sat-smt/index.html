@@ -1,0 +1,1719 @@
+<!DOCTYPE html>
+<html lang="en-gb">
+    <head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	
+	<link rel="stylesheet" href="/css/style.css">
+	<link rel="stylesheet" href="/css/perfundo.with-icons.min.css">
+	
+
+<link rel="stylesheet" href="/katex/katex.min.css" integrity="sha384-BdGj8xC2eZkQaxoQ8nSLefg4AV4/AwB3Fj+8SUSo7pnKP6Eoy18liIKTPn9oBYNG" >
+<script defer src="/katex/katex.min.js" integrity="sha384-JiKN5O8x9Hhs/UE5cT5AAJqieYlOZbGT3CHws/y97o3ty4R7/O5poG9F3JoiOYw1" ></script>
+<script defer src="/katex/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" 
+        onload="renderMathInElement(document.body, {
+        delimiters: [
+            {left: `$$`, right: `$$`, display: true},
+            {left: `$`, right: `$`, display: false},
+        ]
+    });"></script>
+	<link rel="alternate" type="application/rss+xml" href="https://bohlender.github.io/blog/index.xml" title="Dimitri Bohlender" />
+	
+	
+
+
+<meta property="og:title" content="Solving a Logic Synthesis Puzzle via SAT/SMT" />
+<meta property="og:description" content="
+A few weeks ago, I was asked the following riddle:
+Design a logic circuit with three inputs and three outputs, such that the outputs are the inverted inputs. You may use arbitrary many AND and OR gates, but at most two NOT gates.
+Although the characterisation of this problem as an SMT instance is straightforward, I found it necessary to reduce it to SAT and incorporate further assumptions to achieve reasonable performance.
+This post illustrates said process, ranging from the original idea via a standard formulation of SAT-based logic synthesis to a problem-specific and more constrained instance." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/" />
+<meta property="og:image" content="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gfx/full_adder.svg" />
+<meta property="og:image" content="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gfx/puzzle.svg" />
+<meta property="og:image" content="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gfx/schematic_v1.svg" />
+<meta property="og:image" content="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gfx/schematic_v2.svg" />
+<meta property="article:published_time" content="2019-12-12T00:00:00+00:00" />
+<meta property="article:modified_time" content="2019-11-30T22:54:10+01:00" />
+<meta property="og:site_name" content="Dimitri Bohlender" />
+
+<meta property="article:author" content="https://facebook.com/balddenimhero" />
+<meta property="article:publisher" content="https://facebook.com/balddenimhero" />
+<meta property="article:section" content="blog" />
+<meta property="article:tag" content="SAT" />
+<meta property="article:tag" content="SMT" />
+<meta property="article:tag" content="Logic Synthesis" />
+<meta property="article:tag" content="Puzzle" />
+
+	
+	<title>Solving a Logic Synthesis Puzzle via SAT/SMT | Dimitri Bohlender</title>
+</head>
+    <body class="blog">
+        <header>
+	<nav>
+		<input type="checkbox" id="show-menu" role="button">
+		<ul class="dropdown">
+			<label for="show-menu" class="show-menu"><img class="icon" src="/gfx/fa-icons.svg#bars" /></label>
+			<li><a href="/">Home</a></li>
+			<li><a href="/cv/">CV</a></li>
+			<li><a href="/projects/">Projects</a></li>
+			<li><a href="/blog/">Blog</a></li>
+			<li><a href="/photography/">Photography</a></li>
+		</ul>
+	</nav>
+</header>
+        <div class="container">
+        <div class="content">
+<div class="banner">
+	
+    
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="443" height="350" viewBox="0 0 443 350">
+        <image xlink:href="/gfx/cup-rss.png" width="443" height="350"/>
+        <a href="https://bohlender.github.io/blog/index.xml" target="_top">
+            <circle style="fill: transparent" cx="187" cy="165" r="110"/>
+        </a>
+    </svg>
+</div>
+<div class="notepad-wrapper">
+	
+	<div class="notepad">
+		<main>
+		<article>
+			<header>
+				
+				<h1>Solving a Logic Synthesis Puzzle via SAT/SMT</h1>
+				<div class="metadata">
+    <time datetime="2019-12-12">December 12, 2019</time>
+    <ul>
+        <li><a class="tag-block" href="/tags/sat">SAT</a></li>
+        <li><a class="tag-block" href="/tags/smt">SMT</a></li>
+        <li><a class="tag-block" href="/tags/logic-synthesis">Logic Synthesis</a></li>
+        <li><a class="tag-block" href="/tags/puzzle">Puzzle</a></li>
+    </ul>
+</div>
+			</header>
+			<!-- TODO: full_adder.log -->
+<p>A few weeks ago, I was asked the following riddle:
+<q>Design a logic circuit with three inputs and three outputs, such that the outputs are the inverted inputs. You may use arbitrary many AND and OR gates, but at most two NOT gates</q>.
+Although the characterisation of this problem as an <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a> instance is straightforward, I found it necessary to reduce it to <a href="https://en.wikipedia.org/wiki/Satisfiability">SAT</a> and incorporate further assumptions to achieve reasonable performance.
+This post illustrates said process, ranging from the original idea via a standard formulation of SAT-based logic synthesis to a problem-specific and more constrained instance.</p>
+<h2 id="introduction"><a href="#introduction" class="hanchor" ariaLabel="Anchor">Introduction</a> </h2>
+<p><a href="https://en.wikipedia.org/wiki/Logic_synthesis">Logic synthesis</a> is the process of turning an abstract circuit description into a concrete design in terms of logic gates.
+In the context of our riddle, the abstract description can be formalised as a set of goal functions which the circuit must realise:
+<div>$$ 
+\begin{aligned}
+g_0(x_0,x_1,x_2) &=\neg x_0\\
+g_1(x_0,x_1,x_2)&=\neg x_1\\
+g_2(x_0,x_1,x_2)&=\neg x_2
+\end{aligned}
+ $$</div>
+where $x_0,x_1,x_2$ are the circuit's Boolean inputs.</p>
+<p>Instead of thinking of a solution ourselves, we want to characterise the problem in terms of constraints whose solution can be interpreted as a solution to the riddle.
+To this end, we intend the constraints to describe a generic circuit that is parametrised by the <em>functions</em> that its gates realise and the <em>connections</em> between these gates.
+<aside>
+    <p>
+    Without loss of generality, we restrict ourselves to gates with two inputs.
+Gates with larger <a href="https://en.wikipedia.org/wiki/Fan-in">fan-in</a> can be constructed from these.
+    </p>
+</aside></p>
+<p>The following schematic illustrates one choice of connections (solid) from the many potential wirings (dashed) for an example with only one output $g_0$ and one gate $f_3$.</p>
+
+
+
+
+
+
+
+<figure class="figure-outer">
+    <figure class="figure-inner">
+        <img src="gfx/schematic_v1.svg" width="180px"/> 
+            <figcaption>
+                Generic 1-gate circuit
+            </figcaption>
+    </figure>
+    
+</figure>
+<p>If $g_0$ were $x_0 \wedge x_1$, choosing the highlighted wiring and $f_3$ as AND would be a desireable logic synthesis result.
+That is, conceptually we want to solve something along these lines:</p>
+<p>$$\tag{1}\forall x_0,x_1,x_2\ldotp g_0(x_0, x_1, x_2)=\mathit{circuit}(x_0,x_1,x_2)$$</p>
+<p>where $\mathit{circuit}$ is defined by the choice of $f_3$ and the wiring.
+<aside>
+    <p>
+    As in the post on the <a href="/blog/smt-based-optimisation-of-fast-inverse-square-root">inverse square root hack</a>, logic synthesis can be understood as a <strong>parameter synthesis</strong> problem, too.
+We are searching for a choice of parameters (gates and wiring) that make the system (circuit) compliant with some property for every input.
+    </p>
+</aside></p>
+<p>Considering the generic circuit with one gate, $g_0$ can only be connected to the inputs $x_0, x_1, x_2$ or the gate's output $x_3$.
+Depending on which inputs $f_3$ is connected to, its output $x_3$ will be given by $f_3(x_0,x_1), f_3(x_0,x_2)$ or $f_3(x_1,x_2)$.
+Note that it is sufficient to consider the input combinations $f_3(x_j, x_k)$ for $1\leq j &lt; k &lt; 3$ since $f_3$ is unconstrained (yet) and can represent any binary operator on Booleans.</p>
+<p>Allowing an arbitrary number of gates and arbitrary connections right from the start will result in an unnecessarily huge search space.
+Instead, we restrict ourselves to a fixed number of gates which we can increase incrementally if the current number of gates turns out to be insufficient to synthesise the goal function $g_0$.
+Without loss of generality, the inputs of a new gate $f_{n+1}$ may be connected to preceding gates (and inputs) $x_0,\dots,x_n$ but not the other way around, e.g. $x_4$ may not be an input of $f_3$.
+This was the ad-hoc approach <a href="https://lukas-boersma.com/">my colleague</a> and I figured should work, so I started implementing it.</p>
+<h2 id="smtbased-logic-synthesis"><a href="#smtbased-logic-synthesis" class="hanchor" ariaLabel="Anchor">SMT-based Logic Synthesis</a> </h2>
+<p>Looking at the schematic from the introduction, characterising the logic synthesis problem boils down to:</p>
+<ol>
+<li>formulating how the outputs $g_i$ may be connected to the gates $x_0, \dots, x_n$, and</li>
+<li>formulating how the gates may be interconnected.</li>
+</ol>
+<p>To denote that a gate $g_i$ is connected to $x_j$ we use a variable $g_{i,j}$.
+Similarly, we introduce variables $c_{i, j, k}$ to encode that $x_j$ is the first input of $f_i$ and $x_k$ the second one.
+With this in mind, reconsidering the wiring from our schematic, only $g_{0,3}$ and $c_{3,0,1}$ should be $\mathit{true}$.</p>
+
+
+
+
+
+
+
+<figure class="figure-outer">
+    <figure class="figure-inner">
+        <img src="gfx/schematic_v2.svg" width="240px"/> 
+            <figcaption>
+                Connection variables
+            </figcaption>
+    </figure>
+    
+</figure>
+<p>For the simple case of $n=1$ inner gates, a circuit can be synthesised if (and only if) the following is satisfiable:
+<div>$$ 
+\tag{2}
+\begin{aligned}
+\forall x_0,x_1,x_2~ \exists x_3\ldotp &~ (g_0(x_0,x_1,x_2) = x_0\\
+\vee &~ g_0(x_0,x_1,x_2)= x_1\\
+\vee &~ g_0(x_0,x_1,x_2)= x_2\\
+\vee &~ \textcolor{a6e22e}{g_0}(x_0,x_1,x_2)= \textcolor{a6e22e}{x_3})\\
+\wedge &~ (x_3=\textcolor{f92672}{f_3(x_0,x_1)}\\
+\vee &~ x_3 = f_3(x_0,x_2)\\
+\vee &~ x_3 = f_3(x_1,x_2))
+\end{aligned}
+ $$</div></p>
+<p>Here, the first part requires $g_0$ to be connected to at least one $x_i$, and the second part requires $f_3$ to be connected to some combination of inputs.
+In contrast to $(1)$, we now express the circuit's overall semantics $\mathit{circuit}(x_0, x_1, x_2)$ in terms of the functions realised by its gates.
+Increasing either the number of outputs or gates will merely add further conjuncts in the same vein.</p>
+<p>However, this characterisation does not yet make use of the variables $g_{i,j}$ and $c_{i,j,k}$ to encode the chosen wiring.
+To bind the intended semantics to these variables, we let the variables imply the corresponding options and require at least one of them to be $\mathit{true}$.
+<aside>
+    
+    <p>We do not explicitly require $g_0$ to be connected to exactly one $x_i$.
+Although we can add this constraint it is not necessary.
+For example, if the solver finds a satisfying assignment with both $g_{0,4}$ and $g_{0,5}$ set to $\mathit{true}$ then the values of $x_4$ and $x_5$ coincide for all inputs and $g_0$ can be connected to any.</p>
+<p>This hints at redundancy and realisability of the circuit with fewer gates.
+Most of the time the connection variables $g_{i,j}$ of an output $g_i$ cannot be $\mathit{true}$ at the same time.
+The same reasoning applies to the connection variables $c_{i,j,k}$ of gates.</p>
+
+    
+</aside>
+This yields an <a href="https://en.wikipedia.org/wiki/Equisatisfiability">equisatisfiable</a> constraint:
+<div>$$ 
+\tag{3}
+\begin{aligned}
+\forall x_0,x_1,x_2~ \exists x_3\ldotp &~ (g_{0,0}\rightarrow g_0(x_0,x_1,x_2) = x_0)\\
+\wedge &~ (g_{0,1}\rightarrow g_0(x_0,x_1,x_2)= x_1)\\
+\wedge &~ (g_{0,2}\rightarrow g_0(x_0,x_1,x_2)= x_2)\\
+\wedge &~ (\textcolor{a6e22e}{g_{0,3}}\rightarrow g_0(x_0,x_1,x_2)= x_3)\\
+\wedge &~ (g_{0,0} \vee g_{0,1} \vee g_{0,2} \vee \textcolor{a6e22e}{g_{0,3}})\\
+\wedge &~ (\textcolor{f92672}{c_{3,0,1}}\rightarrow x_3 = f_3(x_0,x_1))\\
+\wedge &~ (c_{3,0,2}\rightarrow x_3 = f_3(x_0,x_2))\\
+\wedge &~ (c_{3,1,2}\rightarrow x_3 = f_3(x_1,x_2))\\
+\wedge &~ (\textcolor{f92672}{c_{3,0,1}} \vee c_{3,0,2} \vee c_{3,1,2})
+\end{aligned}
+ $$</div></p>
+<p>If there is an interpretation that satisfies $(2)$, then it can be extended to an interpretation that satisfies $(3)$ by picking appropriate values for $g_{i,j}$ and $c_{i,j,k}$ and vice versa.</p>
+<p>Conceptually, <strong>that's all there is to characterising a generic logic synthesis</strong> problem in <a href="https://en.wikipedia.org/wiki/First-order_logic">first-order logic</a>.
+However, to solve the introductory riddle we still have to restrict the functions $f_i$ to AND, OR and at most two NOTs.</p>
+<p>Restricting the $f_i$ to AND, OR and NOT amounts to constraining each $f_i$ to these operators&rsquo; truth tables, i.e. also assert for each $f_i$:
+<div>$$ 
+\begin{aligned}
+    &(\neg f_i(0,0) \wedge \neg f_i(0, 1) \wedge \neg f_i(1,0) \wedge f_i(1, 1))\\
+    \vee~ & (\neg f_i(0,0) \wedge f_i(0, 1) \wedge f_i(1,0) \wedge f_i(1, 1))\\
+    \vee~ & (f_i(0,0) \wedge \neg f_i(0, 1) = f_i(1,0) \wedge \neg f_i(1, 1))\\
+\end{aligned}
+ $$</div>
+<aside>
+    <p>
+    We use $0$ and $1$ instead of $\mathit{false}$ and $\mathit{true}$ to improve readability.
+Of course the constants must be truth values and not integers.
+    </p>
+</aside></p>
+<p>Here, the first line is only satisfied by an AND, the second line is only satisfied by an OR, and the last line is only satisfied by a NOT on the first or second input.
+This characterisation of NOT is needed since all of our $f_i$ have two parameters.</p>
+<p>Having restricted the functions to the allowed gates, we can also limit the number of NOTs by means of <a href="http://theory.stanford.edu/~nikolaj/programmingz3.html#sec-cardinality-constraints">cardinality constraints</a>:
+<div>$$ 
+\begin{aligned}
+    & (f_3(0,0) \wedge \neg f_3(0, 1) = f_3(1,0) \wedge \neg f_3(1, 1))\\
+    +~& (f_4(0,0) \wedge \neg f_4(0, 1) = f_4(1,0) \wedge \neg f_4(1, 1))\\
+    &~ \vdots\\
+    +~& (f_n(0,0) \wedge \neg f_n(0, 1) = f_n(1,0) \wedge \neg f_n(1, 1))\\
+    \leq~& 2
+\end{aligned}
+ $$</div>
+essentially constraining how many $f_i$ may be interpreted as NOTs.</p>
+<h3 id="implementation"><a href="#implementation" class="hanchor" ariaLabel="Anchor">Implementation</a> </h3>
+<p>Using the Python bindings of <a href="https://github.com/Z3Prover/z3/">Z3</a>, an implementation of this approach for arbitrary numbers of inputs, outputs and inner gates spans only <a href="gen_smt2.py">few lines of code</a>.</p>
+<p>Functions over argument lists allow for an easy specification of the wanted outputs:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">62
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">63
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">64
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">65
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">66
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#75715e"># Original puzzle (possible with 22 gates)</span>
+g0 <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> inputs: Not(inputs[<span style="color:#ae81ff">0</span>])
+g1 <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> inputs: Not(inputs[<span style="color:#ae81ff">1</span>])
+g2 <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> inputs: Not(inputs[<span style="color:#ae81ff">2</span>])
+outputs <span style="color:#f92672">=</span> [g0, g1, g2]</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_smt2.py">gen_smt2.py</a>
+    </figcaption>
+</figure></p>
+<p>Providing the number of inputs and inner gates to consider, we can create the corresponding variables $x_i$ and their uninterpreted functions $f_i:\mathbb{B}^2\rightarrow\mathbb{B}$ as follows:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#75715e"># Create variables (and values for inputs) for each x_i</span>
+x <span style="color:#f92672">=</span> [Bool(<span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">x{:d}</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>format(gate_idx)) <span style="color:#66d9ef">for</span> gate_idx <span style="color:#f92672">in</span> range(num_inputs <span style="color:#f92672">+</span> num_inner_gates)]
+
+<span style="color:#75715e"># Create functions f:B^2--&gt;B realised by the inner gates</span>
+f_sig <span style="color:#f92672">=</span> [BoolSort()]<span style="color:#f92672">*</span><span style="color:#ae81ff">3</span>
+f <span style="color:#f92672">=</span> [Function(<span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">f{:d}</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>format(gate_idx), f_sig) <span style="color:#66d9ef">for</span> gate_idx <span style="color:#f92672">in</span> range(num_inputs, len(x))]</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_smt2.py">gen_smt2.py</a>
+    </figcaption>
+</figure></p>
+<p>The characterisation of possible output connections strongly follows the scheme shown in $(3)$.
+We create variables $g_{i,j}$ for the potential connection of $g_i$ and each $x_j$, and let them imply that $g_0(\mathit{inputs})=x_j$.
+It is also asserted that at least one $g_{i,j}$ for each $g_i$ must be $\mathit{true}$:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">output_connections</span>(num_inputs, x, outputs):
+    asserts <span style="color:#f92672">=</span> []
+    <span style="color:#66d9ef">for</span> output_idx <span style="color:#f92672">in</span> range(len(outputs)):
+        conn_vars <span style="color:#f92672">=</span> []
+        <span style="color:#66d9ef">for</span> gate_idx <span style="color:#f92672">in</span> range(len(x)):
+            conn_var <span style="color:#f92672">=</span> Bool(<span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">g_{:d}_{:d}</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>format(output_idx, gate_idx))
+            conn_vars<span style="color:#f92672">.</span>append(conn_var)
+            asserts<span style="color:#f92672">.</span>append(Implies(conn_var, outputs[output_idx](x[:num_inputs]) <span style="color:#f92672">==</span> x[gate_idx]))
+        asserts<span style="color:#f92672">.</span>append(Or(conn_vars))
+    <span style="color:#66d9ef">return</span> asserts</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_smt2.py">gen_smt2.py</a>
+    </figcaption>
+</figure></p>
+<p>The characterisation of possible gate connections is very similar.
+The enumeration of relevant input combinations can be achieved comfortably via <a href="https://docs.python.org/3.8/library/itertools.html?itertools.combinations#itertools.combinations"><code>itertools.combinations</code></a>:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">gate_connections</span>(num_inputs, x, f):
+    asserts <span style="color:#f92672">=</span> []
+    <span style="color:#66d9ef">for</span> gate_idx <span style="color:#f92672">in</span> range(num_inputs, len(x)):
+        <span style="color:#66d9ef">print</span>(<span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">Encoding gate {}</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>format(gate_idx))
+        conn_vars <span style="color:#f92672">=</span> []
+        <span style="color:#66d9ef">for</span> in1_idx, in2_idx <span style="color:#f92672">in</span> combinations(range(gate_idx), <span style="color:#ae81ff">2</span>):
+            conn_var <span style="color:#f92672">=</span> Bool(<span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">c_{:d}_{:d}_{:d}</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>format(gate_idx, in1_idx, in2_idx))
+            conn_vars<span style="color:#f92672">.</span>append(conn_var)
+            asserts<span style="color:#f92672">.</span>append(Implies(conn_var, x[gate_idx] <span style="color:#f92672">==</span> f[gate_idx <span style="color:#f92672">-</span> num_inputs](x[in1_idx], x[in2_idx])))
+        asserts<span style="color:#f92672">.</span>append(Or(conn_vars))
+    <span style="color:#66d9ef">return</span> asserts</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_smt2.py">gen_smt2.py</a>
+    </figcaption>
+</figure></p>
+<p>Finally, the code for the riddle-specific additional constraints of $f_i$ closely resembles the constraints shown in the end of the previous section:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">f_constraints</span>(f):
+    asserts <span style="color:#f92672">=</span> []
+    is_and <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> gate: And(Not(gate(False, False)), Not(gate(False, True)), Not(gate(True, False)), gate(True, True))
+    is_or <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> gate: And(Not(gate(False, False)), gate(False, True), gate(True, False), gate(True, True))
+    is_not <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> gate: And(gate(False, False), gate(False, True) <span style="color:#f92672">!=</span> gate(True, False), Not(gate(True, True)))
+
+    <span style="color:#66d9ef">for</span> gate <span style="color:#f92672">in</span> f:
+        gate_filters <span style="color:#f92672">=</span> [is_and(gate), is_or(gate), is_not(gate)]
+        asserts<span style="color:#f92672">.</span>append(Or(gate_filters))
+    <span style="color:#66d9ef">if</span> len(f) <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>:
+        asserts<span style="color:#f92672">.</span>append(AtMost([is_not(gate) <span style="color:#66d9ef">for</span> gate <span style="color:#f92672">in</span> f] <span style="color:#f92672">+</span> [<span style="color:#ae81ff">2</span>]))
+    <span style="color:#66d9ef">return</span> asserts</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_smt2.py">gen_smt2.py</a>
+    </figcaption>
+</figure></p>
+<p>All that remains is simplifying these constraints and acquiring their <a href="http://smtlib.cs.uiowa.edu/papers/smt-lib-reference-v2.6-r2017-07-18.pdf">SMT-LIB representation</a> &ndash; the common exchange format for SMT solvers:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">51
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">52
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">53
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python">s <span style="color:#f92672">=</span> Solver()
+constraints <span style="color:#f92672">=</span> output_connections(num_inputs, x, outputs) <span style="color:#f92672">+</span> gate_connections(num_inputs, x, f) <span style="color:#f92672">+</span> f_constraints(f)
+simplified <span style="color:#f92672">=</span> And([simplify(assrt) <span style="color:#66d9ef">for</span> assrt <span style="color:#f92672">in</span> constraints])
+quantified <span style="color:#f92672">=</span> ForAll(x[:num_inputs], Exists(x[num_inputs:], simplified) <span style="color:#66d9ef">if</span> num_inner_gates <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span> <span style="color:#66d9ef">else</span> simplified)
+s<span style="color:#f92672">.</span>add(quantified)
+<span style="color:#66d9ef">return</span> s<span style="color:#f92672">.</span>to_smt2() <span style="color:#f92672">+</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">(get-model)</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span></code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_smt2.py">gen_smt2.py</a>
+    </figcaption>
+</figure></p>
+<aside>
+    <p>
+    Note that we could easily let Z3 solve the instance right away via <code>s.check()</code>.
+I just prefer benchmarking the once generated SMT instances instead of regenerating them in every run.
+    </p>
+</aside>
+<p>The resulting characterisation works great for synthesis of smaller circuits, such as a full adder built from just ANDs, ORs and at most two NOTs:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">58
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">59
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">60
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">61
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#75715e"># Full adder example (impossible with 8 restricted gates; possible with 9)</span>
+sum <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> inputs: Xor(Xor(inputs[<span style="color:#ae81ff">0</span>], inputs[<span style="color:#ae81ff">1</span>]), inputs[<span style="color:#ae81ff">2</span>])
+carry <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> inputs: Or(And(inputs[<span style="color:#ae81ff">0</span>], inputs[<span style="color:#ae81ff">1</span>]), And(Xor(inputs[<span style="color:#ae81ff">0</span>], inputs[<span style="color:#ae81ff">1</span>]), inputs[<span style="color:#ae81ff">2</span>]))
+outputs <span style="color:#f92672">=</span> [sum, carry]</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_smt2.py">gen_smt2.py</a>
+    </figcaption>
+</figure></p>
+<p>Feel free to experiment with <a href="gen_smt2.py">the implementation</a>, feed the generated instances into SMT solvers and interpret the found solutions before continuing with the SAT-based approach.
+I've attached the full adder synthesis <a href="full_adder.smt2">SMT instance</a> to this post, so you don't have run the generator.
+The solution I get describes the following circuit:
+
+
+
+
+
+
+
+<figure class="figure-outer">
+    <figure class="figure-inner">
+        <img src="gfx/full_adder.svg" width="350px"/> 
+            <figcaption>
+                Visualisation of synthesised full adder
+            </figcaption>
+    </figure>
+    
+</figure></p>
+<p>Nevertheless, the quantifiers, uninterpreted functions and cardinality constraints render the instance arising from the introductory puzzle too difficult to be solved within several days.
+Therefore, in the next section, we reduce the characterisation to <a href="https://en.wikipedia.org/wiki/Propositional_calculus">propositional logic</a>, trading off the complexity of our constraints against a larger instance, and end up with a standard approach for SAT-based logic synthesis.
+While the SMT-based synthesis of a full adder may take a few seconds, the <a href="full_adder.cnf">corresponding SAT instance</a> will be <a href="full_adder.log">solvable in milliseconds</a>.</p>
+<h2 id="satbased-logic-synthesis"><a href="#satbased-logic-synthesis" class="hanchor" ariaLabel="Anchor">SAT-based Logic Synthesis</a> </h2>
+<p>To make our problem approachable via SAT solving, we must reformulate the constraints to be free of quantifiers and uninterpreted functions.
+The cardinality constraints are less of a problem since (i) many SAT solvers support them, and (ii) Z3 can also reduce them to propositional logic for us.
+<aside>
+    <p>
+    Strictly speaking, non-logical symbols like <q>=</q> are not part of propositional logic either but are easily reduced to it.
+As with the cardinality constraints, Z3 does this automatically for us.
+    </p>
+</aside></p>
+<h3 id="eliminating-the-existential-quantifier"><a href="#eliminating-the-existential-quantifier" class="hanchor" ariaLabel="Anchor">Eliminating the Existential Quantifier</a> </h3>
+<p>The first step of this reduction is understanding the $\exists$-quantified gate outputs as functions of the $\forall$-quantified circuit inputs.
+Clearly, the gates&rsquo; outputs depend on the current inputs.
+With this in mind, our example constraint $(3)$ can be rewritten as follows:
+<div>$$ 
+\tag{4}
+\begin{aligned}
+\forall x_0,x_1,x_2\ldotp &~ (g_{0,0}\rightarrow g_0(x_0,x_1,x_2) = x_0)\\
+\wedge &~ (g_{0,1}\rightarrow g_0(x_0,x_1,x_2)= x_1)\\
+\wedge &~ (g_{0,2}\rightarrow g_0(x_0,x_1,x_2)= x_2)\\
+\wedge &~ (g_{0,3}\rightarrow g_0(x_0,x_1,x_2)= x_3(x_0,x_1,x_2))\\
+\wedge &~ (g_{0,0} \vee g_{0,1} \vee g_{0,2} \vee g_{0,3})\\
+\wedge &~ (c_{3,0,1}\rightarrow x_3(x_0,x_1,x_2) = f_3(x_0,x_1))\\
+\wedge &~ (c_{3,0,2}\rightarrow x_3(x_0,x_1,x_2) = f_3(x_0,x_2))\\
+\wedge &~ (c_{3,1,2}\rightarrow x_3(x_0,x_1,x_2) = f_3(x_1,x_2))\\
+\wedge &~ (c_{3,0,1} \vee c_{3,0,2} \vee c_{3,1,2})
+\end{aligned}
+ $$</div></p>
+<p>One detail that is easily overlooked is that the inner gates&rsquo; inputs are not guaranteed to be constants, such as $x_0,x_1$ and $x_2$, but may be function evaluations.
+For example, if we were to characterise a generic circuit with $n=2$ inner gates, the following clause would have to be used (among others):
+$$\tag{5} c_{4,0,3} \rightarrow x_4(x_0,x_1,x_2) = f_4(x_0,x_3(x_0,x_1,x_2))$$</p>
+<h3 id="eliminating-the-universal-quantifier"><a href="#eliminating-the-universal-quantifier" class="hanchor" ariaLabel="Anchor">Eliminating the Universal Quantifier</a> </h3>
+<p>In next step we get rid of the $\forall$-quantifier.
+Looking at how $\forall x$ is defined for a Boolean $x$:
+$$ \forall x\ldotp \varphi := \varphi[\mathit{true}/x] \wedge \varphi[\mathit{false}/x]$$
+it is easy to see that we can eliminate one variable at a time by cloning the expression $\varphi$ and substituting $x$ by $\mathit{true}$ in the first instance and by $\mathit{false}$ in the second one.
+We effectively enumerate all the values the quantifier ranges over and conjunct the instantiated constraints.
+<aside>
+    <p>
+    Although every variable elimination doubles the number of constraints, and will clearly not scale to arbitrary numbers of inputs, it is fine for our purposes.
+The puzzle features only three inputs so this quantifier elimination only increases the characterisation roughly by $2^3$.
+    </p>
+</aside></p>
+<p>By eliminating the $\forall$-quantifier in $(4)$ like this, we end up with
+<div>$$ 
+\tag{6}
+\begin{aligned}
+&
+\begin{aligned}
+    (g_{0,0} \rightarrow&~ g_0(0,0,0) = 0)\\
+    \wedge&~ g_0(0,0,1) = 0)\\
+    \wedge&~ g_0(0,1,0) = 0)\\
+    \wedge&~ g_0(0,1,1) = 0)\\
+    \wedge&~ g_0(1,0,0) = 1)\\
+    \wedge&~ g_0(1,0,1) = 1)\\
+    \wedge&~ g_0(1,1,0) = 1)\\
+    \wedge&~ g_0(1,1,1) = 1))\\
+\end{aligned}\\
+\wedge~ & (g_{0,1} \rightarrow~ \dots )\\
+\wedge~ & (g_{0,2} \rightarrow~ \dots )\\
+\wedge~ & (g_{1,2} \rightarrow~ \dots )\\
+\wedge~ & (g_{0,0} \vee g_{0,1} \vee g_{0,2} \vee g_{0,3})\\
+\wedge~ & (c_{3,0,1} \rightarrow~ x_3(0,0,0) = f_3(0,0))\\
+\wedge~ & (c_{3,0,1} \rightarrow~ x_3(0,0,1) = f_3(0,0))\\
+\wedge~ & (c_{3,0,1} \rightarrow~ x_3(0,1,0) = f_3(0,1))\\
+\wedge~ & (c_{3,0,1} \rightarrow~ x_3(0,1,1) = f_3(0,1))\\
+\wedge~ & (c_{3,0,1} \rightarrow~ x_3(1,0,0) = f_3(1,0))\\
+\wedge~ & (c_{3,0,1} \rightarrow~ x_3(1,0,1) = f_3(1,0))\\
+\wedge~ & (c_{3,0,1} \rightarrow~ x_3(1,1,0) = f_3(1,1))\\
+\wedge~ & (c_{3,0,1} \rightarrow~ x_3(1,1,1) = f_3(1,1))\\
+\wedge~ & (c_{3,0,2} \rightarrow~ \dots )\\
+\wedge~ & (c_{3,1,2} \rightarrow~ \dots )\\
+\wedge~ &(c_{3,0,1} \vee c_{3,0,2} \vee c_{3,1,2})
+\end{aligned}
+ $$</div>
+where we again use $0$ and $1$ to denote $\mathit{false}$ and $\mathit{true}$, respectively.
+Note that we could as well have encoded the implications of $c_{3,0,1}$ in a single clause (similar to $g_{0,0}$).
+However, the illustrated encoding will make the upcoming elimination of uninterpreted functions more readable.</p>
+<p>Although likely clear, I want to stress that if we had a more complex clause like $(5)$, it would be expanded into the following clauses:
+<div>$$ 
+\begin{aligned}
+    &~(c_{4,0,3} \rightarrow x_4(0,0,0) = f_4(0,x_3(0,0,0)))\\
+    \wedge&~ (c_{4,0,3} \rightarrow x_4(0,0,1) = f_4(0,x_3(0,0,1)))\\
+    \wedge&~ (c_{4,0,3} \rightarrow x_4(0,1,0) = f_4(0,x_3(0,1,0)))\\
+    \wedge&~ (c_{4,0,3} \rightarrow x_4(0,1,1) = f_4(0,x_3(0,1,1)))\\
+    \wedge&~ (c_{4,0,3} \rightarrow x_4(1,0,0) = f_4(1,x_3(1,0,0)))\\
+    \wedge&~ (c_{4,0,3} \rightarrow x_4(1,0,1) = f_4(1,x_3(1,0,1)))\\
+    \wedge&~ (c_{4,0,3} \rightarrow x_4(1,1,0) = f_4(1,x_3(1,1,0)))\\
+    \wedge&~ (c_{4,0,3} \rightarrow x_4(1,1,1) = f_4(1,x_3(1,1,1)))
+\end{aligned}
+ $$</div></p>
+<h3 id="eliminating-uninterpreted-functions"><a href="#eliminating-uninterpreted-functions" class="hanchor" ariaLabel="Anchor">Eliminating Uninterpreted Functions</a> </h3>
+<p>The last step of the reduction is the elimination of the uninterpreted functions $f_i$ and the corresponding $x_i$.
+Since we're dealing with functions over Booleans, we can simply introduce a variable for each entry of a function's truth table, and encode the semantics in terms of these entries.
+<aside>
+    <p>
+    Note that the goal functions $g_i$ are not uninterpreted but known and evaluated during construction of the constraints.
+    </p>
+</aside></p>
+<p>For example, a gate $f_4:\mathbb{B}^2\rightarrow \mathbb{B}$ can be encoded by an assignment to the four variables
+$$ f_{4,(0,0)}, f_{4,(0,1)}, f_{4,(1,0)}, f_{4,(1,1)} $$
+each of which represents an entry of $f_4$'s truth table.
+Similarly, a function $x_i:\mathbb{B}^3\rightarrow \mathbb{B}$ will be blasted into $2^3$ variables $x_{i,(0,0,0)}, \dots, x_{i,(1,1,1)}$ to refer to the value of $x_i$ for different inputs.</p>
+<p>Since the elimination of all uninterpreted functions from $(6)$ would take too much space, I will illustrate the approach on a single but generic clause:
+$$ c_{i,j,k} \rightarrow x_i(0,0,0) = f_i(x_j(0,0,0),x_k(0,0,0)) $$</p>
+<p>If $x_j$ and $x_k$ are picked as the inputs of $f_i$, this constraint requires $f_i$ to relate the truth values of these inputs with the gate's output $x_i$, for a given circuit input $(0,0,0)$.
+To get rid of $f_i$ but express the same semantics with the new variables, we explicitly enumerate all $2^3$ possible combinations of input and output values of the gate, and require the corresponding $f_{i,(0,0)},\dots,f_{i,(1,1)}$ to be consistent with them:</p>
+<div>$$ 
+\begin{aligned}
+    &~ (c_{i,j,k} \wedge \neg x_{i,(0,0,0)} \wedge \neg x_{j,(0,0,0)} \wedge \neg x_{k,(0,0,0)} \rightarrow \neg f_{4,(0,0)})\\
+    \wedge &~ (c_{i,j,k} \wedge \neg x_{i,(0,0,0)} \wedge \neg x_{j,(0,0,0)} \wedge x_{k,(0,0,0)} \rightarrow \neg f_{4,(0,1)})\\
+    \wedge &~ (c_{i,j,k} \wedge \neg x_{i,(0,0,0)} \wedge x_{j,(0,0,0)} \wedge \neg x_{k,(0,0,0)} \rightarrow \neg f_{4,(1,0)})\\
+    \wedge &~ (c_{i,j,k} \wedge \neg x_{i,(0,0,0)} \wedge x_{j,(0,0,0)} \wedge x_{k,(0,0,0)} \rightarrow \neg f_{4,(1,1)})\\
+    \wedge &~ (c_{i,j,k} \wedge x_{i,(0,0,0)} \wedge \neg x_{j,(0,0,0)} \wedge \neg x_{k,(0,0,0)} \rightarrow f_{4,(0,0)})\\
+    \wedge &~ (c_{i,j,k} \wedge x_{i,(0,0,0)} \wedge \neg x_{j,(0,0,0)} \wedge x_{k,(0,0,0)} \rightarrow f_{4,(0,1)})\\
+    \wedge &~ (c_{i,j,k} \wedge x_{i,(0,0,0)} \wedge x_{j,(0,0,0)} \wedge \neg x_{k,(0,0,0)} \rightarrow f_{4,(1,0)})\\
+    \wedge &~ (c_{i,j,k} \wedge x_{i,(0,0,0)} \wedge x_{j,(0,0,0)} \wedge x_{k,(0,0,0)} \rightarrow f_{4,(1,1)})\\
+\end{aligned}
+ $$</div>
+<p>Applying this transformation to the clauses from $(6)$ leaves us with a SAT instance that is equivalent to a <a href="https://people.eecs.berkeley.edu/~alanmi/publications/2018/date18_exact.pdf">standard formulation</a> of SAT-based logic synthesis.</p>
+<h3 id="implementation1"><a href="#implementation1" class="hanchor" ariaLabel="Anchor">Implementation</a> </h3>
+<p>Since <a href="gen_sat.py">the implementation</a> is mostly a refinement of the SMT instance generator, I will only touch on some aspects and refer to the implementation if something is unclear.</p>
+<p>The biggest difference to the SMT-based characterisation is that we introduced variables $x_{i,(0,0,0)},\dots,x_{i,(1,1,1)}$ and $f_{i,(0,0),\dots,f_{i,(1,1)}}$ to refer to the values of $x_i$ and $f_i$ for every possible input.
+Accordingly, the implementation now uses lists of lists for indexing all the variants of $x_i$ and $f_i$:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">53
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">58
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">59
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">60
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">61
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">62
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">63
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#75715e"># Create variables (and values for inputs) for each x_i, given concrete inputs</span>
+x <span style="color:#f92672">=</span> [[Bool(<span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">x{:d}{}</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>format(gate_idx, val)) <span style="color:#66d9ef">for</span> val <span style="color:#f92672">in</span> product(range(<span style="color:#ae81ff">2</span>), repeat<span style="color:#f92672">=</span>num_inputs)]
+     <span style="color:#66d9ef">for</span> gate_idx <span style="color:#f92672">in</span> range(num_inputs <span style="color:#f92672">+</span> num_inner_gates)]
+<span style="color:#75715e"># Replace variables for inputs by corresponding constants</span>
+<span style="color:#66d9ef">for</span> input_idx <span style="color:#f92672">in</span> range(num_inputs):
+    <span style="color:#66d9ef">for</span> idx, bits <span style="color:#f92672">in</span> enumerate(product(range(<span style="color:#ae81ff">2</span>), repeat<span style="color:#f92672">=</span>num_inputs)):
+        x[input_idx][idx] <span style="color:#f92672">=</span> BoolVal(bits[input_idx])
+
+<span style="color:#75715e"># Create functions f:B^2--&gt;B realised by the inner gates</span>
+f <span style="color:#f92672">=</span> [[Bool(<span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">f{:d}{}</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>format(gate_idx, val)) <span style="color:#66d9ef">for</span> val <span style="color:#f92672">in</span> product(range(<span style="color:#ae81ff">2</span>), repeat<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>)]
+     <span style="color:#66d9ef">for</span> gate_idx <span style="color:#f92672">in</span> range(num_inputs, len(x))]</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_sat.py">gen_sat.py</a>
+    </figcaption>
+</figure></p>
+<p>Due to this indexing of variables, the restriction of $f_i$ had to be adapted slightly:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python">is_and <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> gate: And(Not(gate[<span style="color:#ae81ff">0</span>]), Not(gate[<span style="color:#ae81ff">1</span>]), Not(gate[<span style="color:#ae81ff">2</span>]), gate[<span style="color:#ae81ff">3</span>])
+is_or <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> gate: And(Not(gate[<span style="color:#ae81ff">0</span>]), gate[<span style="color:#ae81ff">1</span>], gate[<span style="color:#ae81ff">2</span>], gate[<span style="color:#ae81ff">3</span>])
+is_not <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> gate: And(gate[<span style="color:#ae81ff">0</span>], Not(gate[<span style="color:#ae81ff">1</span>]) <span style="color:#f92672">==</span> gate[<span style="color:#ae81ff">2</span>], Not(gate[<span style="color:#ae81ff">3</span>]))</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_sat.py">gen_sat.py</a>
+    </figcaption>
+</figure></p>
+<p>Besides the indexing, the implementation implements the very same reduction to SAT that has been sketched above and maintains the general structure of the SMT-oriented implementation.
+What needs mention though is how to export the constraints in the <a href="https://www.domagoj-babic.com/uploads/ResearchProjects/Spear/dimacs-cnf.pdf">DIMACS</a> exchange format used by virtually all SAT solvers:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">66
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">67
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">68
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">69
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">70
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">71
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">72
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">73
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">74
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">75
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python">goal <span style="color:#f92672">=</span> Goal()
+<span style="color:#66d9ef">for</span> assrt <span style="color:#f92672">in</span> output_connections(num_inputs, x, outputs) <span style="color:#f92672">+</span> gate_connections(num_inputs, x, f) <span style="color:#f92672">+</span> f_constraints(f):
+    goal<span style="color:#f92672">.</span>add(simplify(assrt))
+
+<span style="color:#75715e"># Reduce cardinality constraints; transform to CNF</span>
+to_cnf <span style="color:#f92672">=</span> Then(Tactic(<span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">card2bv</span><span style="color:#e6db74">&#34;</span>), Tactic(<span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">tseitin-cnf</span><span style="color:#e6db74">&#34;</span>))
+subgoals <span style="color:#f92672">=</span> to_cnf(goal)
+<span style="color:#66d9ef">assert</span> len(subgoals) <span style="color:#f92672">==</span> <span style="color:#ae81ff">1</span>, <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">Tactic should have resulted in a single goal</span><span style="color:#e6db74">&#34;</span>
+<span style="color:#66d9ef">assert</span> <span style="color:#f92672">not</span> subgoals[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>inconsistent(), <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">Found to be UNSAT during pre-processing</span><span style="color:#e6db74">&#34;</span>
+<span style="color:#66d9ef">return</span> subgoals[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>dimacs() <span style="color:#f92672">+</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span></code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_sat.py">gen_sat.py</a>
+    </figcaption>
+</figure></p>
+<p>Z3 provides <a href="http://theory.stanford.edu/~nikolaj/programmingz3.html#sec-tactics">tactics</a> that can be applied to a set of constraints.
+By applying <code>card2bv</code>, all occurring cardinality constraints will be reduced to propositional logic.
+The subsequent <code>tseitin-cnf</code> tactic brings the resulting constraints into <a href="https://en.wikipedia.org/wiki/Conjunctive_normal_form">conjunctive normal form</a> (CNF) &ndash; in fact they almost are in CNF already.
+The resulting constraints are then be output in the DIMACS format.</p>
+<p>Although a SAT-based characterisation is a lot larger than its SMT-base counterpart, it is less complex and is typically solved in orders-of-magnitude less time.
+Feel free to experiment with <a href="gen_sat.py">the implementation</a>, or try to reconstruct the full adder circuit <a href="gfx/full_adder.svg">shown above</a> from the <a href="full_adder.cnf">generated SAT instance</a> and <a href="full_adder.log">the solution</a> found by a SAT solver.</p>
+<p>Still, the constraint that restricts the number of NOTs seems to make the SAT instance that characterises the introductory puzzle hard to solve.
+The next section proposes two additional assumptions that are rather weak but sufficient to alleviate the combinatorial explosion, and make the constraints solvable in reasonable time.</p>
+<h2 id="solving-the-puzzle"><a href="#solving-the-puzzle" class="hanchor" ariaLabel="Anchor">Solving the Puzzle</a> </h2>
+<p>The constraints that we used so far did not make any assumptions that could disregard potential solutions to the puzzle, but merely formalised the provided information.
+To make the combinatorial explosion more manageable, we will now also add some assumptions that are <em>likely</em> to hold for the circuit, but may potentially disregard some solutions.</p>
+<p>First of all, if the puzzle allows the use of at most two NOTs, almost certainly both NOTs are necessary.
+It is also quite likely that if there is a solution, it can also be realised with both NOTs placed two gates apart, so the result of the first NOT can pass through all kinds of allowed gates (an AND and an OR) before reaching the last NOT.
+So there must be some $i$, such that both $f_i$ and $f_{i+3}$ are NOT gates.</p>
+<p>This is the first puzzle-specific assumption that distinguishes the implementation:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">58
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#75715e"># Additional assumptions: f_i == NOT &amp;&amp; f_{i+3} == NOT</span>
+not_position_constraints <span style="color:#f92672">=</span> []
+<span style="color:#66d9ef">for</span> gate1, gate2 <span style="color:#f92672">in</span> zip(f, f[<span style="color:#ae81ff">3</span>:]):
+    not_position_constraints<span style="color:#f92672">.</span>append(And(is_not(gate1), is_not(gate2)))
+asserts<span style="color:#f92672">.</span>append(Or(not_position_constraints))</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_puzzle.py">gen_puzzle.py</a>
+    </figcaption>
+</figure></p>
+<p>The second assumption is a lot weaker and concerns the connections of the outputs.
+If there is a solution, it likely can be formulated so that the outputs are connected to the very last gates of the circuit.
+In particular, $g_2$ can certainly be computed independently of $g_1$ and $g_0$.
+We can enforce these connections via:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#75715e"># Connect outputs to last gates</span>
+<span style="color:#66d9ef">if</span> output_idx <span style="color:#f92672">==</span> len(x) <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">-</span> gate_idx:
+    asserts<span style="color:#f92672">.</span>append(conn_var)</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_puzzle.py">gen_puzzle.py</a>
+    </figcaption>
+</figure></p>
+<p>With these additional constraints, it took an old i5-4690 CPU <a href="puzzle.log">about 15min</a> to solve the <a href="puzzle.cnf">corresponding SAT instance</a> with <strong>22 inner gates</strong>.
+The synthesised circuit looks as follows:
+
+
+
+
+
+
+
+<figure class="figure-outer">
+    <figure class="figure-inner">
+        <img src="gfx/puzzle.svg"/> 
+            <figcaption>
+                Solution to puzzle
+            </figcaption>
+    </figure>
+    
+</figure>
+Since we only allow gates with fan-in 2, here, the NOT2 denotes a NOT on the second input.</p>
+<h2 id="do-try-this-at-home"><a href="#do-try-this-at-home" class="hanchor" ariaLabel="Anchor">Do Try This at Home!</a> </h2>
+<p>Although the SAT-based characterisation of logic synthesis turns out to be practical &ndash; especially when the artificial constraint on the number of gates is dropped &ndash; there is still room for improvement and experimentation.
+Here are some ideas that you might want to explore on your own (easiest first):</p>
+<ul>
+<li>Instead of relying on an external solver to solve the generated constraints, use the API to invoke the check programmatically.</li>
+<li>Automate the interpretation of the solutions found by a solver as logic circuits and plot them via <a href="https://en.wikipedia.org/wiki/DOT_(graph_description_language)">DOT</a>.</li>
+<li>Extend the characterisation to allow some composite gates.
+For example, I found that the <a href="https://puzzling.stackexchange.com/questions/9438/invert-three-inputs-with-two-not-gates">expected solution</a> has circuitry to decide whether more than one (or more than two) inputs are $\mathit{true}$.
+Requiring the synthesis to feature such blocks may speed up the synthesis of the puzzle's solution.</li>
+<li>Instead of characterising the circuit for a fixed number of gates, devise an incremental variant of SMT-based or SAT-based synthesis.
+It should be advantageous to have the solver reuse information established during checks with fewer gates.</li>
+</ul>
+<p>If you manage to solve the riddle without the domain-specific assumptions, or have any ideas how to do this more efficiently with SAT/SMT solving, please let me know.
+It might also be possible to solve this with the logic synthesis tools mentioned in <a href="https://people.eecs.berkeley.edu/~alanmi/publications/2018/date18_exact.pdf">the paper</a> that discusses the practicability of the SAT-based encoding we ended up with.</p>
+<hr style="margin-top: 2em">
+<div class="links">
+
+    <a href="/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/full_adder.cnf" class="button">full_adder.cnf</a>
+
+    <a href="/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/full_adder.smt2" class="button">full_adder.smt2</a>
+
+    <a href="/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_puzzle.py" class="button">gen_puzzle.py</a>
+
+    <a href="/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_sat.py" class="button">gen_sat.py</a>
+
+    <a href="/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_smt2.py" class="button">gen_smt2.py</a>
+
+    <a href="/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/puzzle.cnf" class="button">puzzle.cnf</a>
+
+    <a href="/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/full_adder.log" class="button">full_adder.log</a>
+
+    <a href="/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/puzzle.log" class="button">puzzle.log</a>
+
+</div>
+		</article>
+		</main>
+	</div>
+	
+	<div class="notepad related-posts">
+		<h1>Related Posts</h1>
+		<hr>
+		
+			<article>
+    <header>
+        <h2><a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/">SMT-based Reasoning About the Fast Inverse Square Root</a></h2>
+        <div class="metadata">
+    <time datetime="2019-09-26">September 26, 2019</time>
+    <ul>
+        <li><a class="tag-block" href="/tags/smt">smt</a></li>
+        <li><a class="tag-block" href="/tags/smt-lib">smt-lib</a></li>
+        <li><a class="tag-block" href="/tags/software-verification">software verification</a></li>
+    </ul>
+</div>
+    </header><p>While there is a <a href="https://web.archive.org/web/20160308091758/http://www.daxia.com/bibis/upload/406Fast_Inverse_Square_Root.pdf">mathematical explanation</a> for the choice of <code>0x5F3759DF</code> in the <a href="https://en.wikipedia.org/wiki/Fast_inverse_square_root">famous bit-level hack</a> for approximating the multiplicative inverse of the square root of a 32-bit floating-point number, it is not immediately clear to what extent the reasoning is really applicable in the context of machine data types and their peculiarities.
+This post illustrates how this, and related aspects, can be investigated with <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a>-based reasoning about the actual implementation.</p>
+	<a class="read-more" href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/">
+        &raquo; Read more
+    </a>
+</article>
+		
+	</div>
+	
+</div>
+
+        </div>
+        </div>
+        <footer>
+	<p>© Dimitri Bohlender</p>
+	<p><a href="/legal">Legal Notice</a></p>
+</footer>
+    </body>
+</html>
