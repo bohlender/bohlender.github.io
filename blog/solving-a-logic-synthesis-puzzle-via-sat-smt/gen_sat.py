@@ -53,7 +53,7 @@ def encode(num_inputs, outputs, num_inner_gates):
     # Create variables (and values for inputs) for each x_i, given concrete inputs
     x = [[Bool("x{:d}{}".format(gate_idx, val)) for val in product(range(2), repeat=num_inputs)]
          for gate_idx in range(num_inputs + num_inner_gates)]
-    # Replace variables for inputs by corresponding constants
+    # Replace variables for inputs by concrete values
     for input_idx in range(num_inputs):
         for idx, bits in enumerate(product(range(2), repeat=num_inputs)):
             x[input_idx][idx] = BoolVal(bits[input_idx])

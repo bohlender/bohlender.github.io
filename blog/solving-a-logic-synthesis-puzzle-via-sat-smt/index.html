@@ -27,7 +27,7 @@
 <meta property="og:description" content="A few weeks ago, I was asked the following riddle:
 Design a logic circuit with three inputs and three outputs, such that the outputs are the inverted inputs. You may use arbitrary many AND and OR gates, but at most two NOT gates.
 Although the characterisation of this problem as an SMT instance is straightforward, I found it necessary to reduce it to SAT and incorporate further assumptions to achieve reasonable performance.
-This post illustrates said process, ranging from the original idea via a standard formulation of SAT-based logic synthesis to a problem-specific and more constrained instance." />
+This post illustrates said process, ranging from the original idea to a standard formulation of SAT-based logic synthesis to a problem-specific and more constrained instance." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/" />
 <meta property="og:image" content="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gfx/full_adder.svg" />
@@ -96,7 +96,7 @@ This post illustrates said process, ranging from the original idea via a standar
 			<p>A few weeks ago, I was asked the following riddle:
 <q>Design a <a href="https://en.wikipedia.org/wiki/Logic_gate">logic circuit</a> with three inputs and three outputs, such that the outputs are the inverted inputs. You may use arbitrary many AND and OR gates, but at most two NOT gates</q>.
 Although the characterisation of this problem as an <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a> instance is straightforward, I found it necessary to reduce it to <a href="https://en.wikipedia.org/wiki/Satisfiability">SAT</a> and incorporate further assumptions to achieve reasonable performance.
-This post illustrates said process, ranging from the original idea via a standard formulation of SAT-based logic synthesis to a problem-specific and more constrained instance.</p>
+This post illustrates said process, ranging from the original idea to a standard formulation of SAT-based logic synthesis to a problem-specific and more constrained instance.</p>
 <h2 id="introduction"><a href="#introduction" class="hanchor" ariaLabel="Anchor">Introduction</a> </h2>
 <p><a href="https://en.wikipedia.org/wiki/Logic_synthesis">Logic synthesis</a> is the process of turning an abstract circuit description into a concrete design in terms of logic gates.
 In the context of our riddle, the abstract description can be formalised as a set of goal functions which the circuit must realise:
@@ -109,7 +109,7 @@ g_2(x_0,x_1,x_2)&=\neg x_2
  $$</div>
 where $x_0,x_1,x_2$ are the circuit's Boolean inputs.</p>
 <p>Instead of thinking of a solution ourselves, we want to characterise the problem in terms of constraints whose solution can be interpreted as a solution to the riddle.
-To this end, we intend the constraints to describe a generic circuit that is parametrised by the <em>functions</em> that its gates realise and the <em>connections</em> between these gates.
+To this end, we intend the constraints to describe a generic circuit that is parametrised by the <em>functions</em> that its gates realise, and the <em>connections</em> between these gates.
 <aside>
     <p>
     Without loss of generality, we restrict ourselves to gates with two inputs.
@@ -133,19 +133,22 @@ Gates with larger <a href="https://en.wikipedia.org/wiki/Fan-in">fan-in</a> can 
     </figure>
     
 </figure>
-<p>If $g_0$ were $x_0 \wedge x_1$, choosing the highlighted wiring and $f_3$ as AND would be a desireable logic synthesis result.
-That is, conceptually we want to solve something along these lines:</p>
+<p>If $g_0$ were $x_0 \wedge x_1$, choosing the highlighted wiring and $f_3$ as AND would be a desirable logic synthesis result.
+Conceptually we want to guarantee something along these lines:</p>
 <p>$$\tag{1}\forall x_0,x_1,x_2\ldotp g_0(x_0, x_1, x_2)=\mathit{circuit}(x_0,x_1,x_2)$$</p>
 <p>where $\mathit{circuit}$ is defined by the choice of $f_3$ and the wiring.
+Here, $f_3$ and the wiring are the parameters which we, or a constraint solver, can tweak to establish the validity of $(1)$.
 <aside>
     <p>
     As in the post on the <a href="/blog/smt-based-optimisation-of-fast-inverse-square-root">inverse square root hack</a>, logic synthesis can be understood as a <strong>parameter synthesis</strong> problem, too.
 We are searching for a choice of parameters (gates and wiring) that make the system (circuit) compliant with some property for every input.
     </p>
 </aside></p>
-<p>Considering the generic circuit with one gate, $g_0$ can only be connected to the inputs $x_0, x_1, x_2$ or the gate's output $x_3$.
+<p>So what kind of wiring should we allow?
+Considering the generic circuit with one gate, $g_0$ can only be connected to the inputs $x_0, x_1, x_2$ or the gate's output $x_3$.
 Depending on which inputs $f_3$ is connected to, its output $x_3$ will be given by $f_3(x_0,x_1), f_3(x_0,x_2)$ or $f_3(x_1,x_2)$.
-Note that it is sufficient to consider the input combinations $f_3(x_j, x_k)$ for $1\leq j &lt; k &lt; 3$ since $f_3$ is unconstrained (yet) and can represent any binary operator on Booleans.</p>
+Note that it is sufficient to consider the input combinations $f_3(x_j, x_k)$ for $1\leq j &lt; k &lt; 3$ since $f_3$ is unconstrained (yet) and can represent any binary operator on Booleans.
+In other words, if there were a solution with $x_3=f_3(x_2,x_1)$, we would also find it with $x_3=f_3(x_1, x_2)$ but the interpretation of $f_3$ <q>mirrored</q>.</p>
 <p>Allowing an arbitrary number of gates and arbitrary connections right from the start will result in an unnecessarily huge search space.
 Instead, we restrict ourselves to a fixed number of gates which we can increase incrementally if the current number of gates turns out to be insufficient to synthesise the goal function $g_0$.
 Without loss of generality, the inputs of a new gate $f_{n+1}$ may be connected to preceding gates (and inputs) $x_0,\dots,x_n$ but not the other way around, e.g. $x_4$ may not be an input of $f_3$.
@@ -157,7 +160,7 @@ This was the ad-hoc approach <a href="https://lukas-boersma.com/">my colleague</
 <li>formulating how the gates may be interconnected.</li>
 </ol>
 <p>To denote that a gate $g_i$ is connected to $x_j$ we use a variable $g_{i,j}$.
-Similarly, we introduce variables $c_{i, j, k}$ to encode that $x_j$ is the first input of $f_i$ and $x_k$ the second one.
+Similarly, we introduce variables $c_{i, j, k}$ to encode that $x_j$ is the first input of $f_i$, and $x_k$ the second one.
 With this in mind, reconsidering the wiring from our schematic, only $g_{0,3}$ and $c_{3,0,1}$ should be $\mathit{true}$.</p>
 
 
@@ -236,7 +239,7 @@ However, to solve the introductory riddle we still have to restrict the function
 Of course the constants must be truth values and not integers.
     </p>
 </aside></p>
-<p>Here, the first line is only satisfied by an AND, the second line is only satisfied by an OR, and the last line is only satisfied by a NOT on the first or second input.
+<p>Here, the first line is only satisfied by an AND, the second line is only satisfied by an OR, and the last line is only satisfied by a NOT on the gate's first or second input.
 This characterisation of NOT is needed since all of our $f_i$ have two parameters.</p>
 <p>Having restricted the functions to the allowed gates, we can also limit the number of NOTs by means of <a href="http://theory.stanford.edu/~nikolaj/programmingz3.html#sec-cardinality-constraints">cardinality constraints</a>:
 <div>$$ 
@@ -335,7 +338,7 @@ outputs <span style="color:#f92672">=</span> [g0, g1, g2]</code></pre></td></tr>
         <a href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_smt2.py">gen_smt2.py</a>
     </figcaption>
 </figure></p>
-<p>Providing the number of inputs and inner gates to consider, we can create the corresponding variables $x_i$ and their uninterpreted functions $f_i:\mathbb{B}^2\rightarrow\mathbb{B}$ as follows:
+<p>Providing the number of inputs and inner gates to consider, we can create lists of the corresponding variables $x_i$ and their uninterpreted functions $f_i:\mathbb{B}^2\rightarrow\mathbb{B}$ as follows:
 
 
 
@@ -430,7 +433,7 @@ f <span style="color:#f92672">=</span> [Function(<span style="color:#e6db74"></s
     </figcaption>
 </figure></p>
 <p>The characterisation of possible output connections strongly follows the scheme shown in $(3)$.
-We create variables $g_{i,j}$ for the potential connection of $g_i$ and each $x_j$, and let them imply that $g_0(\mathit{inputs})=x_j$.
+We create variables $g_{i,j}$ for the potential connection of $g_i$ and each $x_j$, and let them imply that $g_i(\mathit{inputs})=x_j$.
 It is also asserted that at least one $g_{i,j}$ for each $g_i$ must be $\mathit{true}$:
 
 
@@ -972,9 +975,9 @@ outputs <span style="color:#f92672">=</span> [sum, carry]</code></pre></td></tr>
         <a href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_smt2.py">gen_smt2.py</a>
     </figcaption>
 </figure></p>
-<p>Feel free to experiment with <a href="gen_smt2.py">the implementation</a>, feed the generated instances into SMT solvers and interpret the found solutions before continuing with the SAT-based approach.
+<p>Feel free to experiment with <a href="gen_smt2.py">the implementation</a>, feed the generated instances into SMT solvers, and interpret the found solutions before continuing with the SAT-based approach.
 I've attached the full adder synthesis <a href="full_adder.smt2">SMT instance</a> to this post, so you don't have run the generator.
-The solution I get describes the following circuit:
+The solution I get from Z3 describes the following circuit:
 
 
 
@@ -991,7 +994,7 @@ The solution I get describes the following circuit:
     </figure>
     
 </figure></p>
-<p>Nevertheless, the quantifiers, uninterpreted functions and cardinality constraints render the instance arising from the introductory puzzle too difficult to be solved within several days.
+<p>Unfortunately, the quantifiers, uninterpreted functions and cardinality constraints render the instance characterises the introductory puzzle too difficult to be solved within several days.
 Therefore, in the next section, we reduce the characterisation to <a href="https://en.wikipedia.org/wiki/Propositional_calculus">propositional logic</a>, trading off the complexity of our constraints against a larger instance, and end up with a standard approach for SAT-based logic synthesis.
 While the SMT-based synthesis of a full adder may take a few seconds, the <a href="full_adder.cnf">corresponding SAT instance</a> will be <a href="full_adder.log">solvable in milliseconds</a>.</p>
 <h2 id="satbased-logic-synthesis"><a href="#satbased-logic-synthesis" class="hanchor" ariaLabel="Anchor">SAT-based Logic Synthesis</a> </h2>
@@ -1022,7 +1025,7 @@ With this in mind, our example constraint $(3)$ can be rewritten as follows:
 \end{aligned}
  $$</div></p>
 <p>One detail that is easily overlooked is that the inner gates&rsquo; inputs are not guaranteed to be constants, such as $x_0,x_1$ and $x_2$, but may be function evaluations.
-For example, if we were to characterise a generic circuit with $n=2$ inner gates, the following clause would have to be used (among others):
+For example, if we were to characterise a generic circuit with $n=2$ inner gates, the following clause would surface (among others):
 $$\tag{5} c_{4,0,3} \rightarrow x_4(x_0,x_1,x_2) = f_4(x_0,x_3(x_0,x_1,x_2))$$</p>
 <h3 id="eliminating-the-universal-quantifier"><a href="#eliminating-the-universal-quantifier" class="hanchor" ariaLabel="Anchor">Eliminating the Universal Quantifier</a> </h3>
 <p>In next step we get rid of the $\forall$-quantifier.
@@ -1033,7 +1036,7 @@ We effectively enumerate all the values the quantifier ranges over and conjunct 
 <aside>
     <p>
     Although every variable elimination doubles the number of constraints, and will clearly not scale to arbitrary numbers of inputs, it is fine for our purposes.
-The puzzle features only three inputs so this quantifier elimination only increases the characterisation roughly by $2^3$.
+The puzzle features three inputs so this quantifier elimination only increases the characterisation by roughly $2^3$.
     </p>
 </aside></p>
 <p>By eliminating the $\forall$-quantifier in $(4)$ like this, we end up with
@@ -1067,9 +1070,9 @@ The puzzle features only three inputs so this quantifier elimination only increa
 \wedge~ & (c_{3,1,2} \rightarrow~ \dots )\\
 \wedge~ &(c_{3,0,1} \vee c_{3,0,2} \vee c_{3,1,2})
 \end{aligned}
- $$</div>
-where we again use $0$ and $1$ to denote $\mathit{false}$ and $\mathit{true}$, respectively.
-Note that we could as well have encoded the implications of $c_{3,0,1}$ in a single clause (similar to $g_{0,0}$).
+ $$</div></p>
+<p>where we again use $0$ and $1$ to denote $\mathit{false}$ and $\mathit{true}$, respectively.
+Note that we could as well have encoded the implications of $c_{3,0,1}$ in a single clause (like the implications of $g_{0,0}$).
 However, the illustrated encoding will make the upcoming elimination of uninterpreted functions more readable.</p>
 <p>Although likely clear, I want to stress that if we had a more complex clause like $(5)$, it would be expanded into the following clauses:
 <div>$$ 
@@ -1114,7 +1117,7 @@ To get rid of $f_i$ but express the same semantics with the new variables, we ex
  $$</div>
 <p>Applying this transformation to the clauses from $(6)$ leaves us with a SAT instance that is equivalent to a <a href="https://people.eecs.berkeley.edu/~alanmi/publications/2018/date18_exact.pdf">standard formulation</a> of SAT-based logic synthesis.</p>
 <h3 id="implementation1"><a href="#implementation1" class="hanchor" ariaLabel="Anchor">Implementation</a> </h3>
-<p>Since <a href="gen_sat.py">the implementation</a> is mostly a refinement of the SMT instance generator, I will only touch on some aspects and refer to the implementation if something is unclear.</p>
+<p>Since <a href="gen_sat.py">the implementation</a> is mostly a refinement of the SMT instance generator, I will only touch on some aspects and refer to the implementation for details.</p>
 <p>The biggest difference to the SMT-based characterisation is that we introduced variables $x_{i,(0,0,0)},\dots,x_{i,(1,1,1)}$ and $f_{i,(0,0),\dots,f_{i,(1,1)}}$ to refer to the values of $x_i$ and $f_i$ for every possible input.
 Accordingly, the implementation now uses lists of lists for indexing all the variants of $x_i$ and $f_i$:
 
@@ -1246,7 +1249,7 @@ Accordingly, the implementation now uses lists of lists for indexing all the var
 <pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#75715e"># Create variables (and values for inputs) for each x_i, given concrete inputs</span>
 x <span style="color:#f92672">=</span> [[Bool(<span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">x{:d}{}</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>format(gate_idx, val)) <span style="color:#66d9ef">for</span> val <span style="color:#f92672">in</span> product(range(<span style="color:#ae81ff">2</span>), repeat<span style="color:#f92672">=</span>num_inputs)]
      <span style="color:#66d9ef">for</span> gate_idx <span style="color:#f92672">in</span> range(num_inputs <span style="color:#f92672">+</span> num_inner_gates)]
-<span style="color:#75715e"># Replace variables for inputs by corresponding constants</span>
+<span style="color:#75715e"># Replace variables for inputs by concrete values</span>
 <span style="color:#66d9ef">for</span> input_idx <span style="color:#f92672">in</span> range(num_inputs):
     <span style="color:#66d9ef">for</span> idx, bits <span style="color:#f92672">in</span> enumerate(product(range(<span style="color:#ae81ff">2</span>), repeat<span style="color:#f92672">=</span>num_inputs)):
         x[input_idx][idx] <span style="color:#f92672">=</span> BoolVal(bits[input_idx])
@@ -1260,7 +1263,8 @@ f <span style="color:#f92672">=</span> [[Bool(<span style="color:#e6db74"></span
         <a href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_sat.py">gen_sat.py</a>
     </figcaption>
 </figure></p>
-<p>Due to this indexing of variables, the restriction of $f_i$ had to be adapted slightly:
+<p>Due to this indexing of variables, the restriction of $f_i$ has to be adapted slightly too.
+Instead of identifying a gate by its outputs for certain inputs, we now refer to each entry of the gate's truth table:
 
 
 
@@ -1324,7 +1328,7 @@ is_not <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</
         <a href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_sat.py">gen_sat.py</a>
     </figcaption>
 </figure></p>
-<p>Besides the indexing, the implementation implements the very same reduction to SAT that has been sketched above and maintains the general structure of the SMT-oriented implementation.
+<p>Besides the indexing, the implementation uses the very same reduction to SAT that has been sketched above, and maintains the general structure of the SMT-oriented implementation.
 What needs mention though is how to export the constraints in the <a href="https://www.domagoj-babic.com/uploads/ResearchProjects/Spear/dimacs-cnf.pdf">DIMACS</a> exchange format used by virtually all SAT solvers:
 
 
@@ -1463,7 +1467,7 @@ subgoals <span style="color:#f92672">=</span> to_cnf(goal)
 By applying <code>card2bv</code>, all occurring cardinality constraints will be reduced to propositional logic.
 The subsequent <code>tseitin-cnf</code> tactic brings the resulting constraints into <a href="https://en.wikipedia.org/wiki/Conjunctive_normal_form">conjunctive normal form</a> (CNF) &ndash; in fact they almost are in CNF already.
 The resulting constraints can then be output in the DIMACS format.</p>
-<p>Although a SAT-based characterisation is a lot larger than its SMT-base counterpart, it is less complex and is typically solved in orders-of-magnitude less time.
+<p>Although a SAT-based characterisation is a lot larger than its SMT-based counterpart, it is less complex and is typically solved in orders-of-magnitude less time.
 Feel free to experiment with <a href="gen_sat.py">the implementation</a>, or try to reconstruct the full adder circuit <a href="gfx/full_adder.svg">shown above</a> from the <a href="full_adder.cnf">generated SAT instance</a> and <a href="full_adder.log">the solution</a> found by a SAT solver.</p>
 <p>Still, the constraint that restricts the number of NOTs seems to make the SAT instance that characterises the introductory puzzle hard to solve.
 The next section proposes two additional assumptions that are rather weak but sufficient to alleviate the combinatorial explosion, and make the constraints solvable in reasonable time.</p>
@@ -1471,9 +1475,9 @@ The next section proposes two additional assumptions that are rather weak but su
 <p>The constraints that we used so far did not make any assumptions that could disregard potential solutions to the puzzle, but merely formalised the provided information.
 To make the combinatorial explosion more manageable, we will now also add some assumptions that are <em>likely</em> to hold for the circuit, but may potentially disregard some solutions.</p>
 <p>First of all, if the puzzle allows the use of at most two NOTs, almost certainly both NOTs are necessary.
-It is also quite likely that if there is a solution, it can also be realised with both NOTs placed two gates apart, so the result of the first NOT can pass through all kinds of allowed gates (an AND and an OR) before reaching the last NOT.
-So there must be some $i$, such that both $f_i$ and $f_{i+3}$ are NOT gates.</p>
-<p>This is the first puzzle-specific assumption that distinguishes the implementation:
+It is also quite likely that if there is a solution, it can also be realised with both NOTs placed two gates apart, so the result of the first NOT can pass through all kinds of allowed gates (an AND and an OR) before reaching the second NOT.
+So there should be some $i$, such that both $f_i$ and $f_{i+3}$ are NOT gates.</p>
+<p>This is the first puzzle-specific assumption that is added to the generic characterisation:
 
 
 
@@ -1559,7 +1563,7 @@ asserts<span style="color:#f92672">.</span>append(Or(not_position_constraints))<
 </figure></p>
 <p>The second assumption is a lot weaker and concerns the connections of the outputs.
 If there is a solution, it likely can be formulated so that the outputs are connected to the very last gates of the circuit.
-In particular, $g_2$ can certainly be computed independently of $g_1$ and $g_0$.
+In particular, $g_2$ can certainly be computed independently, i.e. without referring to the value of $g_1$ or $g_0$.
 We can enforce these connections via:
 
 
@@ -1648,11 +1652,11 @@ Since we only allow gates with fan-in 2, here, the NOT2 denotes a NOT on the sec
 Here are some ideas that you might want to explore on your own (easiest first):</p>
 <ul>
 <li>Instead of relying on an external solver to solve the generated constraints, use the API to invoke the check programmatically.</li>
-<li>Automate the interpretation of the solutions found by a solver as logic circuits and plot them via <a href="https://en.wikipedia.org/wiki/DOT_(graph_description_language)">DOT</a>.</li>
+<li>Automate the interpretation of the solutions found by a solver as logic circuits, and plot them via <a href="https://en.wikipedia.org/wiki/DOT_(graph_description_language)">DOT</a>.</li>
 <li>Extend the characterisation to allow some composite gates.
 For example, I found that the <a href="https://puzzling.stackexchange.com/questions/9438/invert-three-inputs-with-two-not-gates">expected solution</a> has circuitry to decide whether more than one (or more than two) inputs are $\mathit{true}$.
 Requiring the synthesis to feature such blocks may speed up the synthesis of the puzzle's solution.</li>
-<li>Instead of characterising the circuit for a fixed number of gates, devise an incremental variant of SMT-based or SAT-based synthesis.
+<li>Instead of characterising the circuit for a fixed number of gates, devise an incremental variant of SMT-based or SAT-based synthesis which incorporates one additional gate at a time (and checks satisfiability).
 It should be advantageous to have the solver reuse information established during checks with fewer gates.</li>
 </ul>
 <p>If you manage to solve the riddle without the domain-specific assumptions, or have any ideas how to do this more efficiently with SAT/SMT solving, please let me know.
