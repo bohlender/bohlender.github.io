@@ -21,7 +21,7 @@
       <author>contact@bohlender.pro (Dimitri Bohlender)</author>
       <guid>https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/</guid>
       <description>&lt;p&gt;A few weeks ago, I was asked the following riddle:
-&lt;q&gt;Design a logic circuit with three inputs and three outputs, such that the outputs are the inverted inputs. You may use arbitrary many AND and OR gates, but at most two NOT gates&lt;/q&gt;.
+&lt;q&gt;Design a &lt;a href=&#34;https://en.wikipedia.org/wiki/Logic_gate&#34;&gt;logic circuit&lt;/a&gt; with three inputs and three outputs, such that the outputs are the inverted inputs. You may use arbitrary many AND and OR gates, but at most two NOT gates&lt;/q&gt;.
 Although the characterisation of this problem as an &lt;a href=&#34;https://en.wikipedia.org/wiki/Satisfiability_modulo_theories&#34;&gt;SMT&lt;/a&gt; instance is straightforward, I found it necessary to reduce it to &lt;a href=&#34;https://en.wikipedia.org/wiki/Satisfiability&#34;&gt;SAT&lt;/a&gt; and incorporate further assumptions to achieve reasonable performance.
 This post illustrates said process, ranging from the original idea via a standard formulation of SAT-based logic synthesis to a problem-specific and more constrained instance.&lt;/p&gt;</description>
     </item>
