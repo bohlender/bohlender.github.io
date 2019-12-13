@@ -1462,7 +1462,7 @@ subgoals <span style="color:#f92672">=</span> to_cnf(goal)
 <p>Z3 provides <a href="http://theory.stanford.edu/~nikolaj/programmingz3.html#sec-tactics">tactics</a> that can be applied to a set of constraints.
 By applying <code>card2bv</code>, all occurring cardinality constraints will be reduced to propositional logic.
 The subsequent <code>tseitin-cnf</code> tactic brings the resulting constraints into <a href="https://en.wikipedia.org/wiki/Conjunctive_normal_form">conjunctive normal form</a> (CNF) &ndash; in fact they almost are in CNF already.
-The resulting constraints are then be output in the DIMACS format.</p>
+The resulting constraints can then be output in the DIMACS format.</p>
 <p>Although a SAT-based characterisation is a lot larger than its SMT-base counterpart, it is less complex and is typically solved in orders-of-magnitude less time.
 Feel free to experiment with <a href="gen_sat.py">the implementation</a>, or try to reconstruct the full adder circuit <a href="gfx/full_adder.svg">shown above</a> from the <a href="full_adder.cnf">generated SAT instance</a> and <a href="full_adder.log">the solution</a> found by a SAT solver.</p>
 <p>Still, the constraint that restricts the number of NOTs seems to make the SAT instance that characterises the introductory puzzle hard to solve.
