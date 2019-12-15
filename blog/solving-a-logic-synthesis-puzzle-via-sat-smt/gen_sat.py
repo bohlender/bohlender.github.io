@@ -80,12 +80,12 @@ def main():
     sum = lambda inputs: Xor(Xor(inputs[0], inputs[1]), inputs[2])
     carry = lambda inputs: Or(And(inputs[0], inputs[1]), And(Xor(inputs[0], inputs[1]), inputs[2]))
     outputs = [sum, carry]
-    # Original puzzle (possible with 22 gates)
+    # Original puzzle (possible with 19 gates)
     g0 = lambda inputs: Not(inputs[0])
     g1 = lambda inputs: Not(inputs[1])
     g2 = lambda inputs: Not(inputs[2])
     outputs = [g0, g1, g2]
-    dimacs = encode(3, outputs, 22)
+    dimacs = encode(3, outputs, 19)
     with open("dump.cnf", 'w') as writer:
         writer.write(dimacs)
 

@@ -50,19 +50,13 @@ def f_constraints(f):
         asserts.append(Or(gate_filters))
     if len(f) > 0:
         asserts.append(AtMost([is_not(gate) for gate in f] + [2]))
-
-    # Additional assumptions: f_i == NOT && f_{i+3} == NOT
-    not_position_constraints = []
-    for gate1, gate2 in zip(f, f[3:]):
-        not_position_constraints.append(And(is_not(gate1), is_not(gate2)))
-    asserts.append(Or(not_position_constraints))
     return asserts
 
 def encode(num_inputs, outputs, num_inner_gates):
     # Create variables (and values for inputs) for each x_i, given concrete inputs
     x = [[Bool("x{:d}{}".format(gate_idx, val)) for val in product(range(2), repeat=num_inputs)]
          for gate_idx in range(num_inputs + num_inner_gates)]
-    # Replace variables for inputs by corresponding constants
+    # Replace variables for inputs by concrete values
     for input_idx in range(num_inputs):
         for idx, bits in enumerate(product(range(2), repeat=num_inputs)):
             x[input_idx][idx] = BoolVal(bits[input_idx])
@@ -85,12 +79,12 @@ def encode(num_inputs, outputs, num_inner_gates):
 
 def main():
     print("Using {}".format(z3.get_full_version()))
-    # Original puzzle (possible with 22 gates)
+    # Original puzzle (possible with 19 gates)
     g0 = lambda inputs: Not(inputs[0])
     g1 = lambda inputs: Not(inputs[1])
     g2 = lambda inputs: Not(inputs[2])
     outputs = [g0, g1, g2]
-    dimacs = encode(3, outputs, 22)
+    dimacs = encode(3, outputs, 19)
     with open("dump.cnf", 'w') as writer:
         writer.write(dimacs)
 

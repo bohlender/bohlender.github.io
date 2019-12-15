@@ -327,7 +327,7 @@ essentially constraining how many $f_i$ may be interpreted as NOTs.</p>
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">66
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#75715e"># Original puzzle (possible with 22 gates)</span>
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#75715e"># Original puzzle (possible with 19 gates)</span>
 g0 <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> inputs: Not(inputs[<span style="color:#ae81ff">0</span>])
 g1 <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> inputs: Not(inputs[<span style="color:#ae81ff">1</span>])
 g2 <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> inputs: Not(inputs[<span style="color:#ae81ff">2</span>])
@@ -1470,101 +1470,14 @@ The resulting constraints can then be output in the DIMACS format.</p>
 <p>Although a SAT-based characterisation is a lot larger than its SMT-based counterpart, it is less complex and is typically solved in orders-of-magnitude less time.
 Feel free to experiment with <a href="gen_sat.py">the implementation</a>, or try to reconstruct the full adder circuit <a href="gfx/full_adder.svg">shown above</a> from the <a href="full_adder.cnf">generated SAT instance</a> and <a href="full_adder.log">the solution</a> found by a SAT solver.</p>
 <p>Still, the constraint that restricts the number of NOTs seems to make the SAT instance that characterises the introductory puzzle hard to solve.
-The next section proposes two additional assumptions that are rather weak but sufficient to alleviate the combinatorial explosion, and make the constraints solvable in reasonable time.</p>
+The next section proposes an additional assumption that is rather weak but sufficient to alleviate the combinatorial explosion, and make the constraints solvable in reasonable time.</p>
 <h2 id="solving-the-puzzle"><a href="#solving-the-puzzle" class="hanchor" ariaLabel="Anchor">Solving the Puzzle</a> </h2>
 <p>The constraints that we used so far did not make any assumptions that could disregard potential solutions to the puzzle, but merely formalised the provided information.
-To make the combinatorial explosion more manageable, we will now also add some assumptions that are <em>likely</em> to hold for the circuit, but may potentially disregard some solutions.</p>
-<p>First of all, if the puzzle allows the use of at most two NOTs, almost certainly both NOTs are necessary.
-It is also quite likely that if there is a solution, it can also be realised with both NOTs placed two gates apart, so the result of the first NOT can pass through all kinds of allowed gates (an AND and an OR) before reaching the second NOT.
-So there should be some $i$, such that both $f_i$ and $f_{i+3}$ are NOT gates.</p>
-<p>This is the first puzzle-specific assumption that is added to the generic characterisation:
-
-
-
-
-
-
-
-
-    
-
-
-    
-    
-
-
-
-
-    
-    
-        
-    
-
-    
-    
-
-    
-    
-
-    
-    
-
-    
-    
-
-
-
-
-    
-        
-    
-    
-
-    
-        
-    
-    
-
-    
-        
-    
-    
-
-    
-        
-    
-    
-
-    
-        
-    
-    
-
-<figure class="highlight-figure">
-    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">58
-</span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#75715e"># Additional assumptions: f_i == NOT &amp;&amp; f_{i+3} == NOT</span>
-not_position_constraints <span style="color:#f92672">=</span> []
-<span style="color:#66d9ef">for</span> gate1, gate2 <span style="color:#f92672">in</span> zip(f, f[<span style="color:#ae81ff">3</span>:]):
-    not_position_constraints<span style="color:#f92672">.</span>append(And(is_not(gate1), is_not(gate2)))
-asserts<span style="color:#f92672">.</span>append(Or(not_position_constraints))</code></pre></td></tr></table>
-</div>
-</div>
-    <figcaption>
-        <a href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_puzzle.py">gen_puzzle.py</a>
-    </figcaption>
-</figure></p>
-<p>The second assumption is a lot weaker and concerns the connections of the outputs.
-If there is a solution, it likely can be formulated so that the outputs are connected to the very last gates of the circuit.
-In particular, $g_2$ can certainly be computed independently, i.e. without referring to the value of $g_1$ or $g_0$.
-We can enforce these connections via:
+To make the combinatorial explosion more manageable, we will now incorporate an assumption that <em>likely</em> holds for the circuit, but may potentially disregard some solutions.</p>
+<p>Our assumption is rather weak and concerns the connections of the outputs to the inner gates.
+We assume that if there is a solution, it likely can be formulated so that the outputs are connected to the very last gates of the circuit.
+In particular, each goal $g_i$ can certainly be computed independently, i.e. without referring to the value of an other output $g_j$.
+We can enforce these connections by extending our <a href="gen_sat.py">generic SAT-based characterisation</a> with:
 
 
 
@@ -1628,7 +1541,7 @@ We can enforce these connections via:
         <a href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_puzzle.py">gen_puzzle.py</a>
     </figcaption>
 </figure></p>
-<p>With these additional constraints, it took an old i5-4690 CPU <a href="puzzle.log">about 15min</a> to solve the <a href="puzzle.cnf">corresponding SAT instance</a> with <strong>22 inner gates</strong>.
+<p>With these additional constraints, it took an old i5-4690 CPU <a href="puzzle.log">about 30min</a> to solve the <a href="puzzle.cnf">corresponding SAT instance</a> with <strong>19 inner gates</strong>.
 The synthesised circuit looks as follows:
 
 
@@ -1639,7 +1552,7 @@ The synthesised circuit looks as follows:
 
 <figure class="figure-outer">
     <figure class="figure-inner">
-        <img src="gfx/puzzle.svg"/> 
+        <img src="gfx/puzzle.svg" width="500px"/> 
             <figcaption>
                 Solution to puzzle
             </figcaption>
@@ -1648,10 +1561,11 @@ The synthesised circuit looks as follows:
 </figure>
 Since we only allow gates with fan-in 2, here, the NOT2 denotes a NOT on the second input.</p>
 <h2 id="do-try-this-at-home"><a href="#do-try-this-at-home" class="hanchor" ariaLabel="Anchor">Do Try This at Home!</a> </h2>
-<p>Although the SAT-based characterisation of logic synthesis turns out to be practical &ndash; especially when the artificial constraint on the number of gates is dropped &ndash; there is still room for improvement and experimentation.
+<p>Although the SAT-based characterisation of logic synthesis turns out to be <a href="https://people.eecs.berkeley.edu/~alanmi/publications/2018/date18_exact.pdf">common in practice</a> &ndash; especially without the artificial constraint on the number of gates &ndash; there is still room for improvement and experimentation.
 Here are some ideas that you might want to explore on your own (easiest first):</p>
 <ul>
 <li>Instead of relying on an external solver to solve the generated constraints, use the API to invoke the check programmatically.</li>
+<li>Does a solution to the riddle with less than 19 gates exist? Prove your hypothesis.</li>
 <li>Automate the interpretation of the solutions found by a solver as logic circuits, and plot them via <a href="https://en.wikipedia.org/wiki/DOT_(graph_description_language)">DOT</a>.</li>
 <li>Extend the characterisation to allow some composite gates.
 For example, I found that the <a href="https://puzzling.stackexchange.com/questions/9438/invert-three-inputs-with-two-not-gates">expected solution</a> has circuitry to decide whether more than one (or more than two) inputs are $\mathit{true}$.
@@ -1659,8 +1573,8 @@ Requiring the synthesis to feature such blocks may speed up the synthesis of the
 <li>Instead of characterising the circuit for a fixed number of gates, devise an incremental variant of SMT-based or SAT-based synthesis which incorporates one additional gate at a time (and checks satisfiability).
 It should be advantageous to have the solver reuse information established during checks with fewer gates.</li>
 </ul>
-<p>If you manage to solve the riddle without the domain-specific assumptions, or have any ideas how to do this more efficiently with SAT/SMT solving, please let me know.
-It might also be possible to solve this with the logic synthesis tools mentioned in <a href="https://people.eecs.berkeley.edu/~alanmi/publications/2018/date18_exact.pdf">the paper</a> that discusses the practicability of the SAT-based encoding we ended up with.</p>
+<p>If you manage to solve the riddle without the domain-specific assumption, or have any ideas how to do this more efficiently with SAT/SMT solving, please let me know.
+It might also be possible to solve this with the logic synthesis tools mentioned in <a href="https://people.eecs.berkeley.edu/~alanmi/publications/2018/date18_exact.pdf">the paper</a> that discusses the SAT-based encoding we ended up with.</p>
 <hr style="margin-top: 2em">
 <div class="links">
 
