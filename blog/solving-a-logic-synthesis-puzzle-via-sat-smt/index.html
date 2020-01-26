@@ -153,7 +153,7 @@ In other words, if there were a solution with $x_3=f_3(x_2,x_1)$, we would also 
 Instead, we restrict ourselves to a fixed number of gates which we can increase incrementally if the current number of gates turns out to be insufficient to synthesise the goal function $g_0$.
 Without loss of generality, the inputs of a new gate $f_{n+1}$ may be connected to preceding gates (and inputs) $x_0,\dots,x_n$ but not the other way around, e.g. $x_4$ may not be an input of $f_3$.
 This was the ad-hoc approach <a href="https://lukas-boersma.com/">my colleague</a> and I figured should work, so I started implementing it.</p>
-<h2 id="smtbased-logic-synthesis"><a href="#smtbased-logic-synthesis" class="hanchor" ariaLabel="Anchor">SMT-based Logic Synthesis</a> </h2>
+<h2 id="smt-based-logic-synthesis"><a href="#smt-based-logic-synthesis" class="hanchor" ariaLabel="Anchor">SMT-based Logic Synthesis</a> </h2>
 <p>Looking at the schematic from the introduction, characterising the logic synthesis problem boils down to:</p>
 <ol>
 <li>formulating how the outputs $g_i$ may be connected to the gates $x_0, \dots, x_n$, and</li>
@@ -997,7 +997,7 @@ The solution I get from Z3 describes the following circuit:
 <p>Unfortunately, the quantifiers, uninterpreted functions and cardinality constraints render the instance that characterises the introductory puzzle too difficult to be solved within several days.
 Therefore, in the next section, we reduce the characterisation to <a href="https://en.wikipedia.org/wiki/Propositional_calculus">propositional logic</a>, trading off the complexity of our constraints against a larger instance, and end up with a standard approach for SAT-based logic synthesis.
 While the SMT-based synthesis of a full adder may take a few seconds, the <a href="full_adder.cnf">corresponding SAT instance</a> will be <a href="full_adder.log">solvable in milliseconds</a>.</p>
-<h2 id="satbased-logic-synthesis"><a href="#satbased-logic-synthesis" class="hanchor" ariaLabel="Anchor">SAT-based Logic Synthesis</a> </h2>
+<h2 id="sat-based-logic-synthesis"><a href="#sat-based-logic-synthesis" class="hanchor" ariaLabel="Anchor">SAT-based Logic Synthesis</a> </h2>
 <p>To make our problem approachable via SAT solving, we must reformulate the constraints to be free of quantifiers and uninterpreted functions.
 The cardinality constraints are less of a problem since (i) many SAT solvers support them, and (ii) Z3 can also reduce them to propositional logic for us.
 <aside>
@@ -1116,7 +1116,7 @@ To get rid of $f_i$ but express the same semantics with the new variables, we ex
 \end{aligned}
  $$</div>
 <p>Applying this transformation to the clauses from $(6)$ leaves us with a SAT instance that is equivalent to a <a href="https://people.eecs.berkeley.edu/~alanmi/publications/2018/date18_exact.pdf">standard formulation</a> of SAT-based logic synthesis.</p>
-<h3 id="implementation1"><a href="#implementation1" class="hanchor" ariaLabel="Anchor">Implementation</a> </h3>
+<h3 id="implementation-1"><a href="#implementation-1" class="hanchor" ariaLabel="Anchor">Implementation</a> </h3>
 <p>Since <a href="gen_sat.py">the implementation</a> is mostly a refinement of the SMT instance generator, I will only touch on some aspects and refer to the implementation for details.</p>
 <p>The biggest difference to the SMT-based characterisation is that we introduced variables $x_{i,(0,0,0)},\dots,x_{i,(1,1,1)}$ and $f_{i,(0,0),\dots,f_{i,(1,1)}}$ to refer to the values of $x_i$ and $f_i$ for every possible input.
 Accordingly, the implementation now uses lists of lists for indexing all the variants of $x_i$ and $f_i$:
