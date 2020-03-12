@@ -1,0 +1,2525 @@
+<!DOCTYPE html>
+<html lang="en-gb">
+    <head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	
+	<link rel="stylesheet" href="/css/style.css">
+	<link rel="stylesheet" href="/css/perfundo.with-icons.min.css">
+	
+
+<link rel="stylesheet" href="/katex/katex.min.css" integrity="sha384-BdGj8xC2eZkQaxoQ8nSLefg4AV4/AwB3Fj+8SUSo7pnKP6Eoy18liIKTPn9oBYNG" >
+<script defer src="/katex/katex.min.js" integrity="sha384-JiKN5O8x9Hhs/UE5cT5AAJqieYlOZbGT3CHws/y97o3ty4R7/O5poG9F3JoiOYw1" ></script>
+<script defer src="/katex/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" 
+        onload="renderMathInElement(document.body, {
+        delimiters: [
+            {left: `$$`, right: `$$`, display: true},
+            {left: `$`, right: `$`, display: false},
+        ]
+    });"></script>
+	<link rel="alternate" type="application/rss+xml" href="https://bohlender.github.io/blog/index.xml" title="Dimitri Bohlender" />
+	
+	
+
+
+<meta property="og:title" content="Playing Hard Mastermind Games with a SAT-based AI" />
+<meta property="og:description" content="Back in the day, Mastermind was a popular two player code-breaking game, and many variations thereof still exist as both standalone games and puzzles within other games.
+Although it is difficult for a human player to make optimal guesses of the secret code, or at least guesses that do not conflict with the provided clues, the setting is usually simple enough for an AI to find such candidates via explicit exploration of the game tree.
+However, such approaches becomes unfeasible when the number of possibilities for secret codes grows into the millions.
+This post illustrates the problems, and how finding consistent candidates can be approached with SAT solving &ndash; yielding an AI that can handle orders-of-magnitude harder Mastermind instances than the standard approaches." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/" />
+<meta property="article:published_time" content="2020-03-12T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-03-08T16:12:02+01:00" />
+<meta property="og:site_name" content="Dimitri Bohlender" />
+
+<meta property="article:author" content="https://facebook.com/balddenimhero" />
+<meta property="article:publisher" content="https://facebook.com/balddenimhero" />
+<meta property="article:section" content="blog" />
+<meta property="article:tag" content="sat" />
+<meta property="article:tag" content="ai" />
+<meta property="article:tag" content="puzzle" />
+
+	
+	<title>Playing Hard Mastermind Games with a SAT-based AI | Dimitri Bohlender</title>
+</head>
+    <body class="blog">
+        <header>
+	<nav>
+		<input type="checkbox" id="show-menu" role="button">
+		<ul class="dropdown">
+			<label for="show-menu" class="show-menu"><img class="icon" src="/gfx/fa-icons.svg#bars" /></label>
+			<li><a href="/">Home</a></li>
+			<li><a href="/cv/">CV</a></li>
+			<li><a href="/projects/">Projects</a></li>
+			<li><a href="/blog/">Blog</a></li>
+			<li><a href="/photography/">Photography</a></li>
+		</ul>
+	</nav>
+</header>
+        <div class="container">
+        <div class="content">
+<div class="banner">
+	
+    
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="443" height="350" viewBox="0 0 443 350">
+        <image xlink:href="/gfx/cup-rss.png" width="443" height="350"/>
+        <a href="https://bohlender.github.io/blog/index.xml" target="_top">
+            <circle style="fill: transparent" cx="187" cy="165" r="110"/>
+        </a>
+    </svg>
+</div>
+<div class="notepad-wrapper">
+	
+	<div class="notepad">
+		<main>
+		<article>
+			<header>
+				
+				<h1>Playing Hard Mastermind Games with a SAT-based AI</h1>
+				<div class="metadata">
+    <time datetime="2020-03-12">March 12, 2020</time>
+    <ul>
+        <li><a class="tag-block" href="/tags/sat">sat</a></li>
+        <li><a class="tag-block" href="/tags/ai">ai</a></li>
+        <li><a class="tag-block" href="/tags/puzzle">puzzle</a></li>
+    </ul>
+</div>
+			</header>
+			<p>Back in the day, <a href="https://en.wikipedia.org/wiki/Mastermind_(board_game)">Mastermind</a> was a popular two player code-breaking game, and many <a href="https://en.wikipedia.org/wiki/Mastermind_(board_game)#Variations">variations thereof</a> still exist as both standalone games and puzzles within other games.
+Although it is difficult for a human player to make <em>optimal guesses</em> of the secret code, or at least guesses that do not conflict with the provided clues, the setting is usually simple enough for an AI to find such candidates via explicit exploration of the <a href="https://en.wikipedia.org/wiki/Game_tree">game tree</a>.</p>
+<p>However, such approaches becomes unfeasible when the number of possibilities for secret codes grows into the millions.
+This post illustrates the problems, and how finding consistent candidates can be approached with <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">SAT</a> solving &ndash; yielding an AI that can handle orders-of-magnitude harder Mastermind instances than the standard approaches.</p>
+<h2 id="introduction"><a href="#introduction" class="hanchor" ariaLabel="Anchor">Introduction</a> </h2>
+<p>Every now and then, my friends and I gather to play <a href="https://en.wikipedia.org/wiki/Mansions_of_Madness">Mansions of Madness</a> &ndash; a cooperative boardgame.
+In line with its Lovecraftian setting, the game is often unforgiving so we try to optimise our every move.
+Besides the core gameplay, solving various puzzles is often needed to advance.
+One of these puzzles is in fact <a href="https://boardgamegeek.com/image/3742103/mansions-madness-second-edition">a Mastermind variant</a>, and, as <a href="https://www.boardgamegeek.com/thread/1653724/code-puzzle-absurdity-almost-game-breaking">some players argue</a>, the instances may be rather difficult to reason about &ndash; resulting in wasted turns and decreased chance of winning the scenario.
+This is how the problem of making educated guesses in Mastermind piqued my interest.</p>
+<h3 id="rules-of-mastermind"><a href="#rules-of-mastermind" class="hanchor" ariaLabel="Anchor">Rules of Mastermind</a> </h3>
+<p>In the classic Mastermind game, a <em>secret code</em> $s$ is a row of four pegs, where each peg is of one of six colours.
+For example given the colours
+$
+\textcolor{#272822}●
+\textcolor{#f92672}●
+\textcolor{#a6e22e}●
+\textcolor{#f4bf75}●
+\textcolor{#66d9ef}●
+\textcolor{#ae81ff}●
+$,
+the following sequence would be a possible secret code:</p>
+<p>$$\tag{1}
+s=\textcolor{#a6e22e}●\textcolor{#272822}{●●}\textcolor{#f92672}{●}
+$$</p>
+<p>This secret is designed by and only known to the <em>codemaker</em>.
+In every round, the <em>codebreaker</em> makes a guess, and receives a pair of numbers as feedback/clue from the codemaker:</p>
+<ol>
+<li>The number of <em>full matches</em> states how many of the pegs coincide with the secret.</li>
+<li>The number of <em>partial</em> or <em>symbol matches</em> states how many additional full matches can be achieved by reordering the pegs.</li>
+</ol>
+<p>For example let $s$ be the secret from $(1)$ and $g=\textcolor{#a6e22e}{●}\textcolor{#f92672}{●●}\textcolor{#ae81ff}{●}$ be the codebreaker&rsquo;s guess.
+The codemaker&rsquo;s feedback to that guess would be $(1, 1)$, since</p>
+<ul>
+<li>only one peg matches exactly (the green one in the first position)</li>
+<li>even though there are two pink pegs, only one of them can become a full match if put in the last position &ndash; we can&rsquo;t put both there</li>
+</ul>
+<p>The following code computes such feedback in two phases.
+First, we get rid of all full matches from both the <code>guess</code> and <code>secret</code>, and then try to match the remaining symbols:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">eval_guess</span>(secret, guess):
+    <span style="color:#75715e"># Count full matches (position &amp; symbol)</span>
+    guess_rest <span style="color:#f92672">=</span> [a <span style="color:#66d9ef">for</span> (a, b) <span style="color:#f92672">in</span> zip(guess, secret) <span style="color:#66d9ef">if</span> a <span style="color:#f92672">!=</span> b]
+    secret_rest <span style="color:#f92672">=</span> [b <span style="color:#66d9ef">for</span> (a, b) <span style="color:#f92672">in</span> zip(guess, secret) <span style="color:#66d9ef">if</span> a <span style="color:#f92672">!=</span> b]
+    full_match_count <span style="color:#f92672">=</span> len(guess) <span style="color:#f92672">-</span> len(guess_rest)
+
+    <span style="color:#75715e"># Count partial matches (symbol only)</span>
+    symbol_match_count <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+    <span style="color:#66d9ef">for</span> symbol <span style="color:#f92672">in</span> guess_rest:
+        <span style="color:#66d9ef">try</span>:
+            secret_rest<span style="color:#f92672">.</span>remove(symbol)
+            symbol_match_count <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>
+        <span style="color:#66d9ef">except</span> <span style="color:#a6e22e">ValueError</span>:
+            <span style="color:#66d9ef">pass</span>
+    <span style="color:#66d9ef">return</span> Feedback(full_match_count, symbol_match_count)</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
+    </figcaption>
+</figure></p>
+<h3 id="example-playthrough"><a href="#example-playthrough" class="hanchor" ariaLabel="Anchor">Example Playthrough</a> </h3>
+<p>A full playthrough of classic Mastermind, i.e. with codes of length four, and six colours/symbols
+$\Sigma=\{
+\textcolor{#272822}●,
+\textcolor{#f92672}●,
+\textcolor{#a6e22e}●,
+\textcolor{#f4bf75}●,
+\textcolor{#66d9ef}●,
+\textcolor{#ae81ff}●
+\}$
+to choose from, may look as follows.</p>
+<p>The game starts with the codemaker picking a secret $s\in\Sigma^4$.
+To keep things simple, let this be the familiar combination $s=\textcolor{#a6e22e}●\textcolor{#272822}{●●}\textcolor{#f92672}{●}$ from $(1)$.
+Without questioning the reasoning of the codebreaker, the following table outlines possible guesses and received feedback of every round.</p>
+<table>
+<thead>
+<tr>
+<th align="center">Round</th>
+<th align="center">Guess</th>
+<th align="center">Feedback</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">1</td>
+<td align="center">$\textcolor{#272822}●\textcolor{#ae81ff}{●●}\textcolor{#66d9ef}{●}$</td>
+<td align="center">$(0, 1)$</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">$\textcolor{#f92672}●\textcolor{#f4bf75}{●}\textcolor{#272822}{●●}$</td>
+<td align="center">$(1, 2)$</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td align="center">$\textcolor{#f4bf75}●\textcolor{#a6e22e}{●}\textcolor{#272822}{●}\textcolor{#f92672}{●}$</td>
+<td align="center">$(2, 1)$</td>
+</tr>
+<tr>
+<td align="center">4</td>
+<td align="center">$\textcolor{#a6e22e}●\textcolor{#272822}{●●}\textcolor{#f92672}{●}$</td>
+<td align="center">$(4, 0)$</td>
+</tr>
+</tbody>
+</table>
+<p>This is in fact the log of an actual game played by the SAT-based AI that we will end up with at the end of the post.</p>
+<p>The corresponding game loop amounts to few lines of code.
+It requires a potential player or AI to be able to give a first guess at the beginning of the game (<code>initial_guess()</code>), and incorporate feedback for subsequent guesses (<code>make_guess(feedback)</code>):
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">58
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">59
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">60
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">61
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">62
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">63
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">64
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">65
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">66
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">67
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">68
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">69
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">70
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">71
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Game</span>:
+    <span style="color:#66d9ef">def</span> __init__(self, secret, player):
+        self<span style="color:#f92672">.</span>secret <span style="color:#f92672">=</span> secret
+        self<span style="color:#f92672">.</span>player <span style="color:#f92672">=</span> player
+
+    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">run</span>(self):
+        guess <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>player<span style="color:#f92672">.</span>initial_guess()
+        num_guesses <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>
+
+        <span style="color:#75715e"># Guess-Feedback loop until exact match is guessed</span>
+        <span style="color:#66d9ef">while</span> True:
+            feedback <span style="color:#f92672">=</span> eval_guess(self<span style="color:#f92672">.</span>secret, guess)
+            <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;{} --&gt; {}&#34;</span><span style="color:#f92672">.</span>format(guess, feedback))
+            <span style="color:#66d9ef">if</span> feedback<span style="color:#f92672">.</span>full_matches <span style="color:#f92672">==</span> NUM_POSITIONS:
+                <span style="color:#66d9ef">break</span>
+            guess <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>player<span style="color:#f92672">.</span>make_guess(feedback)
+            num_guesses <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>
+        <span style="color:#66d9ef">return</span> guess, num_guesses</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
+    </figcaption>
+</figure></p>
+<h3 id="wheres-the-difficulty"><a href="#wheres-the-difficulty" class="hanchor" ariaLabel="Anchor">Where&rsquo;s the Difficulty?</a> </h3>
+<p>With four positions and six colours there are only $6^4=1\,296$ possible combinations to choose from, so keeping the set of all combinations in memory and working with it is perfectly feasible when solving classic Mastermind instances.
+However, there is nothing hindering us from using even longer sequences or introducing further colours.
+The <strong>code length</strong> $|s|$ and <strong>set of colours/symbols</strong> $\Sigma$ are exactly the parameters that are typically varied to arrive at the different <a href="https://en.wikipedia.org/wiki/Mastermind_(board_game)#Variations">variations of Mastermind</a>.</p>
+<p>For example, <em>Grand Mastermind</em> keeps the secret length of the original but uses $25$ symbols ($5$ shapes, $5$ colours) which allows for $25^4=390\,625$ different codes.
+Overall, most Mastermind variants feature a number of combinations in this order of magnitude (thousands), rendering them amenable to analysis via methods that explicitly explore the game tree.
+At the time of writing, <a href="https://en.wikipedia.org/wiki/Mastermind_(board_game)#Variations">the Wikipedia page</a> lists only one exception: <em>Mastermind Secret Search</em> uses $26$ letters as symbols to form words up to a length of six characters, which gives rise to $26^6=308\,915\,776$ possible secrets.</p>
+<aside>
+    
+    <p>Keep in mind that Mastermind games are designed to be played by humans, and mostly feature reasonably small numbers of combinations.
+To alleviate the difficulty of playing the variations with large numbers of combinations, such games resort to additional constraints or more restrictive feedback.</p>
+<p><em>Mastermind Secret Search</em> limits the secret codes to valid words and provides separate feedback for each letter, stating whether the secret letter occurs earlier or later in the alphabet.</p>
+
+    
+</aside>
+<p>But how to approach playing Mastermind variants with $6^{16}=2\,821\,109\,907\,456$ or more combinations without resorting to blind guessing?
+Just to give you an idea: even iterating through all these combinations will take <q>forever</q> and is out of question for a game AI.
+Therefore, even when not aiming for optimal play but merely reasonable guesses, explicit methods won&rsquo;t get us far.
+However, they work well for most practical Mastermind variants and are a good place to start getting a feel for the problem domain.</p>
+<h2 id="explicit-approaches"><a href="#explicit-approaches" class="hanchor" ariaLabel="Anchor">Explicit Approaches</a> </h2>
+<p>In contrast to <em>symbolic</em> methods for search and reachability checking, which work with implicit representations of state sets, <em>explicit</em> methods actually construct each state (here: secret codes) separately and store each in an accessible form in memory.</p>
+<aside>
+    <p>
+    I&rsquo;ve found this <a href="http://www.philos.rug.nl/~barteld/master.pdf">overview of Mastermind strategies</a> particularly helpful to get an understanding of the (explicit) standard approaches and their tradeoffs.
+    </p>
+</aside>
+<p>In the following implementations, we represent secrets as tuples of integers.
+That is, the symbol set
+$\Sigma=\{
+\textcolor{#272822}●,
+\textcolor{#f92672}●,
+\textcolor{#a6e22e}●,
+\textcolor{#f4bf75}●,
+\textcolor{#66d9ef}●,
+\textcolor{#ae81ff}●
+\}$
+is treated as $\Sigma=\{0,1,2,3,4,5\}$, and the secret $s=\textcolor{#a6e22e}●\textcolor{#272822}{●●}\textcolor{#f92672}{●}$ is just the tuple $s=(2,0,0,1)$ to us.
+Given $|s|$ and $|\Sigma|$, we can now easily enumerate all possible secrets with Python&rsquo;s <a href="https://docs.python.org/3.8/library/itertools.html#itertools.product"><code>product</code></a> function:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+
+
+
+    
+    
+
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">all_secrets</span>():
+    <span style="color:#66d9ef">return</span> product(range(NUM_SYMBOLS), repeat<span style="color:#f92672">=</span>NUM_POSITIONS)</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
+    </figcaption>
+</figure></p>
+<h3 id="refinement-of-consistent-candidates"><a href="#refinement-of-consistent-candidates" class="hanchor" ariaLabel="Anchor">Refinement of Consistent Candidates</a> </h3>
+<p>The simplest approach to playing Mastermind is probably to iterate over <code>all_secrets()</code> and commit each element, since we must eventually encounter the code chosen by the codemaker.
+However, this approach completely ignores the feedback received from the codemaker, and will obviously lead to many wasted rounds for the codebreaker.</p>
+<p>The next best thing we can try is to avoid making guesses that are <em>inconsistent</em> with the accumulated feedback.
+For this, we must merely check that whatever we assume <code>secret</code> to be, the following function returns <code>True</code> for every pair of guess and feedback received from previous rounds:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+
+
+
+    
+    
+
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">is_consistent</span>(secret, guess, feedback):
+    <span style="color:#66d9ef">return</span> feedback <span style="color:#f92672">==</span> eval_guess(secret, guess)</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
+    </figcaption>
+</figure></p>
+<p>This is exactly the approach suggested by <a href="https://doi.org/10.1145/1056635.1056637">Shapiro</a> in 1983, and a naïve implementation is provided with <code>ExplicitConsistentAi</code>:</p>
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">82
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">83
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">84
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">85
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">86
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">87
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">88
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">89
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">90
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">91
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">92
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">93
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">94
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">95
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ExplicitConsistentAi</span>(Player):
+    <span style="color:#66d9ef">def</span> __init__(self):
+        self<span style="color:#f92672">.</span>last_guess <span style="color:#f92672">=</span> None
+        self<span style="color:#f92672">.</span>candidates <span style="color:#f92672">=</span> list(all_secrets())
+
+    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">initial_guess</span>(self):
+        self<span style="color:#f92672">.</span>last_guess <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>candidates[<span style="color:#ae81ff">0</span>]
+        <span style="color:#66d9ef">return</span> self<span style="color:#f92672">.</span>last_guess
+
+    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">make_guess</span>(self, feedback):
+        self<span style="color:#f92672">.</span>candidates <span style="color:#f92672">=</span> [c <span style="color:#66d9ef">for</span> c <span style="color:#f92672">in</span> self<span style="color:#f92672">.</span>candidates
+                           <span style="color:#66d9ef">if</span> is_consistent(c, self<span style="color:#f92672">.</span>last_guess, feedback)
+                           <span style="color:#f92672">and</span> c <span style="color:#f92672">!=</span> self<span style="color:#f92672">.</span>last_guess]
+        <span style="color:#66d9ef">return</span> self<span style="color:#f92672">.</span>initial_guess()</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
+    </figcaption>
+</figure>
+<p><code>self.candidates</code> stores all candidates that are consistent with the received feedback.
+Prior to the first guess there is no feedback, so initially all possible secrets are consistent.
+Although the implementation always returns the first element, there is nothing wrong with picking a different one.</p>
+<p>Unless a guess happens to match the secret exactly, we will receive feedback $f$ that renders some elements of <code>self.candidates</code> inconsistent with $f$.
+Therefore, both these candidates and the last (wrong) guess are removed from <code>self.candidates</code>.</p>
+<p>Although the approach does not result in optimal play, and many instances can be won in less turns, it is computationally cheap and solves a classic Mastermind instance in $5.765$ turns on average.
+This is surprisingly <a href="http://www.philos.rug.nl/~barteld/master.pdf">close to the theoretical minimum</a> of $4.34$ turns.</p>
+<h3 id="lazy-enumeration-of-consistent-candidates"><a href="#lazy-enumeration-of-consistent-candidates" class="hanchor" ariaLabel="Anchor">Lazy Enumeration of Consistent Candidates</a> </h3>
+<p>A downside of the above method is that it builds and keeps a list of all consistent candidates in memory.
+Since the number of possible secrets grows exponentially in the admissible length of secrets, this may already hinder us from solving slightly harder Mastermind variations, e.g. with $6^8$ possible secrets.</p>
+<p><code>LazyExplicitConsistentAi</code> is a more practical implementation of the previous approach.
+It enumerates the consistent combinations but only needs one candidate to be explicitly present in memory at a time, which results in a small memory footprint:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">136
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">137
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">138
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">139
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">140
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">141
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">142
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">143
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">144
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">145
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">146
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">147
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">148
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">149
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">LazyExplicitConsistentAi</span>(Player):
+    <span style="color:#66d9ef">def</span> __init__(self):
+        self<span style="color:#f92672">.</span>guesses <span style="color:#f92672">=</span> list()
+        self<span style="color:#f92672">.</span>feedbacks <span style="color:#f92672">=</span> list()
+        self<span style="color:#f92672">.</span>candidates <span style="color:#f92672">=</span> (c <span style="color:#66d9ef">for</span> c <span style="color:#f92672">in</span> all_secrets()
+                           <span style="color:#66d9ef">if</span> is_consistent_with_history(c, self<span style="color:#f92672">.</span>guesses, self<span style="color:#f92672">.</span>feedbacks))
+
+    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">initial_guess</span>(self):
+        self<span style="color:#f92672">.</span>guesses<span style="color:#f92672">.</span>append(next(self<span style="color:#f92672">.</span>candidates))
+        <span style="color:#66d9ef">return</span> self<span style="color:#f92672">.</span>guesses[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]
+
+    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">make_guess</span>(self, feedback):
+        self<span style="color:#f92672">.</span>feedbacks<span style="color:#f92672">.</span>append(feedback)
+        <span style="color:#66d9ef">return</span> self<span style="color:#f92672">.</span>initial_guess()</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
+    </figcaption>
+</figure></p>
+<p>Unlike the previous approach, which incrementally refines the set of candidates w.r.t. the latest feedback, a lazily generated candidate is checked w.r.t. all of the received feedback:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">is_consistent_with_history</span>(secret, guesses, feedbacks):
+    <span style="color:#66d9ef">for</span> guess, feedback <span style="color:#f92672">in</span> zip(guesses, feedbacks):
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> is_consistent(secret, guess, feedback):
+            <span style="color:#66d9ef">return</span> False
+    <span style="color:#66d9ef">return</span> True</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
+    </figcaption>
+</figure></p>
+<h3 id="minimax-based-guessing"><a href="#minimax-based-guessing" class="hanchor" ariaLabel="Anchor">Minimax-based Guessing</a> </h3>
+<p>Since my original motivation for looking into the topic was to learn how to play the Mastermind games in <a href="https://en.wikipedia.org/wiki/Mansions_of_Madness">Mansions of Madness</a> optimally, I feel like I should outline how to do this, too.
+Even though the central topic of this post is the (symbolic) computation of consistent guesses for hard Mastermind instances.</p>
+<p>Instead of just picking some consistent candidate, one can also analyse how promising the various candidates are and pick the <q>best</q> one &ndash; depending on some heuristic or notion of quality.</p>
+<p>The first and probably most popular way for picking a &ldquo;good&rdquo; candidate was suggested by <a href="https://www.cs.uni.edu/~wallingf/teaching/cs3530/resources/knuth-mastermind.pdf">Knuth</a> in 1977.
+The general idea is that the best guess should minimise the set of consistent candidates &ndash; no matter the feedback.
+By assuming the least helpful feedback to be returned for each guess, and finding the (not necessarily consistent) candidate in this setting that will reduce the set of consistent candidates the most, Knuth effectively implements a shallow <a href="https://en.wikipedia.org/wiki/Minimax">Minimax</a> rule.
+While a tree-like illustration is most helpful for Minimax on longer games, I found the table-oriented argument from <a href="http://www.philos.rug.nl/~barteld/master.pdf">the overview</a> to be more apt in the case of Mastermind.</p>
+<p>Consider committing some candidate $c$ and, in turn, receiving some feedback $f$.
+The following table illustrates the possible outcomes depending on the chosen $c$ and the codemaker&rsquo;s feedback $f$ for the very <em>first guess</em>:</p>
+<table>
+<thead>
+<tr>
+<th align="center"></th>
+<th align="center"> $(0,0,0,0)$ </th>
+<th align="center"> $(0,0,0,1)$ </th>
+<th align="center"> $(0,0,1,1)$ </th>
+<th align="center"> $\dots$ </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">$(0,0)$</td>
+<td align="center">$625$</td>
+<td align="center">$256$</td>
+<td align="center">$256$</td>
+<td align="center">$\dots$</td>
+</tr>
+<tr>
+<td align="center">$(0,1)$</td>
+<td align="center">$0$</td>
+<td align="center">$308$</td>
+<td align="center">$256$</td>
+<td align="center">$\dots$</td>
+</tr>
+<tr>
+<td align="center">$(0,2)$</td>
+<td align="center">$0$</td>
+<td align="center">$61$</td>
+<td align="center">$96$</td>
+<td align="center">$\dots$</td>
+</tr>
+<tr>
+<td align="center">$(0,3)$</td>
+<td align="center">$0$</td>
+<td align="center">$0$</td>
+<td align="center">$16$</td>
+<td align="center">$\dots$</td>
+</tr>
+<tr>
+<td align="center">$(0,4)$</td>
+<td align="center">$0$</td>
+<td align="center">$0$</td>
+<td align="center">$1$</td>
+<td align="center">$\dots$</td>
+</tr>
+<tr>
+<td align="center">$(1,0)$</td>
+<td align="center">$500$</td>
+<td align="center">$317$</td>
+<td align="center">$256$</td>
+<td align="center">$\dots$</td>
+</tr>
+<tr>
+<td align="center">$(1,1)$</td>
+<td align="center">$0$</td>
+<td align="center">$156$</td>
+<td align="center">$208$</td>
+<td align="center">$\dots$</td>
+</tr>
+<tr>
+<td align="center">$(1,2)$</td>
+<td align="center">$0$</td>
+<td align="center">$27$</td>
+<td align="center">$36$</td>
+<td align="center">$\dots$</td>
+</tr>
+<tr>
+<td align="center">$(1,3)$</td>
+<td align="center">$0$</td>
+<td align="center">$0$</td>
+<td align="center">$0$</td>
+<td align="center">$\dots$</td>
+</tr>
+<tr>
+<td align="center">$(2,0)$</td>
+<td align="center">$150$</td>
+<td align="center">$123$</td>
+<td align="center">$114$</td>
+<td align="center">$\dots$</td>
+</tr>
+<tr>
+<td align="center">$(2,1)$</td>
+<td align="center">$0$</td>
+<td align="center">$24$</td>
+<td align="center">$32$</td>
+<td align="center">$\dots$</td>
+</tr>
+<tr>
+<td align="center">$(2,2)$</td>
+<td align="center">$0$</td>
+<td align="center">$3$</td>
+<td align="center">$4$</td>
+<td align="center">$\dots$</td>
+</tr>
+<tr>
+<td align="center">$(3,0)$</td>
+<td align="center">$20$</td>
+<td align="center">$20$</td>
+<td align="center">$20$</td>
+<td align="center">$\dots$</td>
+</tr>
+<tr>
+<td align="center">$(4,0)$</td>
+<td align="center">$1$</td>
+<td align="center">$1$</td>
+<td align="center">$1$</td>
+<td align="center">$\dots$</td>
+</tr>
+</tbody>
+</table>
+<p>For each possible guess, there is a column which states the sizes of the resulting sets of consistent candidates for each possible feedback.
+To make it more clear, consider picking $c=(0,0,0,0)$ for the first guess.
+The worst that could happen next would be receiving the feedback $(0,0)$, since this would still leave us with a set of $625$ candidates that are consistent with the feedback.
+In contrast, the best feedback would clearly be $(4,0)$, as this would imply that our guess was equal to the secret code and we just won.</p>
+<aside>
+    <p>
+    Due to symmetry and the lack of feedback, there is actually no need to enumerate all possible secrets prior to the first guess.
+It is sufficient to consider $(0,0,0,0)$, $(0,0,0,1)$, $(0,0,1,1)$, $(0,0,1,2)$ and $(0,1,2,3)$ to cover all unique columns.
+    </p>
+</aside>
+<p>To develop the idea further, finding the <q>best</q> guess amounts to constructing such a table, identifying the worst case of each column, and picking the column/candidate with the smallest worst case.
+According to the provided table, <em>a</em> best initial guess would be $(0,0,1,1)$, which guarantees to bring the set of candidates down to a size of at most $256$.
+<code>ExplicitMinimaxAi</code> implements this method to determine the best guess:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">98
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">99
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">100
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">101
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">102
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">103
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">104
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">105
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">106
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">107
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">108
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">109
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">110
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">111
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">112
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">113
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">114
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">115
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">116
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">117
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">118
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">119
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">120
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">121
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">122
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">123
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">124
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">125
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">126
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">127
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">128
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">129
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">130
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">131
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">132
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">133
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ExplicitMinimaxAi</span>(Player):
+    <span style="color:#66d9ef">def</span> __init__(self):
+        self<span style="color:#f92672">.</span>candidates <span style="color:#f92672">=</span> list(all_secrets())
+        self<span style="color:#f92672">.</span>not_candidates <span style="color:#f92672">=</span> list()
+        self<span style="color:#f92672">.</span>guesses <span style="color:#f92672">=</span> list()
+
+    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">initial_guess</span>(self):
+        <span style="color:#75715e"># Pick the (not necessarily consistent) candidate with the best worst feedback</span>
+        <span style="color:#75715e"># w.r.t. the size of the set of consistent candidates (smaller = better)</span>
+        not_tried_secrets <span style="color:#f92672">=</span> (c <span style="color:#66d9ef">for</span> c <span style="color:#f92672">in</span> chain(self<span style="color:#f92672">.</span>candidates, self<span style="color:#f92672">.</span>not_candidates)
+                             <span style="color:#66d9ef">if</span> c <span style="color:#f92672">not</span> <span style="color:#f92672">in</span> self<span style="color:#f92672">.</span>guesses)
+
+        best_c <span style="color:#f92672">=</span> None
+        best_size <span style="color:#f92672">=</span> math<span style="color:#f92672">.</span>inf
+        <span style="color:#66d9ef">for</span> c <span style="color:#f92672">in</span> not_tried_secrets:
+            <span style="color:#75715e"># Partition consistent candidates by feedback</span>
+            feedback_occs <span style="color:#f92672">=</span> {f: <span style="color:#ae81ff">0</span> <span style="color:#66d9ef">for</span> f <span style="color:#f92672">in</span> all_feedbacks()}
+            <span style="color:#66d9ef">for</span> s <span style="color:#f92672">in</span> self<span style="color:#f92672">.</span>candidates:
+                f <span style="color:#f92672">=</span> eval_guess(s, c)
+                feedback_occs[f] <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>
+
+            <span style="color:#75715e"># Find worst feedback for this c</span>
+            max_size <span style="color:#f92672">=</span> max(feedback_occs<span style="color:#f92672">.</span>values())
+
+            <span style="color:#75715e"># Identify the c that has the best worst feedback</span>
+            <span style="color:#66d9ef">if</span> max_size <span style="color:#f92672">&lt;</span> best_size:
+                best_size <span style="color:#f92672">=</span> max_size
+                best_c <span style="color:#f92672">=</span> c
+
+        self<span style="color:#f92672">.</span>guesses<span style="color:#f92672">.</span>append(best_c)
+        <span style="color:#66d9ef">return</span> self<span style="color:#f92672">.</span>guesses[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]
+
+    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">make_guess</span>(self, feedback):
+        self<span style="color:#f92672">.</span>not_candidates<span style="color:#f92672">.</span>extend(c <span style="color:#66d9ef">for</span> c <span style="color:#f92672">in</span> self<span style="color:#f92672">.</span>candidates <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> is_consistent(c, self<span style="color:#f92672">.</span>guesses[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>], feedback))
+        self<span style="color:#f92672">.</span>candidates <span style="color:#f92672">=</span> [c <span style="color:#66d9ef">for</span> c <span style="color:#f92672">in</span> self<span style="color:#f92672">.</span>candidates <span style="color:#66d9ef">if</span> is_consistent(c, self<span style="color:#f92672">.</span>guesses[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>], feedback)]
+        <span style="color:#66d9ef">return</span> self<span style="color:#f92672">.</span>initial_guess()</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
+    </figcaption>
+</figure></p>
+<p>Note that the best move may even be to gather further information and purposefully make a guess that is inconsistent with the received feedback.
+However, if there is both a consistent and an inconsistent candidate that are <q>best</q>, one should of course prefer the consistent one &ndash; it might match the secret after all.</p>
+<p>The Minimax-based approach manages to solve each classic Mastermind instance within five guesses, and needs $4.476$ rounds on average.
+Unfortunately, the runtime complexity of this and similar methods that optimise rigorously is quadratic in the number of candidates.
+Considering that even iterating over all possible secrets of a hard Mastermind instance takes too long for a game AI, aiming for optimal guesses is quite a stretch.</p>
+<h2 id="sat-based-approach"><a href="#sat-based-approach" class="hanchor" ariaLabel="Anchor">SAT-based Approach</a> </h2>
+<p>So far we&rsquo;ve seen that the Minimax-based approach is well-suited for Mastermind instances with small numbers of possible secrets, and that the lazy enumeration of consistent candidates is not optimal, but cheaper to compute, and on average not much worse.
+However, despite the small memory footprint, the core problem is that enumerative methods don&rsquo;t scale to larger Mastermind instances.</p>
+<p>It would be nice if we could at least manage to compute consistent candidates for the hard instances, but even this problem <a href="https://arxiv.org/abs/cs/0512049">is known</a> to be <a href="https://en.wikipedia.org/wiki/NP-complete">NP-complete</a>.
+Luckily, we can reduce the problem to another NP-complete problem &ndash; the <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">Boolean satisfiability problem (SAT)</a> &ndash; and leverage the highly-tuned solvers existing for it.</p>
+<p>All we have to do is devise a logical characterisation of the candidates that are consistent with the feedback received so far and use a SAT solver to acquire such a candidate.
+Let&rsquo;s see what kind of variables and constraints we need for this.</p>
+<h3 id="encoding-the-symbol-mapping"><a href="#encoding-the-symbol-mapping" class="hanchor" ariaLabel="Anchor">Encoding the Symbol Mapping</a> </h3>
+<p>Since we want to guess some secret $s$, we first of all need variables that indicate which symbol occurs at which position.
+To this end, we introduce the Boolean variables:
+$$s_{\mathit{pos},\mathit{sym}}$$
+where $\mathit{pos}\in \{0,\dots,|s|-1\}, \mathit{sym}\in\Sigma$.</p>
+<p>The intended semantics is that an assignment $s_{1,2}=\mathit{true}$ denotes symbol $2$ to be at index $1$ of $s$.
+However, since there are no constraints yet, a solver might just as well choose $s_{1,2}$ and $s_{1,3}$ to be $\mathit{true}$, which suggest both $2$ and $3$ to be at index $1$ of the secret.</p>
+<p>To characterise that each position of the tuple $s$ has <strong>exactly one</strong> symbol, we need add an according <em>cardinality constraint</em> for each position.
+Assuming the classic Mastermind setting, i.e. $|s|=4$ and $|\Sigma|=6$, we add the constraints:</p>
+<div>$$ 
+\begin{aligned}
+s_{0,0} + s_{0,1} + s_{0,2} + s_{0,3} + s_{0,4} + s_{0,5} &= 1,\\
+s_{1,0} + s_{1,1} + s_{1,2} + s_{1,3} + s_{1,4} + s_{1,5} &= 1,\\
+s_{2,0} + s_{2,1} + s_{2,2} + s_{2,3} + s_{2,4} + s_{2,5} &= 1,\\
+s_{3,0} + s_{3,1} + s_{3,2} + s_{3,3} + s_{3,4} + s_{3,5} &= 1\\
+\end{aligned}
+ $$</div>
+<p>If we were to query the satisfiability of our SAT instance now, we would get a satisfying assignment with four of the $s_{\mathit{pos},\mathit{sym}}$ variables set to $\mathit{true}$ &ndash; one for each $\mathit{pos}$.</p>
+<p>Using the Python bindings for <a href="https://github.com/Z3Prover/z3/">Z3</a> &ndash; a popular solver for SAT and <a href="https://en.wikipedia.org/wiki/SMT_solver">SMT</a> instances &ndash; the initialisation of <code>SymbolicConsistentAi</code> creates the discussed variables and constraints:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">152
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">153
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">154
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">155
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">156
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">157
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">158
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">159
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">160
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">161
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">162
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">163
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">164
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">SymbolicConsistentAi</span>(Player):
+    <span style="color:#66d9ef">def</span> __init__(self):
+        self<span style="color:#f92672">.</span>last_guess <span style="color:#f92672">=</span> None
+        self<span style="color:#f92672">.</span>solver <span style="color:#f92672">=</span> SolverFor(<span style="color:#e6db74">&#34;QF_FD&#34;</span>)  <span style="color:#75715e"># Solver for quantifier-free constraints over finite domains</span>
+
+        <span style="color:#75715e"># Possible values at secret positions, i.e. s_0_2 denotes position 0 of secret having symbol 2</span>
+        self<span style="color:#f92672">.</span>secret_vars <span style="color:#f92672">=</span> [[Bool(<span style="color:#e6db74">&#34;s_{}_{}&#34;</span><span style="color:#f92672">.</span>format(pos, sym)) <span style="color:#66d9ef">for</span> sym <span style="color:#f92672">in</span> range(NUM_SYMBOLS)]
+                            <span style="color:#66d9ef">for</span> pos <span style="color:#f92672">in</span> range(NUM_POSITIONS)]
+
+        <span style="color:#75715e"># Exactly one symbol on each position</span>
+        <span style="color:#66d9ef">for</span> pos <span style="color:#f92672">in</span> range(NUM_POSITIONS):
+            coeffs <span style="color:#f92672">=</span> [(sym, <span style="color:#ae81ff">1</span>) <span style="color:#66d9ef">for</span> sym <span style="color:#f92672">in</span> self<span style="color:#f92672">.</span>secret_vars[pos]]
+            self<span style="color:#f92672">.</span>solver<span style="color:#f92672">.</span>add(PbEq(coeffs, <span style="color:#ae81ff">1</span>))</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
+    </figcaption>
+</figure></p>
+<h3 id="encoding-full-matches"><a href="#encoding-full-matches" class="hanchor" ariaLabel="Anchor">Encoding Full Matches</a> </h3>
+<p>Initially, there is no feedback to constrain the set of consistent candidates, and picking a random candidate is unproblematic.
+Any subsequent guess, however, should at least be consistent with the feedback accumulated up to that point.
+To characterise such candidates, we next consider which constraints some feedback $f$ for a committed candidate $c$ imposes.</p>
+<p>Consider the first part of the feedback: the number of full matches.
+This is clearly another cardinality constraint, but this one does not constrain the $s_{\mathit{pos},\mathit{sym}}$ variables directly.
+Instead we need some auxiliary variables
+$$\mathit{fm}_\mathit{pos}$$
+where $\mathit{pos}\in \{0,\dots,|s|-1\}$, to identify in which position we have a full match.
+These are the variables for which we create the constraint.
+Assuming the classic Mastermind setting and some feedback $f=(2,1)$, we simply add:
+$$\mathit{fm_0} + \mathit{fm_1} + \mathit{fm_2} + \mathit{fm_3} = 2$$</p>
+<p>Although the $\mathit{fm}_\mathit{pos}$ variables are now constrained, they are not related to any $s_{\mathit{pos},\mathit{sym}}$ yet.
+Intuitively, a variable $\mathit{fm}_\mathit{pos}$ should be $\mathit{true}$, if and only if the symbol at index $\mathit{pos}$ of the committed candidate has the same symbol as the secret at index $\mathit{pos}$ &ndash; that&rsquo;s what a full match is.
+With this in mind, and assuming the candidate to have been $c=(3,2,0,1)$, the following constraints establish the missing link:</p>
+<div>$$ 
+\begin{aligned}
+s_{0,3} &= \mathit{fm}_0,\\
+s_{1,2} &= \mathit{fm}_1,\\
+s_{2,0} &= \mathit{fm}_2,\\
+s_{3,1} &= \mathit{fm}_3
+\end{aligned}
+ $$</div>
+<p>The first part of <code>make_guess</code> mirrors the discussed idea, but introduces fresh variables $\mathit{fm}_\mathit{pos}$ in every iteration since the feedback of different rounds is unrelated:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">182
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">183
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">184
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">185
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">186
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">187
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">188
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">189
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">190
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">191
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">192
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">make_guess</span>(self, feedback):
+    <span style="color:#75715e"># Fresh &#34;full match&#34; variables for each position</span>
+    fm <span style="color:#f92672">=</span> [FreshBool(<span style="color:#e6db74">&#34;fm_{}&#34;</span><span style="color:#f92672">.</span>format(pos)) <span style="color:#66d9ef">for</span> pos <span style="color:#f92672">in</span> range(NUM_POSITIONS)]
+
+    <span style="color:#75715e"># Full matches must be consistent with feedback</span>
+    fm_coeffs <span style="color:#f92672">=</span> [(fm_pos, <span style="color:#ae81ff">1</span>) <span style="color:#66d9ef">for</span> fm_pos <span style="color:#f92672">in</span> fm]
+    self<span style="color:#f92672">.</span>solver<span style="color:#f92672">.</span>add(PbEq(fm_coeffs, feedback<span style="color:#f92672">.</span>full_matches))
+
+    <span style="color:#75715e"># Possible full matches</span>
+    <span style="color:#66d9ef">for</span> pos <span style="color:#f92672">in</span> range(NUM_POSITIONS):
+        self<span style="color:#f92672">.</span>solver<span style="color:#f92672">.</span>add(self<span style="color:#f92672">.</span>secret_vars[pos][self<span style="color:#f92672">.</span>last_guess[pos]] <span style="color:#f92672">==</span> fm[pos])</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
+    </figcaption>
+</figure></p>
+<aside>
+    <p>
+    During development I actually used variables of the form $\mathit{fm}_{\mathit{pos},\mathit{round}}$ to simplify debugging.
+Once done, it was just more readable to let Z3 pick fresh names for the variables instead of manually generating distinct names for each feedback&rsquo;s full match variables.
+    </p>
+</aside>
+<h3 id="encoding-symbol-matches"><a href="#encoding-symbol-matches" class="hanchor" ariaLabel="Anchor">Encoding Symbol Matches</a> </h3>
+<p>What remains is the creation of constraints which enforce consistency w.r.t. the second part of the feedback: the number of symbol matches.
+Unlike the full match <q>flag</q> that we introduced for every position, a symbol match relates two positions &ndash; one from the guess with one from the secret.
+To this end, we introduce the Boolean variables:
+$$\mathit{sm}_{\mathit{src},\mathit{dst}}$$
+where $\mathit{src},\mathit{dst}\in \{0,\dots,|s|-1\}$.
+A true literal $\mathit{sm}_{2,3}$ shall denote that the symbol at index $2$ of the guess can be moved to index $3$ to achieve a full match.</p>
+<p>With this in mind, we can easily construct an according cardinality constraint for some feedback $f=(2,1)$:
+$$\mathit{sm}_{0,1} +\mathit{sm}_{0,2} + \dots + \mathit{sm}_{3,2}  = 1$$
+Note that no constraint should have a variable of the form $\mathit{sm}_{\mathit{pos},\mathit{pos}}$, as such a case would actually describe a full match &ndash; not a symbol match.</p>
+<aside>
+    
+    <p>One might think that it is also necessary to add a constraint which disallows cases like $\mathit{sm}_{2,1}$ and $\mathit{sm}_{3,1}$ being $\mathit{true}$ at the same time.
+After all, this would indicate that both symbols can become full matches if moved to the same position.</p>
+<p>This is not wrong, but unnecessary since the following constraints already take care of that.</p>
+
+    
+</aside>
+<p>To characterise the intended relation between the $\mathit{sm}_{\mathit{src},\mathit{dst}}$ variables and the $\mathit{s}_\mathit{pos}$ variables, we define a matching scheme that takes existing full matches into consideration and <strong>prioritises low indices</strong>.
+A variable $\mathit{sm}_{\mathit{src},\mathit{dst}}$ should be $\mathit{true}$, if and only if all of the following conditions are met:</p>
+<ul>
+<li>There is no full match at position $\mathit{src}$:
+$$\neg \mathit{fm}_\mathit{src}$$</li>
+<li>The symbol $\mathit{sym}$ at index $\mathit{src}$ of the guess is the same as the symbol at index $\mathit{dst}$ of the secret:
+$$s_{\mathit{dst},\mathit{sym}}$$</li>
+<li>There is no full match at position $\mathit{dst}$:
+$$\neg \mathit{fm}_\mathit{dst}$$</li>
+<li>No smaller (higher priority) position has matched the symbol at $\mathit{dst}$:
+$$\bigwedge_{\substack{0\leq\mathit{prev}&lt;\mathit{src}\\ \mathit{prev} \neq \mathit{dst}}} \neg \mathit{sm}_{\mathit{prev},\mathit{dst}}$$</li>
+<li>The symbol at index $\mathit{src}$ has not matched any symbol on a smaller (higher priority) position:
+$$\bigwedge_{\substack{0\leq\mathit{prev}&lt;\mathit{dst}\\ \mathit{prev} \neq \mathit{src}}} \neg \mathit{sm}_{\mathit{src},\mathit{prev}}$$</li>
+</ul>
+<p>The rest of the <code>make_guess</code> method &ndash; started in the previous section &ndash; implements the proposed encoding:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">194
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">195
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">196
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">197
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">198
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">199
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">200
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">201
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">202
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">203
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">204
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">205
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">206
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">207
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">208
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">209
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">210
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">211
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">212
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">213
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">214
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">215
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">216
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">217
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">218
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">219
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">220
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">221
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">222
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">223
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#75715e"># Fresh &#34;symbol match&#34; variables for each pair of positions</span>
+sm <span style="color:#f92672">=</span> [[FreshBool(<span style="color:#e6db74">&#34;sm_{}_{}&#34;</span><span style="color:#f92672">.</span>format(src_pos, dst_pos)) <span style="color:#66d9ef">for</span> dst_pos <span style="color:#f92672">in</span> range(NUM_POSITIONS)]
+      <span style="color:#66d9ef">for</span> src_pos <span style="color:#f92672">in</span> range(NUM_POSITIONS)]
+
+<span style="color:#75715e"># Symbol matches must be consistent with feedback</span>
+sm_coeffs <span style="color:#f92672">=</span> [(sm[src_pos][dst_pos], <span style="color:#ae81ff">1</span>) <span style="color:#66d9ef">for</span> (src_pos, dst_pos) <span style="color:#f92672">in</span>
+             permutations(range(NUM_POSITIONS), <span style="color:#ae81ff">2</span>)]
+self<span style="color:#f92672">.</span>solver<span style="color:#f92672">.</span>add(PbEq(sm_coeffs, feedback<span style="color:#f92672">.</span>symbol_matches))
+
+<span style="color:#75715e"># Possible symbol matches</span>
+<span style="color:#66d9ef">for</span> src_pos <span style="color:#f92672">in</span> range(NUM_POSITIONS):
+    match_exprs <span style="color:#f92672">=</span> list()
+    <span style="color:#66d9ef">for</span> dst_pos <span style="color:#f92672">in</span> range(NUM_POSITIONS):
+        <span style="color:#66d9ef">if</span> src_pos <span style="color:#f92672">==</span> dst_pos:
+            <span style="color:#66d9ef">continue</span>
+
+        lhs <span style="color:#f92672">=</span> list()
+        lhs<span style="color:#f92672">.</span>append(Not(fm[src_pos]))
+        lhs<span style="color:#f92672">.</span>append(self<span style="color:#f92672">.</span>secret_vars[dst_pos][self<span style="color:#f92672">.</span>last_guess[src_pos]])
+        lhs<span style="color:#f92672">.</span>append(Not(fm[dst_pos]))
+        <span style="color:#75715e"># No previous position in the guess has a symbol match with the current dst_pos</span>
+        lhs<span style="color:#f92672">.</span>extend([Not(sm[prev_pos][dst_pos]) <span style="color:#66d9ef">for</span> prev_pos <span style="color:#f92672">in</span> range(src_pos) <span style="color:#66d9ef">if</span> dst_pos <span style="color:#f92672">!=</span> prev_pos])
+        <span style="color:#75715e"># src_pos has no symbol match with a previous dst_pos</span>
+        lhs<span style="color:#f92672">.</span>extend([Not(sm[src_pos][prev_pos]) <span style="color:#66d9ef">for</span> prev_pos <span style="color:#f92672">in</span> range(dst_pos) <span style="color:#66d9ef">if</span> src_pos <span style="color:#f92672">!=</span> prev_pos])
+
+        rhs <span style="color:#f92672">=</span> sm[src_pos][dst_pos]
+        match_exprs<span style="color:#f92672">.</span>append(And(lhs) <span style="color:#f92672">==</span> rhs)
+    self<span style="color:#f92672">.</span>solver<span style="color:#f92672">.</span>add(And(match_exprs))
+
+<span style="color:#66d9ef">return</span> self<span style="color:#f92672">.</span>initial_guess()</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
+    </figcaption>
+</figure></p>
+<p>Note that we treat the $\mathit{sm}_{\mathit{src},\mathit{dst}}$ variables similar to the feedback-specific $\mathit{fm}_\mathit{pos}$ variables: we introduce fresh ones for every feedback.</p>
+<h3 id="computing-a-guess"><a href="#computing-a-guess" class="hanchor" ariaLabel="Anchor">Computing a Guess</a> </h3>
+<p>We now have all the constraints together for the $s_{\mathit{pos},\mathit{sym}}$ variables to characterise the code sequences that are consistent with the received feedback.
+To actually compute a guess, we just need to find an assignment that satisfies these constraints.
+Luckily, we can delegate this task to a SAT solver.</p>
+<p>To construct the guess, we identify the $s_{\mathit{pos},\mathit{sym}}$ variables that are set to $\mathit{true}$:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">166
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">167
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">168
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">169
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">170
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">171
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">172
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">173
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">174
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">175
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">176
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">177
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">178
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">179
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">180
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">initial_guess</span>(self):
+    status <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>solver<span style="color:#f92672">.</span>check()
+
+    <span style="color:#75715e"># Extract guess from solution to constraints</span>
+    m <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>solver<span style="color:#f92672">.</span>model()
+    guess <span style="color:#f92672">=</span> list()
+    <span style="color:#66d9ef">for</span> pos <span style="color:#f92672">in</span> range(NUM_POSITIONS):
+        <span style="color:#66d9ef">for</span> sym <span style="color:#f92672">in</span> range(NUM_SYMBOLS):
+            <span style="color:#66d9ef">if</span> is_true(m<span style="color:#f92672">.</span>eval(self<span style="color:#f92672">.</span>secret_vars[pos][sym])):
+                guess<span style="color:#f92672">.</span>append(sym)
+                <span style="color:#66d9ef">continue</span>
+    <span style="color:#66d9ef">assert</span> (len(guess) <span style="color:#f92672">==</span> NUM_POSITIONS)
+
+    self<span style="color:#f92672">.</span>last_guess <span style="color:#f92672">=</span> tuple(guess)
+    <span style="color:#66d9ef">return</span> self<span style="color:#f92672">.</span>last_guess</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
+    </figcaption>
+</figure></p>
+<p>That&rsquo;s all there is to it.
+Feel free to experiment with <a href="mastermind.py">the provided implementations</a> of the discussed methods.
+Using the <code>SymbolicConsistentAi</code> you can now easily play Mastermind games with huge numbers of secret code combinations.
+On average, it takes only $10.51$ guesses to find the secret within $2\,821\,109\,907\,456$ possible combinations of the classic Mastermind variant with codes of length $16$ (see experiments below).</p>
+<h2 id="experiments"><a href="#experiments" class="hanchor" ariaLabel="Anchor">Experiments</a> </h2>
+<p>For reference, I&rsquo;ve run some experiments to measure the performance on an i7-7700K CPU, using Python 3.8 and Z3 v4.8.7.
+The following table provides both a qualitative and quantitative comparison of the lazy enumeration AI and the SAT-based AI, with measurement cells formatted as <q>(Explicit / Symbolic)</q>:</p>
+<table>
+<thead>
+<tr>
+<th align="center">$|s|,|\Sigma|$ </th>
+<th align="center"> Games Played </th>
+<th align="center"> Avg. Turns </th>
+<th align="center"> Max. Turns </th>
+<th align="center"> Avg. Game Time </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">4, 6</td>
+<td align="center">all 1 296</td>
+<td align="center">5.765 / 4.659</td>
+<td align="center">9 / 7</td>
+<td align="center">2ms / 17ms</td>
+</tr>
+<tr>
+<td align="center">5, 6</td>
+<td align="center">all 7 776</td>
+<td align="center">6.218 / 5.100</td>
+<td align="center">11 / 8</td>
+<td align="center">11ms / 34ms</td>
+</tr>
+<tr>
+<td align="center">6, 6</td>
+<td align="center">all 46 656</td>
+<td align="center">6.735 / 5.572</td>
+<td align="center">12 / 9</td>
+<td align="center">71ms / 60ms</td>
+</tr>
+<tr>
+<td align="center">7, 6</td>
+<td align="center">10 000</td>
+<td align="center">7.301 / 6.072</td>
+<td align="center">11 / 9</td>
+<td align="center">466ms / 101ms</td>
+</tr>
+<tr>
+<td align="center">8, 6</td>
+<td align="center">1 000</td>
+<td align="center">7.874 / 6.560</td>
+<td align="center">12 / 10</td>
+<td align="center">3s / 161ms</td>
+</tr>
+<tr>
+<td align="center">9, 6</td>
+<td align="center">10 000</td>
+<td align="center">? / 7.237</td>
+<td align="center">? / 11</td>
+<td align="center">? / 263ms</td>
+</tr>
+<tr>
+<td align="center">10, 6</td>
+<td align="center">10 000</td>
+<td align="center">? / 7.901</td>
+<td align="center">? / 12</td>
+<td align="center">? / 413ms</td>
+</tr>
+<tr>
+<td align="center">16, 6</td>
+<td align="center">1 000</td>
+<td align="center">? / 10.51</td>
+<td align="center">? / 15</td>
+<td align="center">? / 6.6s</td>
+</tr>
+</tbody>
+</table>
+<aside>
+    <p>
+    Note that, due to the nondeterministic and heuristics-guided nature of SAT solving, the results may vary slightly for your setup.
+    </p>
+</aside>
+<p>As to be expected, the lazy enumeration works well for Mastermind variants with small numbers of possible secrets but becomes unusably slow on harder instances.
+Such measurements were aborted and are denoted by <q>?</q> in the table.
+Furthermore, once the average game times went into the seconds, I switched from evaluating the performance for each possible secret to a fixed number of secrets that are evenly spaced over all possible combinations.
+Accordingly, for those non-exhaustive runs, the measured maximal number of turns is not a guaranteed worst case.</p>
+<p>Although both approaches implement the same idea, i.e. make guesses that are consistent with the feedback, the qualitative results differ.
+This is because our implementation of Shapiro&rsquo;s idea picks the <em>smallest</em> consistent candidate but the SAT-based approach picks <em>some</em> consistent candidate.
+The latter seems to be advantageous.</p>
+<h2 id="do-try-this-at-home"><a href="#do-try-this-at-home" class="hanchor" ariaLabel="Anchor">Do Try This at Home!</a> </h2>
+<p>As usual, there is a lot of room for further improvement and experimentation.
+Here are some points you might want to explore on your own (easiest first):</p>
+<ul>
+<li>There are many low hanging fruits regarding performance improvements.
+Python is convenient for prototyping but its interpreted nature slows down the execution.
+Try alternative Python implementations like <a href="https://www.pypy.org/">Pypy</a> to get a significant speedup of the explicit approaches for free, or port the approaches to <a href="https://dlang.org/">your favorite compiled language</a>.
+Furthermore, even though Z3 has tons of features and is a joy to use, I expect dedicated SAT solvers like <a href="https://github.com/arminbiere/lingeling">Lingeling</a> to be even faster at solving the resulting constraints.</li>
+<li>Try to devise a SAT/SMT-based solver for a Mastermind variation with different forms of feedback.
+For example, <a href="https://en.wikipedia.org/wiki/Mastermind_(board_game)#Variations">Number Mastermind</a> is played with numbers and the secret&rsquo;s sum is an additional clue.</li>
+<li>The suggested logical characterisation is just what seemed most straightforward to me.
+Try reformulating the encoding to achieve even better solver performance &ndash; I might have overlooked a thing or two.</li>
+<li>Investigate whether it is feasible to implement the Minimax-style approach, or some other heuristic, symbolically.
+Depending on the chose approach, you might want to look into <a href="https://en.wikipedia.org/wiki/Maximum_satisfiability_problem">MAX-SAT</a> or <a href="https://www.msoos.org/2018/12/how-approximate-model-counting-works/">(approximate) model counting</a>.</li>
+</ul>
+<hr style="margin-top: 2em">
+<div class="links">
+
+    <a href="/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py" class="button">mastermind.py</a>
+
+</div>
+		</article>
+		</main>
+	</div>
+	
+	<div class="notepad related-posts">
+		<h1>Related Posts</h1>
+		<hr>
+		
+			<article>
+    <header>
+        <h2><a href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/">Solving a Logic Synthesis Puzzle via SAT/SMT</a></h2>
+        <div class="metadata">
+    <time datetime="2019-12-12">December 12, 2019</time>
+    <ul>
+        <li><a class="tag-block" href="/tags/sat">sat</a></li>
+        <li><a class="tag-block" href="/tags/smt">smt</a></li>
+        <li><a class="tag-block" href="/tags/logic-synthesis">logic synthesis</a></li>
+        <li><a class="tag-block" href="/tags/puzzle">puzzle</a></li>
+    </ul>
+</div>
+    </header><p>A few weeks ago, I was asked the following riddle:
+<q>Design a <a href="https://en.wikipedia.org/wiki/Logic_gate">logic circuit</a> with three inputs and three outputs, such that the outputs are the inverted inputs. You may use arbitrary many AND and OR gates, but at most two NOT gates</q>.
+Although the characterisation of this problem as an <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a> instance is straightforward, I found it necessary to reduce it to <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">SAT</a> and incorporate further assumptions to achieve reasonable performance.</p>
+<p>This post illustrates said process, ranging from the original idea to a standard formulation of SAT-based logic synthesis to a problem-specific and more constrained instance.</p>
+	<a class="read-more" href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/">
+        &raquo; Read more
+    </a>
+</article>
+		
+	</div>
+	
+</div>
+
+        </div>
+        </div>
+        <footer>
+	<p>© Dimitri Bohlender</p>
+	<p><a href="/legal">Legal Notice</a></p>
+</footer>
+    </body>
+</html>

@@ -64,6 +64,26 @@
         
         <article>
     <header>
+        <h2><a href="https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/">Playing Hard Mastermind Games with a SAT-based AI</a></h2>
+        <div class="metadata">
+    <time datetime="2020-03-12">March 12, 2020</time>
+    <ul>
+        <li><a class="tag-block" href="/tags/sat">SAT</a></li>
+        <li><a class="tag-block" href="/tags/ai">AI</a></li>
+        <li><a class="tag-block" href="/tags/puzzle">Puzzle</a></li>
+    </ul>
+</div>
+    </header><p>Back in the day, <a href="https://en.wikipedia.org/wiki/Mastermind_(board_game)">Mastermind</a> was a popular two player code-breaking game, and many <a href="https://en.wikipedia.org/wiki/Mastermind_(board_game)#Variations">variations thereof</a> still exist as both standalone games and puzzles within other games.
+Although it is difficult for a human player to make <em>optimal guesses</em> of the secret code, or at least guesses that do not conflict with the provided clues, the setting is usually simple enough for an AI to find such candidates via explicit exploration of the <a href="https://en.wikipedia.org/wiki/Game_tree">game tree</a>.</p>
+<p>However, such approaches becomes unfeasible when the number of possibilities for secret codes grows into the millions.
+This post illustrates the problems, and how finding consistent candidates can be approached with <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">SAT</a> solving &ndash; yielding an AI that can handle orders-of-magnitude harder Mastermind instances than the standard approaches.</p>
+	<a class="read-more" href="https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/">
+        &raquo; Read more
+    </a>
+</article>
+        
+        <article>
+    <header>
         <h2><a href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/">Solving a Logic Synthesis Puzzle via SAT/SMT</a></h2>
         <div class="metadata">
     <time datetime="2019-12-12">December 12, 2019</time>
@@ -76,8 +96,8 @@
 </div>
     </header><p>A few weeks ago, I was asked the following riddle:
 <q>Design a <a href="https://en.wikipedia.org/wiki/Logic_gate">logic circuit</a> with three inputs and three outputs, such that the outputs are the inverted inputs. You may use arbitrary many AND and OR gates, but at most two NOT gates</q>.
-Although the characterisation of this problem as an <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a> instance is straightforward, I found it necessary to reduce it to <a href="https://en.wikipedia.org/wiki/Satisfiability">SAT</a> and incorporate further assumptions to achieve reasonable performance.
-This post illustrates said process, ranging from the original idea to a standard formulation of SAT-based logic synthesis to a problem-specific and more constrained instance.</p>
+Although the characterisation of this problem as an <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a> instance is straightforward, I found it necessary to reduce it to <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">SAT</a> and incorporate further assumptions to achieve reasonable performance.</p>
+<p>This post illustrates said process, ranging from the original idea to a standard formulation of SAT-based logic synthesis to a problem-specific and more constrained instance.</p>
 	<a class="read-more" href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/">
         &raquo; Read more
     </a>
@@ -115,38 +135,44 @@ This post illustrates how this, and related aspects, can be investigated with <a
         
             <article>
                 <header>
-                    <h2><a href="https://zipcpu.com/quiz/2020/01/23/quiz11.html">Quiz #11: Induction and clock enables</a></h2>
+                    <h2><a href="https://blog.regehr.org/archives/1722">Alive 2 Part 1: Introduction</a></h2>
                     <div class="metadata">
-                        <time datetime="January 212, 2020">January 23, 2020</time>
+                        <time datetime="March 12, 2020">March 12, 2020</time>
                         <ul><li>
-                            <a class="source" href="https://zipcpu.com/">The ZipCPU by Gisselquist Technology</a>
+                            <a class="source" href="https://blog.regehr.org">Embedded in Academia</a>
                         </li></ul>
                     </div>
                 </header>
-                <p><p>Induction
-can be very confusing to an HDL designer trying to use the formal verification
-tools for the first time.  A common refrain that I’ve heard among those
-I’ve mentored is, “but I set this value on reset!  How can it ever get into
-this state?”</p>
-<p>The induct…</p>
-</p>
-	            <a class="read-more" href="https://zipcpu.com/quiz/2020/01/23/quiz11.html">
+                <p>[This piece is co-authored by Nuno P. Lopes and John Regehr.] Compiler bugs threaten the correctness of almost any computer system that uses compiled code. Translation validation is a path towards reliably correct compilation that works by checking that a…</p>
+	            <a class="read-more" href="https://blog.regehr.org/archives/1722">
                     &raquo; Read more
                 </a>
             </article>
         
             <article>
                 <header>
-                    <h2><a href="https://blog.regehr.org/archives/1714">Precision Opportunities for Demanded Bits in LLVM</a></h2>
+                    <h2><a href="https://zipcpu.com/blog/2020/03/08/easyaxil.html">Buidilng an AXI-Lite slave the easy way</a></h2>
                     <div class="metadata">
-                        <time datetime="January 22, 2020">January 22, 2020</time>
+                        <time datetime="March 8, 2020">March 8, 2020</time>
                         <ul><li>
-                            <a class="source" href="https://blog.regehr.org">Embedded in Academia</a>
+                            <a class="source" href="https://zipcpu.com/">The ZipCPU by Gisselquist Technology</a>
                         </li></ul>
                     </div>
                 </header>
-                <p>[Although this post was written to stand by itself, it builds on the previous one. It is authored by Jubi Taneja, Zhengyang Liu, and John Regehr.] When designing computer systems, it can be useful to avoid specifying behaviors too tightly. For example, we…</p>
-	            <a class="read-more" href="https://blog.regehr.org/archives/1714">
+                <p>Since writing my first two articles on AXI-Lite, the first discussing how
+to verify the an AXI-Lite
+interface and the second
+how to build an AXI-Lite
+slave, I’ve had the
+opportunity to build not just one but several AXI-Lite slaves.
+(1,
+2,
+3,
+4,
+5,
+6, etc.)
+The cool …</p>
+	            <a class="read-more" href="https://zipcpu.com/blog/2020/03/08/easyaxil.html">
                     &raquo; Read more
                 </a>
             </article>

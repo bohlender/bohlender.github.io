@@ -182,7 +182,7 @@
       <pubDate>Sat, 01 Nov 2014 00:00:00 +0000</pubDate>
       <author>contact@bohlender.pro (Dimitri Bohlender)</author>
       <guid>https://bohlender.github.io/cv/education/2014-phd/</guid>
-      <description>Working on formal verification of control software from the automation domain. I leverage SAT/SMT solving and abstract interpretation to develop techniques for proving a program&#39;s compliance with various specifications, synthesis of safe parameters and automated test generation.</description>
+      <description>Working on formal verification of control software from the automation domain. I leverage SAT/SMT solving and abstract interpretation to develop techniques for proving a program&amp;rsquo;s compliance with various specifications, synthesis of safe parameters and automated test generation.</description>
     </item>
     
     <item>
@@ -191,7 +191,7 @@
       <pubDate>Sat, 01 Nov 2014 00:00:00 +0000</pubDate>
       <author>contact@bohlender.pro (Dimitri Bohlender)</author>
       <guid>https://bohlender.github.io/cv/work/2014-research-associate/</guid>
-      <description>Teaching and working on Arcade.PLC, a platform for verification of software for industrial controllers, featuring model checking procedures and static analyses. The work on this project involves abstracting the concrete program semantics to avoid exhaustive exploration of the program&#39;s state space, and formalising and exploiting peculiarities of both the properties of interest and the domain.</description>
+      <description>Teaching and working on Arcade.PLC, a platform for verification of software for industrial controllers, featuring model checking procedures and static analyses. The work on this project involves abstracting the concrete program semantics to avoid exhaustive exploration of the program&amp;rsquo;s state space, and formalising and exploiting peculiarities of both the properties of interest and the domain.</description>
     </item>
     
     <item>

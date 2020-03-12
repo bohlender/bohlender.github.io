@@ -13,15 +13,15 @@
 	
 
 
-<meta property="og:title" content="Software Verification" />
+<meta property="og:title" content="AI" />
 <meta property="og:description" content="Both a portfolio and outlet for all things creative" />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://bohlender.github.io/tags/software-verification/" />
-<meta property="og:updated_time" content="2019-09-12T09:31:28+02:00" />
+<meta property="og:url" content="https://bohlender.github.io/tags/ai/" />
+<meta property="og:updated_time" content="2020-03-08T16:12:02+01:00" />
 <meta property="og:site_name" content="Dimitri Bohlender" />
 
 	
-	<title>Software Verification | Dimitri Bohlender</title>
+	<title>AI | Dimitri Bohlender</title>
 </head>
     <body class="tags">
         <header>
@@ -54,24 +54,26 @@
     	<a href="/tags">Show all tags</a>
     </div>
     <main class="notepad"> 
-        <h1 class="tag-block">software verification</h1>
+        <h1 class="tag-block">ai</h1>
         <hr>
         
         
             <article>
     <header>
-        <h2><a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/">SMT-based Reasoning About the Fast Inverse Square Root</a></h2>
+        <h2><a href="https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/">Playing Hard Mastermind Games with a SAT-based AI</a></h2>
         <div class="metadata">
-    <time datetime="2019-09-26">September 26, 2019</time>
+    <time datetime="2020-03-12">March 12, 2020</time>
     <ul>
-        <li><a class="tag-block" href="/tags/smt">smt</a></li>
-        <li><a class="tag-block" href="/tags/smt-lib">smt-lib</a></li>
-        <li><a class="tag-block" href="/tags/software-verification">software verification</a></li>
+        <li><a class="tag-block" href="/tags/sat">SAT</a></li>
+        <li><a class="tag-block" href="/tags/ai">AI</a></li>
+        <li><a class="tag-block" href="/tags/puzzle">Puzzle</a></li>
     </ul>
 </div>
-    </header><p>While there is a <a href="https://web.archive.org/web/20160308091758/http://www.daxia.com/bibis/upload/406Fast_Inverse_Square_Root.pdf">mathematical explanation</a> for the choice of <code>0x5F3759DF</code> in the <a href="https://en.wikipedia.org/wiki/Fast_inverse_square_root">famous bit-level hack</a> for approximating the multiplicative inverse of the square root of a 32-bit floating-point number, it is not immediately clear to what extent the reasoning is really applicable in the context of machine data types and their peculiarities.
-This post illustrates how this, and related aspects, can be investigated with <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a>-based reasoning about the actual implementation.</p>
-	<a class="read-more" href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/">
+    </header><p>Back in the day, <a href="https://en.wikipedia.org/wiki/Mastermind_(board_game)">Mastermind</a> was a popular two player code-breaking game, and many <a href="https://en.wikipedia.org/wiki/Mastermind_(board_game)#Variations">variations thereof</a> still exist as both standalone games and puzzles within other games.
+Although it is difficult for a human player to make <em>optimal guesses</em> of the secret code, or at least guesses that do not conflict with the provided clues, the setting is usually simple enough for an AI to find such candidates via explicit exploration of the <a href="https://en.wikipedia.org/wiki/Game_tree">game tree</a>.</p>
+<p>However, such approaches becomes unfeasible when the number of possibilities for secret codes grows into the millions.
+This post illustrates the problems, and how finding consistent candidates can be approached with <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">SAT</a> solving &ndash; yielding an AI that can handle orders-of-magnitude harder Mastermind instances than the standard approaches.</p>
+	<a class="read-more" href="https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/">
         &raquo; Read more
     </a>
 </article>

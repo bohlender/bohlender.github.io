@@ -20,8 +20,8 @@
       <pubDate>Thu, 05 Sep 2019 21:07:25 +0200</pubDate>
       <author>contact@bohlender.pro (Dimitri Bohlender)</author>
       <guid>https://bohlender.github.io/projects/personal-website/</guid>
-      <description>With the end of my PhD looming on the horizon, I wanted to get a short CV and some information about me online. However, I wasn&#39;t interested in generic, impersonal solutions, such as the services of career-oriented social networking sites.
-I used this opportunity to learn some web development basics, and build a static website that serves as both a portfolio and an outlet for all things creative. It&#39;s the site you&#39;re looking at right now.</description>
+      <description>With the end of my PhD looming on the horizon, I wanted to get a short CV and some information about me online. However, I wasn&amp;rsquo;t interested in generic, impersonal solutions, such as the services of career-oriented social networking sites.
+I used this opportunity to learn some web development basics, and build a static website that serves as both a portfolio and an outlet for all things creative. It&amp;rsquo;s the site you&amp;rsquo;re looking at right now.</description>
     </item>
     
     <item>
@@ -30,8 +30,8 @@ I used this opportunity to learn some web development basics, and build a static
       <pubDate>Tue, 01 Jan 2019 00:00:00 +0000</pubDate>
       <author>contact@bohlender.pro (Dimitri Bohlender)</author>
       <guid>https://bohlender.github.io/projects/arcade/</guid>
-      <description>I worked on Arcade.PLC on two occasions: during my bachelor&#39;s thesis, and my time as research associate at Embedded Software. Arcade.PLC is both a tool and a framework for formal verification of industrial control software, featuring procedures for static analysis, automated test generation and model checking.
-It started out as explicit state-space exploration based on abstract interpretation, which is what I&#39;ve been integrating abstractions into during my bachelor&#39;s thesis, but was extended with various SMT-based methods during my PhD.</description>
+      <description>I worked on Arcade.PLC on two occasions: during my bachelor&amp;rsquo;s thesis, and my time as research associate at Embedded Software. Arcade.PLC is both a tool and a framework for formal verification of industrial control software, featuring procedures for static analysis, automated test generation and model checking.
+It started out as explicit state-space exploration based on abstract interpretation, which is what I&amp;rsquo;ve been integrating abstractions into during my bachelor&amp;rsquo;s thesis, but was extended with various SMT-based methods during my PhD.</description>
     </item>
     
     <item>
@@ -41,7 +41,7 @@ It started out as explicit state-space exploration based on abstract interpretat
       <author>contact@bohlender.pro (Dimitri Bohlender)</author>
       <guid>https://bohlender.github.io/projects/vim-smt2/</guid>
       <description>Although SMT-LIB is the standard language supported by most SMT solvers, some of them introduce custom language extensions. Such extensions may range from syntactical sugar to fine-grained control over the underlying solver-procedure.
-Since I&#39;m an avid user of Z3, I started vim-smt2 to have a plugin for the Vim editor that supports both the base SMT-LIB language and the extensions provided by Z3. Besides the basic syntax highlighting I&#39;m implementing convenient features, such as querying satisfiability or the solver&#39;s version, when I find myself repeatedly doing automatable tasks manually.</description>
+Since I&amp;rsquo;m an avid user of Z3, I started vim-smt2 to have a plugin for the Vim editor that supports both the base SMT-LIB language and the extensions provided by Z3. Besides the basic syntax highlighting I&amp;rsquo;m implementing convenient features, such as querying satisfiability or the solver&amp;rsquo;s version, when I find myself repeatedly doing automatable tasks manually.</description>
     </item>
     
     <item>
@@ -50,7 +50,7 @@ Since I&#39;m an avid user of Z3, I started vim-smt2 to have a plugin for the Vi
       <pubDate>Tue, 02 Sep 2014 00:00:00 +0000</pubDate>
       <author>contact@bohlender.pro (Dimitri Bohlender)</author>
       <guid>https://bohlender.github.io/projects/storm/</guid>
-      <description>In the context of my master&#39;s thesis I&#39;ve worked on the Storm probabilistic model checker. In particular, I developed a fully symbolic variant of the partially explicit procedure used in PASS for probabilistic reachability checking of Markov decision processes.
+      <description>In the context of my master&amp;rsquo;s thesis I&amp;rsquo;ve worked on the Storm probabilistic model checker. In particular, I developed a fully symbolic variant of the partially explicit procedure used in PASS for probabilistic reachability checking of Markov decision processes.
 I used SMT-solving to compute a menu-based abstraction, and refine it in a counterexample-guided fashion. The abstraction was stored in terms of MTBDDs, for which I developed both the actual symbolic value iteration and symbolic static analyses for preprocessing.</description>
     </item>
     
@@ -71,7 +71,7 @@ In COMPASS, the system specification is written in the SLIM language. I was main
       <author>contact@bohlender.pro (Dimitri Bohlender)</author>
       <guid>https://bohlender.github.io/projects/signal-flow/</guid>
       <description>When I was a research assistant at Embedded Software, I was involved in a research project with Daimler AG. With MATLAB Simulink being a popular choice for the development of embedded software in the automotive domain, this project aimed to develop model-based analyses to aid developers of Simulink models.
-Tracking a signal&#39;s (potential) flow manually, given the highly modular and hierarchical models, is prone to error. To simplify this, I adapted standard dataflow analyses for programs to this domain.</description>
+Tracking a signal&amp;rsquo;s (potential) flow manually, given the highly modular and hierarchical models, is prone to error. To simplify this, I adapted standard dataflow analyses for programs to this domain.</description>
     </item>
     
   </channel>

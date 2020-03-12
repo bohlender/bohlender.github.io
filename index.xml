@@ -15,6 +15,18 @@
     
     
     <item>
+      <title>Playing Hard Mastermind Games with a SAT-based AI</title>
+      <link>https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/</link>
+      <pubDate>Sun, 08 Mar 2020 16:12:02 +0100</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/</guid>
+      <description>&lt;p&gt;Back in the day, &lt;a href=&#34;https://en.wikipedia.org/wiki/Mastermind_(board_game)&#34;&gt;Mastermind&lt;/a&gt; was a popular two player code-breaking game, and many &lt;a href=&#34;https://en.wikipedia.org/wiki/Mastermind_(board_game)#Variations&#34;&gt;variations thereof&lt;/a&gt; still exist as both standalone games and puzzles within other games.
+Although it is difficult for a human player to make &lt;em&gt;optimal guesses&lt;/em&gt; of the secret code, or at least guesses that do not conflict with the provided clues, the setting is usually simple enough for an AI to find such candidates via explicit exploration of the &lt;a href=&#34;https://en.wikipedia.org/wiki/Game_tree&#34;&gt;game tree&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;However, such approaches becomes unfeasible when the number of possibilities for secret codes grows into the millions.
+This post illustrates the problems, and how finding consistent candidates can be approached with &lt;a href=&#34;https://en.wikipedia.org/wiki/Boolean_satisfiability_problem&#34;&gt;SAT&lt;/a&gt; solving &amp;ndash; yielding an AI that can handle orders-of-magnitude harder Mastermind instances than the standard approaches.&lt;/p&gt;</description>
+    </item>
+    
+    <item>
       <title>Solving a Logic Synthesis Puzzle via SAT/SMT</title>
       <link>https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/</link>
       <pubDate>Sat, 30 Nov 2019 22:54:10 +0100</pubDate>
@@ -22,8 +34,8 @@
       <guid>https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/</guid>
       <description>&lt;p&gt;A few weeks ago, I was asked the following riddle:
 &lt;q&gt;Design a &lt;a href=&#34;https://en.wikipedia.org/wiki/Logic_gate&#34;&gt;logic circuit&lt;/a&gt; with three inputs and three outputs, such that the outputs are the inverted inputs. You may use arbitrary many AND and OR gates, but at most two NOT gates&lt;/q&gt;.
-Although the characterisation of this problem as an &lt;a href=&#34;https://en.wikipedia.org/wiki/Satisfiability_modulo_theories&#34;&gt;SMT&lt;/a&gt; instance is straightforward, I found it necessary to reduce it to &lt;a href=&#34;https://en.wikipedia.org/wiki/Satisfiability&#34;&gt;SAT&lt;/a&gt; and incorporate further assumptions to achieve reasonable performance.
-This post illustrates said process, ranging from the original idea to a standard formulation of SAT-based logic synthesis to a problem-specific and more constrained instance.&lt;/p&gt;</description>
+Although the characterisation of this problem as an &lt;a href=&#34;https://en.wikipedia.org/wiki/Satisfiability_modulo_theories&#34;&gt;SMT&lt;/a&gt; instance is straightforward, I found it necessary to reduce it to &lt;a href=&#34;https://en.wikipedia.org/wiki/Boolean_satisfiability_problem&#34;&gt;SAT&lt;/a&gt; and incorporate further assumptions to achieve reasonable performance.&lt;/p&gt;
+&lt;p&gt;This post illustrates said process, ranging from the original idea to a standard formulation of SAT-based logic synthesis to a problem-specific and more constrained instance.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -60,8 +72,8 @@ This post illustrates how this, and related aspects, can be investigated with &l
       <pubDate>Thu, 05 Sep 2019 21:07:25 +0200</pubDate>
       <author>contact@bohlender.pro (Dimitri Bohlender)</author>
       <guid>https://bohlender.github.io/projects/personal-website/</guid>
-      <description>With the end of my PhD looming on the horizon, I wanted to get a short CV and some information about me online. However, I wasn&#39;t interested in generic, impersonal solutions, such as the services of career-oriented social networking sites.
-I used this opportunity to learn some web development basics, and build a static website that serves as both a portfolio and an outlet for all things creative. It&#39;s the site you&#39;re looking at right now.</description>
+      <description>With the end of my PhD looming on the horizon, I wanted to get a short CV and some information about me online. However, I wasn&amp;rsquo;t interested in generic, impersonal solutions, such as the services of career-oriented social networking sites.
+I used this opportunity to learn some web development basics, and build a static website that serves as both a portfolio and an outlet for all things creative. It&amp;rsquo;s the site you&amp;rsquo;re looking at right now.</description>
     </item>
     
     <item>
@@ -79,8 +91,8 @@ I used this opportunity to learn some web development basics, and build a static
       <pubDate>Tue, 01 Jan 2019 00:00:00 +0000</pubDate>
       <author>contact@bohlender.pro (Dimitri Bohlender)</author>
       <guid>https://bohlender.github.io/projects/arcade/</guid>
-      <description>I worked on Arcade.PLC on two occasions: during my bachelor&#39;s thesis, and my time as research associate at Embedded Software. Arcade.PLC is both a tool and a framework for formal verification of industrial control software, featuring procedures for static analysis, automated test generation and model checking.
-It started out as explicit state-space exploration based on abstract interpretation, which is what I&#39;ve been integrating abstractions into during my bachelor&#39;s thesis, but was extended with various SMT-based methods during my PhD.</description>
+      <description>I worked on Arcade.PLC on two occasions: during my bachelor&amp;rsquo;s thesis, and my time as research associate at Embedded Software. Arcade.PLC is both a tool and a framework for formal verification of industrial control software, featuring procedures for static analysis, automated test generation and model checking.
+It started out as explicit state-space exploration based on abstract interpretation, which is what I&amp;rsquo;ve been integrating abstractions into during my bachelor&amp;rsquo;s thesis, but was extended with various SMT-based methods during my PhD.</description>
     </item>
     
     <item>
@@ -144,7 +156,7 @@ It started out as explicit state-space exploration based on abstract interpretat
       <author>contact@bohlender.pro (Dimitri Bohlender)</author>
       <guid>https://bohlender.github.io/projects/vim-smt2/</guid>
       <description>Although SMT-LIB is the standard language supported by most SMT solvers, some of them introduce custom language extensions. Such extensions may range from syntactical sugar to fine-grained control over the underlying solver-procedure.
-Since I&#39;m an avid user of Z3, I started vim-smt2 to have a plugin for the Vim editor that supports both the base SMT-LIB language and the extensions provided by Z3. Besides the basic syntax highlighting I&#39;m implementing convenient features, such as querying satisfiability or the solver&#39;s version, when I find myself repeatedly doing automatable tasks manually.</description>
+Since I&amp;rsquo;m an avid user of Z3, I started vim-smt2 to have a plugin for the Vim editor that supports both the base SMT-LIB language and the extensions provided by Z3. Besides the basic syntax highlighting I&amp;rsquo;m implementing convenient features, such as querying satisfiability or the solver&amp;rsquo;s version, when I find myself repeatedly doing automatable tasks manually.</description>
     </item>
     
     <item>
@@ -243,7 +255,7 @@ Since I&#39;m an avid user of Z3, I started vim-smt2 to have a plugin for the Vi
       <pubDate>Sat, 01 Nov 2014 00:00:00 +0000</pubDate>
       <author>contact@bohlender.pro (Dimitri Bohlender)</author>
       <guid>https://bohlender.github.io/cv/education/2014-phd/</guid>
-      <description>Working on formal verification of control software from the automation domain. I leverage SAT/SMT solving and abstract interpretation to develop techniques for proving a program&#39;s compliance with various specifications, synthesis of safe parameters and automated test generation.</description>
+      <description>Working on formal verification of control software from the automation domain. I leverage SAT/SMT solving and abstract interpretation to develop techniques for proving a program&amp;rsquo;s compliance with various specifications, synthesis of safe parameters and automated test generation.</description>
     </item>
     
     <item>
@@ -252,7 +264,7 @@ Since I&#39;m an avid user of Z3, I started vim-smt2 to have a plugin for the Vi
       <pubDate>Sat, 01 Nov 2014 00:00:00 +0000</pubDate>
       <author>contact@bohlender.pro (Dimitri Bohlender)</author>
       <guid>https://bohlender.github.io/cv/work/2014-research-associate/</guid>
-      <description>Teaching and working on Arcade.PLC, a platform for verification of software for industrial controllers, featuring model checking procedures and static analyses. The work on this project involves abstracting the concrete program semantics to avoid exhaustive exploration of the program&#39;s state space, and formalising and exploiting peculiarities of both the properties of interest and the domain.</description>
+      <description>Teaching and working on Arcade.PLC, a platform for verification of software for industrial controllers, featuring model checking procedures and static analyses. The work on this project involves abstracting the concrete program semantics to avoid exhaustive exploration of the program&amp;rsquo;s state space, and formalising and exploiting peculiarities of both the properties of interest and the domain.</description>
     </item>
     
     <item>
@@ -270,7 +282,7 @@ Since I&#39;m an avid user of Z3, I started vim-smt2 to have a plugin for the Vi
       <pubDate>Tue, 02 Sep 2014 00:00:00 +0000</pubDate>
       <author>contact@bohlender.pro (Dimitri Bohlender)</author>
       <guid>https://bohlender.github.io/projects/storm/</guid>
-      <description>In the context of my master&#39;s thesis I&#39;ve worked on the Storm probabilistic model checker. In particular, I developed a fully symbolic variant of the partially explicit procedure used in PASS for probabilistic reachability checking of Markov decision processes.
+      <description>In the context of my master&amp;rsquo;s thesis I&amp;rsquo;ve worked on the Storm probabilistic model checker. In particular, I developed a fully symbolic variant of the partially explicit procedure used in PASS for probabilistic reachability checking of Markov decision processes.
 I used SMT-solving to compute a menu-based abstraction, and refine it in a counterexample-guided fashion. The abstraction was stored in terms of MTBDDs, for which I developed both the actual symbolic value iteration and symbolic static analyses for preprocessing.</description>
     </item>
     
@@ -336,7 +348,7 @@ In COMPASS, the system specification is written in the SLIM language. I was main
       <author>contact@bohlender.pro (Dimitri Bohlender)</author>
       <guid>https://bohlender.github.io/projects/signal-flow/</guid>
       <description>When I was a research assistant at Embedded Software, I was involved in a research project with Daimler AG. With MATLAB Simulink being a popular choice for the development of embedded software in the automotive domain, this project aimed to develop model-based analyses to aid developers of Simulink models.
-Tracking a signal&#39;s (potential) flow manually, given the highly modular and hierarchical models, is prone to error. To simplify this, I adapted standard dataflow analyses for programs to this domain.</description>
+Tracking a signal&amp;rsquo;s (potential) flow manually, given the highly modular and hierarchical models, is prone to error. To simplify this, I adapted standard dataflow analyses for programs to this domain.</description>
     </item>
     
     <item>
