@@ -21,7 +21,7 @@
       <description>&lt;p&gt;Back in the day, &lt;a href=&#34;https://en.wikipedia.org/wiki/Mastermind_(board_game)&#34;&gt;Mastermind&lt;/a&gt; was a popular two player code-breaking game, and many &lt;a href=&#34;https://en.wikipedia.org/wiki/Mastermind_(board_game)#Variations&#34;&gt;variations thereof&lt;/a&gt; still exist as both standalone games and puzzles within other games.
 Although it is difficult for a human player to make &lt;em&gt;optimal guesses&lt;/em&gt; of the secret code, or at least guesses that do not conflict with the provided clues, the setting is usually simple enough for an AI to find such candidates via explicit exploration of the &lt;a href=&#34;https://en.wikipedia.org/wiki/Game_tree&#34;&gt;game tree&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;However, such approaches becomes unfeasible when the number of possibilities for secret codes grows into the millions.
-This post illustrates the problems, and how finding consistent candidates can be approached with &lt;a href=&#34;https://en.wikipedia.org/wiki/Boolean_satisfiability_problem&#34;&gt;SAT&lt;/a&gt; solving &amp;ndash; yielding an AI that can handle orders-of-magnitude harder Mastermind instances than the standard approaches.&lt;/p&gt;</description>
+This post illustrates the problem with standard approaches, and how finding consistent candidates can be approached with &lt;a href=&#34;https://en.wikipedia.org/wiki/Boolean_satisfiability_problem&#34;&gt;SAT&lt;/a&gt; solving &amp;ndash; yielding an AI that can handle orders-of-magnitude harder Mastermind instances.&lt;/p&gt;</description>
     </item>
     <item>
       <title>Solving a Logic Synthesis Puzzle via SAT/SMT</title>

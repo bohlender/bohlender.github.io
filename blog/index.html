@@ -76,7 +76,7 @@
     </header><p>Back in the day, <a href="https://en.wikipedia.org/wiki/Mastermind_(board_game)">Mastermind</a> was a popular two player code-breaking game, and many <a href="https://en.wikipedia.org/wiki/Mastermind_(board_game)#Variations">variations thereof</a> still exist as both standalone games and puzzles within other games.
 Although it is difficult for a human player to make <em>optimal guesses</em> of the secret code, or at least guesses that do not conflict with the provided clues, the setting is usually simple enough for an AI to find such candidates via explicit exploration of the <a href="https://en.wikipedia.org/wiki/Game_tree">game tree</a>.</p>
 <p>However, such approaches becomes unfeasible when the number of possibilities for secret codes grows into the millions.
-This post illustrates the problems, and how finding consistent candidates can be approached with <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">SAT</a> solving &ndash; yielding an AI that can handle orders-of-magnitude harder Mastermind instances than the standard approaches.</p>
+This post illustrates the problem with standard approaches, and how finding consistent candidates can be approached with <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">SAT</a> solving &ndash; yielding an AI that can handle orders-of-magnitude harder Mastermind instances.</p>
 	<a class="read-more" href="https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/">
         &raquo; Read more
     </a>
@@ -135,28 +135,22 @@ This post illustrates how this, and related aspects, can be investigated with <a
         
             <article>
                 <header>
-                    <h2><a href="https://zipcpu.com/blog/2020/03/08/easyaxil.html">Buidilng an AXI-Lite slave the easy way</a></h2>
+                    <h2><a href="https://zipcpu.com/dsp/2020/03/12/quadpll.html">Adjusting our logic PLL to handle I&amp;Q</a></h2>
                     <div class="metadata">
-                        <time datetime="March 8, 2020">March 8, 2020</time>
+                        <time datetime="March 12, 2020">March 12, 2020</time>
                         <ul><li>
                             <a class="source" href="https://zipcpu.com/">The ZipCPU by Gisselquist Technology</a>
                         </li></ul>
                     </div>
                 </header>
-                <p>Since writing my first two articles on AXI-Lite, the first discussing how
-to verify the an AXI-Lite
-interface and the second
-how to build an AXI-Lite
-slave, I’ve had the
-opportunity to build not just one but several AXI-Lite slaves.
-(1,
-2,
-3,
-4,
-5,
-6, etc.)
-The cool …</p>
-	            <a class="read-more" href="https://zipcpu.com/blog/2020/03/08/easyaxil.html">
+                <p>Some time ago, I posted an article on how to create a basic logic PLL
+in Verilog.  The
+design
+was simple, basic, and easy to implement in an FPGA.  It worked by tracking
+the most significant bit of any
+sinewave
+given to it, giving it a nice gain invariance whic…</p>
+	            <a class="read-more" href="https://zipcpu.com/dsp/2020/03/12/quadpll.html">
                     &raquo; Read more
                 </a>
             </article>
