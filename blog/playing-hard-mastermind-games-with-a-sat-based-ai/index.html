@@ -18,7 +18,7 @@
             {left: `$`, right: `$`, display: false},
         ]
     });"></script>
-	<link rel="alternate" type="application/rss+xml" href="https://bohlender.github.io/blog/index.xml" title="Dimitri Bohlender" />
+	<link rel="alternate" type="application/rss+xml" href="https://bohlender.pro/blog/index.xml" title="Dimitri Bohlender" />
 	
 	
 
@@ -29,7 +29,7 @@ Although it is difficult for a human player to make optimal guesses of the secre
 However, such approaches becomes unfeasible when the number of possibilities for secret codes grows into the millions.
 This post illustrates the problem with standard approaches, and how finding consistent candidates can be approached with SAT solving &ndash; yielding an AI that can handle orders-of-magnitude harder Mastermind instances." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/" />
+<meta property="og:url" content="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/" />
 <meta property="article:published_time" content="2020-03-12T00:00:00+00:00" />
 <meta property="article:modified_time" content="2020-03-08T16:12:02+01:00" />
 <meta property="og:site_name" content="Dimitri Bohlender" />
@@ -65,7 +65,7 @@ This post illustrates the problem with standard approaches, and how finding cons
     
     <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="443" height="350" viewBox="0 0 443 350">
         <image xlink:href="/gfx/cup-rss.png" width="443" height="350"/>
-        <a href="https://bohlender.github.io/blog/index.xml" target="_top">
+        <a href="https://bohlender.pro/blog/index.xml" target="_top">
             <circle style="fill: transparent" cx="187" cy="165" r="110"/>
         </a>
     </svg>
@@ -276,7 +276,7 @@ First, we get rid of all full matches from both the <code>guess</code> and <code
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
+        <a href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
     </figcaption>
 </figure></p>
 <h3 id="example-playthrough"><a href="#example-playthrough" class="hanchor" ariaLabel="Anchor">Example Playthrough</a> </h3>
@@ -296,31 +296,31 @@ Without questioning the reasoning of the codebreaker, the following table outlin
 <table>
 <thead>
 <tr>
-<th align="center">Round</th>
-<th align="center">Guess</th>
-<th align="center">Feedback</th>
+<th style="text-align:center">Round</th>
+<th style="text-align:center">Guess</th>
+<th style="text-align:center">Feedback</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td align="center">1</td>
-<td align="center">$\textcolor{#272822}●\textcolor{#ae81ff}{●●}\textcolor{#66d9ef}{●}$</td>
-<td align="center">$(0, 1)$</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">$\textcolor{#272822}●\textcolor{#ae81ff}{●●}\textcolor{#66d9ef}{●}$</td>
+<td style="text-align:center">$(0, 1)$</td>
 </tr>
 <tr>
-<td align="center">2</td>
-<td align="center">$\textcolor{#f92672}●\textcolor{#f4bf75}{●}\textcolor{#272822}{●●}$</td>
-<td align="center">$(1, 2)$</td>
+<td style="text-align:center">2</td>
+<td style="text-align:center">$\textcolor{#f92672}●\textcolor{#f4bf75}{●}\textcolor{#272822}{●●}$</td>
+<td style="text-align:center">$(1, 2)$</td>
 </tr>
 <tr>
-<td align="center">3</td>
-<td align="center">$\textcolor{#f4bf75}●\textcolor{#a6e22e}{●}\textcolor{#272822}{●}\textcolor{#f92672}{●}$</td>
-<td align="center">$(2, 1)$</td>
+<td style="text-align:center">3</td>
+<td style="text-align:center">$\textcolor{#f4bf75}●\textcolor{#a6e22e}{●}\textcolor{#272822}{●}\textcolor{#f92672}{●}$</td>
+<td style="text-align:center">$(2, 1)$</td>
 </tr>
 <tr>
-<td align="center">4</td>
-<td align="center">$\textcolor{#a6e22e}●\textcolor{#272822}{●●}\textcolor{#f92672}{●}$</td>
-<td align="center">$(4, 0)$</td>
+<td style="text-align:center">4</td>
+<td style="text-align:center">$\textcolor{#a6e22e}●\textcolor{#272822}{●●}\textcolor{#f92672}{●}$</td>
+<td style="text-align:center">$(4, 0)$</td>
 </tr>
 </tbody>
 </table>
@@ -501,7 +501,7 @@ It requires a potential player or AI to be able to give a first guess at the beg
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
+        <a href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
     </figcaption>
 </figure></p>
 <h3 id="wheres-the-difficulty"><a href="#wheres-the-difficulty" class="hanchor" ariaLabel="Anchor">Where&rsquo;s the Difficulty?</a> </h3>
@@ -588,7 +588,7 @@ Given $|s|$ and $|\Sigma|$, we can now easily enumerate all possible secrets wit
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
+        <a href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
     </figcaption>
 </figure></p>
 <h3 id="refinement-of-consistent-candidates"><a href="#refinement-of-consistent-candidates" class="hanchor" ariaLabel="Anchor">Refinement of Consistent Candidates</a> </h3>
@@ -643,7 +643,7 @@ For every guess-feedback pair from previous rounds the following function must r
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
+        <a href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
     </figcaption>
 </figure></p>
 <p>This is exactly the approach suggested by <a href="https://doi.org/10.1145/1056635.1056637">Shapiro</a> in 1983, and a naïve implementation is provided with <code>ExplicitConsistentAi</code>:</p>
@@ -789,7 +789,7 @@ For every guess-feedback pair from previous rounds the following function must r
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
+        <a href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
     </figcaption>
 </figure>
 <p><code>self.candidates</code> stores all candidates that are consistent with the received feedback.
@@ -946,7 +946,7 @@ It enumerates the consistent combinations but only needs one candidate to be exp
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
+        <a href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
     </figcaption>
 </figure></p>
 <p>Unlike the previous approach, which incrementally refines the set of candidates w.r.t. the latest feedback, a lazily generated candidate is checked w.r.t. all of the received feedback:
@@ -1020,7 +1020,7 @@ It enumerates the consistent combinations but only needs one candidate to be exp
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
+        <a href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
     </figcaption>
 </figure></p>
 <h3 id="minimax-based-guessing"><a href="#minimax-based-guessing" class="hanchor" ariaLabel="Anchor">Minimax-based Guessing</a> </h3>
@@ -1036,126 +1036,126 @@ The following table illustrates the possible outcomes depending on the chosen $c
 <table>
 <thead>
 <tr>
-<th align="center"></th>
-<th align="center"> $(0,0,0,0)$ </th>
-<th align="center"> $(0,0,0,1)$ </th>
-<th align="center"> $(0,0,1,0)$ </th>
-<th align="center"> $(0,0,1,1)$ </th>
-<th align="center"> $\dots$ </th>
+<th style="text-align:center"></th>
+<th style="text-align:center"> $(0,0,0,0)$ </th>
+<th style="text-align:center"> $(0,0,0,1)$ </th>
+<th style="text-align:center"> $(0,0,1,0)$ </th>
+<th style="text-align:center"> $(0,0,1,1)$ </th>
+<th style="text-align:center"> $\dots$ </th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td align="center">$(0,0)$</td>
-<td align="center">$625$</td>
-<td align="center">$256$</td>
-<td align="center">$256$</td>
-<td align="center">$256$</td>
-<td align="center">$\dots$</td>
+<td style="text-align:center">$(0,0)$</td>
+<td style="text-align:center">$625$</td>
+<td style="text-align:center">$256$</td>
+<td style="text-align:center">$256$</td>
+<td style="text-align:center">$256$</td>
+<td style="text-align:center">$\dots$</td>
 </tr>
 <tr>
-<td align="center">$(0,1)$</td>
-<td align="center">$0$</td>
-<td align="center">$308$</td>
-<td align="center">$308$</td>
-<td align="center">$256$</td>
-<td align="center">$\dots$</td>
+<td style="text-align:center">$(0,1)$</td>
+<td style="text-align:center">$0$</td>
+<td style="text-align:center">$308$</td>
+<td style="text-align:center">$308$</td>
+<td style="text-align:center">$256$</td>
+<td style="text-align:center">$\dots$</td>
 </tr>
 <tr>
-<td align="center">$(0,2)$</td>
-<td align="center">$0$</td>
-<td align="center">$61$</td>
-<td align="center">$61$</td>
-<td align="center">$96$</td>
-<td align="center">$\dots$</td>
+<td style="text-align:center">$(0,2)$</td>
+<td style="text-align:center">$0$</td>
+<td style="text-align:center">$61$</td>
+<td style="text-align:center">$61$</td>
+<td style="text-align:center">$96$</td>
+<td style="text-align:center">$\dots$</td>
 </tr>
 <tr>
-<td align="center">$(0,3)$</td>
-<td align="center">$0$</td>
-<td align="center">$0$</td>
-<td align="center">$0$</td>
-<td align="center">$16$</td>
-<td align="center">$\dots$</td>
+<td style="text-align:center">$(0,3)$</td>
+<td style="text-align:center">$0$</td>
+<td style="text-align:center">$0$</td>
+<td style="text-align:center">$0$</td>
+<td style="text-align:center">$16$</td>
+<td style="text-align:center">$\dots$</td>
 </tr>
 <tr>
-<td align="center">$(0,4)$</td>
-<td align="center">$0$</td>
-<td align="center">$0$</td>
-<td align="center">$0$</td>
-<td align="center">$1$</td>
-<td align="center">$\dots$</td>
+<td style="text-align:center">$(0,4)$</td>
+<td style="text-align:center">$0$</td>
+<td style="text-align:center">$0$</td>
+<td style="text-align:center">$0$</td>
+<td style="text-align:center">$1$</td>
+<td style="text-align:center">$\dots$</td>
 </tr>
 <tr>
-<td align="center">$(1,0)$</td>
-<td align="center">$500$</td>
-<td align="center">$317$</td>
-<td align="center">$317$</td>
-<td align="center">$256$</td>
-<td align="center">$\dots$</td>
+<td style="text-align:center">$(1,0)$</td>
+<td style="text-align:center">$500$</td>
+<td style="text-align:center">$317$</td>
+<td style="text-align:center">$317$</td>
+<td style="text-align:center">$256$</td>
+<td style="text-align:center">$\dots$</td>
 </tr>
 <tr>
-<td align="center">$(1,1)$</td>
-<td align="center">$0$</td>
-<td align="center">$156$</td>
-<td align="center">$156$</td>
-<td align="center">$208$</td>
-<td align="center">$\dots$</td>
+<td style="text-align:center">$(1,1)$</td>
+<td style="text-align:center">$0$</td>
+<td style="text-align:center">$156$</td>
+<td style="text-align:center">$156$</td>
+<td style="text-align:center">$208$</td>
+<td style="text-align:center">$\dots$</td>
 </tr>
 <tr>
-<td align="center">$(1,2)$</td>
-<td align="center">$0$</td>
-<td align="center">$27$</td>
-<td align="center">$27$</td>
-<td align="center">$36$</td>
-<td align="center">$\dots$</td>
+<td style="text-align:center">$(1,2)$</td>
+<td style="text-align:center">$0$</td>
+<td style="text-align:center">$27$</td>
+<td style="text-align:center">$27$</td>
+<td style="text-align:center">$36$</td>
+<td style="text-align:center">$\dots$</td>
 </tr>
 <tr>
-<td align="center">$(1,3)$</td>
-<td align="center">$0$</td>
-<td align="center">$0$</td>
-<td align="center">$0$</td>
-<td align="center">$0$</td>
-<td align="center">$\dots$</td>
+<td style="text-align:center">$(1,3)$</td>
+<td style="text-align:center">$0$</td>
+<td style="text-align:center">$0$</td>
+<td style="text-align:center">$0$</td>
+<td style="text-align:center">$0$</td>
+<td style="text-align:center">$\dots$</td>
 </tr>
 <tr>
-<td align="center">$(2,0)$</td>
-<td align="center">$150$</td>
-<td align="center">$123$</td>
-<td align="center">$123$</td>
-<td align="center">$114$</td>
-<td align="center">$\dots$</td>
+<td style="text-align:center">$(2,0)$</td>
+<td style="text-align:center">$150$</td>
+<td style="text-align:center">$123$</td>
+<td style="text-align:center">$123$</td>
+<td style="text-align:center">$114$</td>
+<td style="text-align:center">$\dots$</td>
 </tr>
 <tr>
-<td align="center">$(2,1)$</td>
-<td align="center">$0$</td>
-<td align="center">$24$</td>
-<td align="center">$24$</td>
-<td align="center">$32$</td>
-<td align="center">$\dots$</td>
+<td style="text-align:center">$(2,1)$</td>
+<td style="text-align:center">$0$</td>
+<td style="text-align:center">$24$</td>
+<td style="text-align:center">$24$</td>
+<td style="text-align:center">$32$</td>
+<td style="text-align:center">$\dots$</td>
 </tr>
 <tr>
-<td align="center">$(2,2)$</td>
-<td align="center">$0$</td>
-<td align="center">$3$</td>
-<td align="center">$3$</td>
-<td align="center">$4$</td>
-<td align="center">$\dots$</td>
+<td style="text-align:center">$(2,2)$</td>
+<td style="text-align:center">$0$</td>
+<td style="text-align:center">$3$</td>
+<td style="text-align:center">$3$</td>
+<td style="text-align:center">$4$</td>
+<td style="text-align:center">$\dots$</td>
 </tr>
 <tr>
-<td align="center">$(3,0)$</td>
-<td align="center">$20$</td>
-<td align="center">$20$</td>
-<td align="center">$20$</td>
-<td align="center">$20$</td>
-<td align="center">$\dots$</td>
+<td style="text-align:center">$(3,0)$</td>
+<td style="text-align:center">$20$</td>
+<td style="text-align:center">$20$</td>
+<td style="text-align:center">$20$</td>
+<td style="text-align:center">$20$</td>
+<td style="text-align:center">$\dots$</td>
 </tr>
 <tr>
-<td align="center">$(4,0)$</td>
-<td align="center">$1$</td>
-<td align="center">$1$</td>
-<td align="center">$1$</td>
-<td align="center">$1$</td>
-<td align="center">$\dots$</td>
+<td style="text-align:center">$(4,0)$</td>
+<td style="text-align:center">$1$</td>
+<td style="text-align:center">$1$</td>
+<td style="text-align:center">$1$</td>
+<td style="text-align:center">$1$</td>
+<td style="text-align:center">$\dots$</td>
 </tr>
 </tbody>
 </table>
@@ -1413,8 +1413,8 @@ According to the provided table, <em>a</em> best initial guess would be $(0,0,1,
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">98
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">99
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 98
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 99
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">100
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">101
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">102
@@ -1490,7 +1490,7 @@ According to the provided table, <em>a</em> best initial guess would be $(0,0,1,
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
+        <a href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
     </figcaption>
 </figure></p>
 <p>Note that the best move may even be to gather further information and purposefully make a guess that is inconsistent with the received feedback.
@@ -1659,7 +1659,7 @@ s_{3,0} + s_{3,1} + s_{3,2} + s_{3,3} + s_{3,4} + s_{3,5} &= 1\\
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
+        <a href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
     </figcaption>
 </figure></p>
 <h3 id="encoding-full-matches"><a href="#encoding-full-matches" class="hanchor" ariaLabel="Anchor">Encoding Full Matches</a> </h3>
@@ -1826,7 +1826,7 @@ s_{3,1} &= \mathit{fm}_3
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
+        <a href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
     </figcaption>
 </figure></p>
 <aside>
@@ -2198,7 +2198,7 @@ self<span style="color:#f92672">.</span>solver<span style="color:#f92672">.</spa
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
+        <a href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
     </figcaption>
 </figure></p>
 <p>Note that we treat the $\mathit{sm}_{\mathit{src},\mathit{dst}}$ variables similar to the feedback-specific $\mathit{fm}_\mathit{pos}$ variables: we introduce fresh ones for every feedback.</p>
@@ -2387,7 +2387,7 @@ Luckily, we can delegate this task to a SAT solver.</p>
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
+        <a href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
     </figcaption>
 </figure></p>
 <p>That&rsquo;s all there is to it.
@@ -2400,69 +2400,69 @@ The following table provides both a qualitative and quantitative comparison of t
 <table>
 <thead>
 <tr>
-<th align="center">$|s|,|\Sigma|$ </th>
-<th align="center"> Games Played </th>
-<th align="center"> Avg. Turns </th>
-<th align="center"> Max. Turns </th>
-<th align="center"> Avg. Game Time </th>
+<th style="text-align:center">$|s|,|\Sigma|$ </th>
+<th style="text-align:center"> Games Played </th>
+<th style="text-align:center"> Avg. Turns </th>
+<th style="text-align:center"> Max. Turns </th>
+<th style="text-align:center"> Avg. Game Time </th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td align="center">4, 6</td>
-<td align="center">all 1 296</td>
-<td align="center">5.765 / 4.659</td>
-<td align="center">9 / 7</td>
-<td align="center">2ms / 17ms</td>
+<td style="text-align:center">4, 6</td>
+<td style="text-align:center">all 1 296</td>
+<td style="text-align:center">5.765 / 4.659</td>
+<td style="text-align:center">9 / 7</td>
+<td style="text-align:center">2ms / 17ms</td>
 </tr>
 <tr>
-<td align="center">5, 6</td>
-<td align="center">all 7 776</td>
-<td align="center">6.218 / 5.100</td>
-<td align="center">11 / 8</td>
-<td align="center">11ms / 34ms</td>
+<td style="text-align:center">5, 6</td>
+<td style="text-align:center">all 7 776</td>
+<td style="text-align:center">6.218 / 5.100</td>
+<td style="text-align:center">11 / 8</td>
+<td style="text-align:center">11ms / 34ms</td>
 </tr>
 <tr>
-<td align="center">6, 6</td>
-<td align="center">all 46 656</td>
-<td align="center">6.735 / 5.572</td>
-<td align="center">12 / 9</td>
-<td align="center">71ms / 60ms</td>
+<td style="text-align:center">6, 6</td>
+<td style="text-align:center">all 46 656</td>
+<td style="text-align:center">6.735 / 5.572</td>
+<td style="text-align:center">12 / 9</td>
+<td style="text-align:center">71ms / 60ms</td>
 </tr>
 <tr>
-<td align="center">7, 6</td>
-<td align="center">10 000</td>
-<td align="center">7.301 / 6.072</td>
-<td align="center">11 / 9</td>
-<td align="center">466ms / 101ms</td>
+<td style="text-align:center">7, 6</td>
+<td style="text-align:center">10 000</td>
+<td style="text-align:center">7.301 / 6.072</td>
+<td style="text-align:center">11 / 9</td>
+<td style="text-align:center">466ms / 101ms</td>
 </tr>
 <tr>
-<td align="center">8, 6</td>
-<td align="center">1 000</td>
-<td align="center">7.874 / 6.560</td>
-<td align="center">12 / 10</td>
-<td align="center">3s / 161ms</td>
+<td style="text-align:center">8, 6</td>
+<td style="text-align:center">1 000</td>
+<td style="text-align:center">7.874 / 6.560</td>
+<td style="text-align:center">12 / 10</td>
+<td style="text-align:center">3s / 161ms</td>
 </tr>
 <tr>
-<td align="center">9, 6</td>
-<td align="center">10 000</td>
-<td align="center">? / 7.237</td>
-<td align="center">? / 11</td>
-<td align="center">? / 263ms</td>
+<td style="text-align:center">9, 6</td>
+<td style="text-align:center">10 000</td>
+<td style="text-align:center">? / 7.237</td>
+<td style="text-align:center">? / 11</td>
+<td style="text-align:center">? / 263ms</td>
 </tr>
 <tr>
-<td align="center">10, 6</td>
-<td align="center">10 000</td>
-<td align="center">? / 7.901</td>
-<td align="center">? / 12</td>
-<td align="center">? / 413ms</td>
+<td style="text-align:center">10, 6</td>
+<td style="text-align:center">10 000</td>
+<td style="text-align:center">? / 7.901</td>
+<td style="text-align:center">? / 12</td>
+<td style="text-align:center">? / 413ms</td>
 </tr>
 <tr>
-<td align="center">16, 6</td>
-<td align="center">1 000</td>
-<td align="center">? / 10.51</td>
-<td align="center">? / 15</td>
-<td align="center">? / 6.6s</td>
+<td style="text-align:center">16, 6</td>
+<td style="text-align:center">1 000</td>
+<td style="text-align:center">? / 10.51</td>
+<td style="text-align:center">? / 15</td>
+<td style="text-align:center">? / 6.6s</td>
 </tr>
 </tbody>
 </table>
@@ -2509,21 +2509,41 @@ Depending on the chosen approach, it might help to look into <a href="https://en
 		
 			<article>
     <header>
-        <h2><a href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/">Solving a Logic Synthesis Puzzle via SAT/SMT</a></h2>
+        <h2><a href="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/">Generating Crosswords via SAT/SMT</a></h2>
+        <div class="metadata">
+    <time datetime="2020-10-24">October 24, 2020</time>
+    <ul>
+        <li><a class="tag-block" href="/tags/sat">SAT</a></li>
+        <li><a class="tag-block" href="/tags/puzzle">Puzzle</a></li>
+    </ul>
+</div>
+    </header><p>Recently I got interested in designing personalised crosswords as a way to spice up photo book presents.
+This made me realise how hard generating <q>high-quality</q> crosswords actually is.
+Trying to create a crossword from a set of words &ndash; or a subset thereof &ndash; I checked out several tools but found all of them to be based on heuristics and yield rather sparse crosswords.</p>
+<p>In line with the general theme of my previous posts, this one illustrates how we can leverage <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">SAT solving</a> to solve this problem.
+In contrast to related approaches, which assume a fixed word placement and search for fitting words, we consider word placement as part of the problem and eventually end up with an integrated solution to generating crosswords of adjustable quality.</p>
+	<a class="read-more" href="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/">
+        &raquo; Read more
+    </a>
+</article>
+		
+			<article>
+    <header>
+        <h2><a href="https://bohlender.pro/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/">Solving a Logic Synthesis Puzzle via SAT/SMT</a></h2>
         <div class="metadata">
     <time datetime="2019-12-12">December 12, 2019</time>
     <ul>
-        <li><a class="tag-block" href="/tags/sat">sat</a></li>
-        <li><a class="tag-block" href="/tags/smt">smt</a></li>
-        <li><a class="tag-block" href="/tags/logic-synthesis">logic synthesis</a></li>
-        <li><a class="tag-block" href="/tags/puzzle">puzzle</a></li>
+        <li><a class="tag-block" href="/tags/sat">SAT</a></li>
+        <li><a class="tag-block" href="/tags/smt">SMT</a></li>
+        <li><a class="tag-block" href="/tags/logic-synthesis">Logic Synthesis</a></li>
+        <li><a class="tag-block" href="/tags/puzzle">Puzzle</a></li>
     </ul>
 </div>
     </header><p>A few weeks ago, I was asked the following riddle:
 <q>Design a <a href="https://en.wikipedia.org/wiki/Logic_gate">logic circuit</a> with three inputs and three outputs, such that the outputs are the inverted inputs. You may use arbitrary many AND and OR gates, but at most two NOT gates</q>.
 Although the characterisation of this problem as an <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a> instance is straightforward, I found it necessary to reduce it to <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">SAT</a> and incorporate further assumptions to achieve reasonable performance.</p>
 <p>This post illustrates said process, ranging from the original idea to a standard formulation of SAT-based logic synthesis to a problem-specific and more constrained instance.</p>
-	<a class="read-more" href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/">
+	<a class="read-more" href="https://bohlender.pro/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/">
         &raquo; Read more
     </a>
 </article>

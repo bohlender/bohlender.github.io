@@ -18,7 +18,7 @@
             {left: `$`, right: `$`, display: false},
         ]
     });"></script>
-	<link rel="alternate" type="application/rss+xml" href="https://bohlender.github.io/blog/index.xml" title="Dimitri Bohlender" />
+	<link rel="alternate" type="application/rss+xml" href="https://bohlender.pro/blog/index.xml" title="Dimitri Bohlender" />
 	
 	
 
@@ -29,11 +29,11 @@ Design a logic circuit with three inputs and three outputs, such that the output
 Although the characterisation of this problem as an SMT instance is straightforward, I found it necessary to reduce it to SAT and incorporate further assumptions to achieve reasonable performance.
 This post illustrates said process, ranging from the original idea to a standard formulation of SAT-based logic synthesis to a problem-specific and more constrained instance." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/" />
-<meta property="og:image" content="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gfx/full_adder.svg" />
-<meta property="og:image" content="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gfx/puzzle.svg" />
-<meta property="og:image" content="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gfx/schematic_v1.svg" />
-<meta property="og:image" content="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gfx/schematic_v2.svg" />
+<meta property="og:url" content="https://bohlender.pro/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/" />
+<meta property="og:image" content="https://bohlender.pro/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gfx/full_adder.svg" />
+<meta property="og:image" content="https://bohlender.pro/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gfx/puzzle.svg" />
+<meta property="og:image" content="https://bohlender.pro/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gfx/schematic_v1.svg" />
+<meta property="og:image" content="https://bohlender.pro/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gfx/schematic_v2.svg" />
 <meta property="article:published_time" content="2019-12-12T00:00:00+00:00" />
 <meta property="article:modified_time" content="2019-11-30T22:54:10+01:00" />
 <meta property="og:site_name" content="Dimitri Bohlender" />
@@ -41,10 +41,10 @@ This post illustrates said process, ranging from the original idea to a standard
 <meta property="article:author" content="https://facebook.com/balddenimhero" />
 <meta property="article:publisher" content="https://facebook.com/balddenimhero" />
 <meta property="article:section" content="blog" />
-<meta property="article:tag" content="sat" />
-<meta property="article:tag" content="smt" />
-<meta property="article:tag" content="logic synthesis" />
-<meta property="article:tag" content="puzzle" />
+<meta property="article:tag" content="SAT" />
+<meta property="article:tag" content="SMT" />
+<meta property="article:tag" content="Logic Synthesis" />
+<meta property="article:tag" content="Puzzle" />
 
 	
 	<title>Solving a Logic Synthesis Puzzle via SAT/SMT | Dimitri Bohlender</title>
@@ -70,7 +70,7 @@ This post illustrates said process, ranging from the original idea to a standard
     
     <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="443" height="350" viewBox="0 0 443 350">
         <image xlink:href="/gfx/cup-rss.png" width="443" height="350"/>
-        <a href="https://bohlender.github.io/blog/index.xml" target="_top">
+        <a href="https://bohlender.pro/blog/index.xml" target="_top">
             <circle style="fill: transparent" cx="187" cy="165" r="110"/>
         </a>
     </svg>
@@ -86,10 +86,10 @@ This post illustrates said process, ranging from the original idea to a standard
 				<div class="metadata">
     <time datetime="2019-12-12">December 12, 2019</time>
     <ul>
-        <li><a class="tag-block" href="/tags/sat">sat</a></li>
-        <li><a class="tag-block" href="/tags/smt">smt</a></li>
-        <li><a class="tag-block" href="/tags/logic-synthesis">logic synthesis</a></li>
-        <li><a class="tag-block" href="/tags/puzzle">puzzle</a></li>
+        <li><a class="tag-block" href="/tags/sat">SAT</a></li>
+        <li><a class="tag-block" href="/tags/smt">SMT</a></li>
+        <li><a class="tag-block" href="/tags/logic-synthesis">Logic Synthesis</a></li>
+        <li><a class="tag-block" href="/tags/puzzle">Puzzle</a></li>
     </ul>
 </div>
 			</header>
@@ -124,7 +124,7 @@ Gates with larger <a href="https://en.wikipedia.org/wiki/Fan-in">fan-in</a> can 
 
 
 
-<figure class="figure-outer">
+<figure class="figure-outer" id="generic-1-gate-circuit">
     <figure class="figure-inner">
         <img src="gfx/schematic_v1.svg" width="180px"/> 
             <figcaption>
@@ -169,7 +169,7 @@ With this in mind, reconsidering the wiring from our schematic, only $g_{0,3}$ a
 
 
 
-<figure class="figure-outer">
+<figure class="figure-outer" id="connection-variables">
     <figure class="figure-inner">
         <img src="gfx/schematic_v2.svg" width="240px"/> 
             <figcaption>
@@ -225,7 +225,7 @@ This yields an <a href="https://en.wikipedia.org/wiki/Equisatisfiability">equisa
 <p>If there is an interpretation that satisfies $(2)$, then it can be extended to an interpretation that satisfies $(3)$ by picking appropriate values for $g_{i,j}$ and $c_{i,j,k}$ and vice versa.</p>
 <p>Conceptually, <strong>that&rsquo;s all there is to characterising a generic logic synthesis</strong> problem in <a href="https://en.wikipedia.org/wiki/First-order_logic">first-order logic</a>.
 However, to solve the introductory riddle we still have to restrict the functions $f_i$ to AND, OR and at most two NOTs.</p>
-<p>Restricting the $f_i$ to AND, OR and NOT amounts to constraining each $f_i$ to these operators&rsquo; truth tables, i.e. also assert for each $f_i$:
+<p>Restricting the $f_i$ to AND, OR and NOT amounts to constraining each $f_i$ to these operators' truth tables, i.e. also assert for each $f_i$:
 <div>$$ 
 \begin{aligned}
     &(\neg f_i(0,0) \wedge \neg f_i(0, 1) \wedge \neg f_i(1,0) \wedge f_i(1, 1))\\
@@ -335,7 +335,7 @@ outputs <span style="color:#f92672">=</span> [g0, g1, g2]</code></pre></td></tr>
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_smt2.py">gen_smt2.py</a>
+        <a href="https://bohlender.pro/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_smt2.py">gen_smt2.py</a>
     </figcaption>
 </figure></p>
 <p>Providing the number of inputs and inner gates to consider, we can create lists of the corresponding variables $x_i$ and their uninterpreted functions $f_i:\mathbb{B}^2\rightarrow\mathbb{B}$ as follows:
@@ -429,7 +429,7 @@ f <span style="color:#f92672">=</span> [Function(<span style="color:#e6db74">&#3
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_smt2.py">gen_smt2.py</a>
+        <a href="https://bohlender.pro/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_smt2.py">gen_smt2.py</a>
     </figcaption>
 </figure></p>
 <p>The characterisation of possible output connections strongly follows the scheme shown in $(3)$.
@@ -545,7 +545,7 @@ It is also asserted that at least one $g_{i,j}$ for each $g_i$ must be $\mathit{
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_smt2.py">gen_smt2.py</a>
+        <a href="https://bohlender.pro/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_smt2.py">gen_smt2.py</a>
     </figcaption>
 </figure></p>
 <p>The characterisation of possible gate connections is very similar.
@@ -668,7 +668,7 @@ The enumeration of relevant input combinations can be achieved comfortably via <
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_smt2.py">gen_smt2.py</a>
+        <a href="https://bohlender.pro/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_smt2.py">gen_smt2.py</a>
     </figcaption>
 </figure></p>
 <p>Finally, the code for the riddle-specific additional constraints of $f_i$ closely resembles the constraints shown in the end of the previous section:
@@ -798,7 +798,7 @@ The enumeration of relevant input combinations can be achieved comfortably via <
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_smt2.py">gen_smt2.py</a>
+        <a href="https://bohlender.pro/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_smt2.py">gen_smt2.py</a>
     </figcaption>
 </figure></p>
 <p>All that remains is simplifying these constraints and acquiring their <a href="http://smtlib.cs.uiowa.edu/papers/smt-lib-reference-v2.6-r2017-07-18.pdf">SMT-LIB representation</a> &ndash; the common exchange format for SMT solvers:
@@ -892,7 +892,7 @@ s<span style="color:#f92672">.</span>add(quantified)
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_smt2.py">gen_smt2.py</a>
+        <a href="https://bohlender.pro/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_smt2.py">gen_smt2.py</a>
     </figcaption>
 </figure></p>
 <aside>
@@ -972,7 +972,7 @@ outputs <span style="color:#f92672">=</span> [sum, carry]</code></pre></td></tr>
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_smt2.py">gen_smt2.py</a>
+        <a href="https://bohlender.pro/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_smt2.py">gen_smt2.py</a>
     </figcaption>
 </figure></p>
 <p>Feel free to experiment with <a href="gen_smt2.py">the implementation</a>, feed the generated instances into SMT solvers, and interpret the found solutions before continuing with the SAT-based approach.
@@ -985,7 +985,7 @@ The solution I get from Z3 describes the following circuit:
 
 
 
-<figure class="figure-outer">
+<figure class="figure-outer" id="visualisation-of-synthesised-full-adder">
     <figure class="figure-inner">
         <img src="gfx/full_adder.svg" width="350px"/> 
             <figcaption>
@@ -1008,7 +1008,7 @@ As with the cardinality constraints, Z3 does this automatically for us.
 </aside></p>
 <h3 id="eliminating-the-existential-quantifier"><a href="#eliminating-the-existential-quantifier" class="hanchor" ariaLabel="Anchor">Eliminating the Existential Quantifier</a> </h3>
 <p>The first step of this reduction is understanding the $\exists$-quantified gate outputs as functions of the $\forall$-quantified circuit inputs.
-Clearly, the gates&rsquo; outputs depend on the current inputs.
+Clearly, the gates' outputs depend on the current inputs.
 With this in mind, our example constraint $(3)$ can be rewritten as follows:
 <div>$$ 
 \tag{4}
@@ -1024,7 +1024,7 @@ With this in mind, our example constraint $(3)$ can be rewritten as follows:
 \wedge &~ (c_{3,0,1} \vee c_{3,0,2} \vee c_{3,1,2})
 \end{aligned}
  $$</div></p>
-<p>One detail that is easily overlooked is that the inner gates&rsquo; inputs are not guaranteed to be constants, such as $x_0,x_1$ and $x_2$, but may be function evaluations.
+<p>One detail that is easily overlooked is that the inner gates' inputs are not guaranteed to be constants, such as $x_0,x_1$ and $x_2$, but may be function evaluations.
 For example, if we were to characterise a generic circuit with $n=2$ inner gates, the following clause would surface (among others):
 $$\tag{5} c_{4,0,3} \rightarrow x_4(x_0,x_1,x_2) = f_4(x_0,x_3(x_0,x_1,x_2))$$</p>
 <h3 id="eliminating-the-universal-quantifier"><a href="#eliminating-the-universal-quantifier" class="hanchor" ariaLabel="Anchor">Eliminating the Universal Quantifier</a> </h3>
@@ -1097,7 +1097,7 @@ Since we&rsquo;re dealing with functions over Booleans, we can simply introduce 
 </aside></p>
 <p>For example, a gate $f_4:\mathbb{B}^2\rightarrow \mathbb{B}$ can be encoded by an assignment to the four variables
 $$ f_{4,(0,0)}, f_{4,(0,1)}, f_{4,(1,0)}, f_{4,(1,1)} $$
-each of which represents an entry of $f_4$'s truth table.
+each of which represents an entry of $f_4$&rsquo;s truth table.
 Similarly, a function $x_i:\mathbb{B}^3\rightarrow \mathbb{B}$ will be blasted into $2^3$ variables $x_{i,(0,0,0)}, \dots, x_{i,(1,1,1)}$ to refer to the value of $x_i$ for different inputs.</p>
 <p>Since the elimination of all uninterpreted functions from $(6)$ would take too much space, I will illustrate the approach on a single but generic clause:
 $$ c_{i,j,k} \rightarrow x_i(0,0,0) = f_i(x_j(0,0,0),x_k(0,0,0)) $$</p>
@@ -1260,7 +1260,7 @@ f <span style="color:#f92672">=</span> [[Bool(<span style="color:#e6db74">&#34;f
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_sat.py">gen_sat.py</a>
+        <a href="https://bohlender.pro/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_sat.py">gen_sat.py</a>
     </figcaption>
 </figure></p>
 <p>Due to this indexing of variables, the restriction of $f_i$ has to be adapted slightly too.
@@ -1325,7 +1325,7 @@ is_not <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_sat.py">gen_sat.py</a>
+        <a href="https://bohlender.pro/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_sat.py">gen_sat.py</a>
     </figcaption>
 </figure></p>
 <p>Besides the indexing, the implementation uses the very same reduction to SAT that has been sketched above, and maintains the general structure of the SMT-oriented implementation.
@@ -1460,7 +1460,7 @@ subgoals <span style="color:#f92672">=</span> to_cnf(goal)
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_sat.py">gen_sat.py</a>
+        <a href="https://bohlender.pro/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_sat.py">gen_sat.py</a>
     </figcaption>
 </figure></p>
 <p>Z3 provides <a href="http://theory.stanford.edu/~nikolaj/programmingz3.html#sec-tactics">tactics</a> that can be applied to a set of constraints.
@@ -1538,7 +1538,7 @@ We can enforce these connections by extending our <a href="gen_sat.py">generic S
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_puzzle.py">gen_puzzle.py</a>
+        <a href="https://bohlender.pro/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_puzzle.py">gen_puzzle.py</a>
     </figcaption>
 </figure></p>
 <p>With these additional constraints, it took an old i5-4690 CPU <a href="puzzle.log">about 30min</a> to solve the <a href="puzzle.cnf">corresponding SAT instance</a> with <strong>19 inner gates</strong>.
@@ -1550,7 +1550,7 @@ The synthesised circuit looks as follows:
 
 
 
-<figure class="figure-outer">
+<figure class="figure-outer" id="solution-to-puzzle">
     <figure class="figure-inner">
         <img src="gfx/puzzle.svg" width="500px"/> 
             <figcaption>
@@ -1605,38 +1605,58 @@ It might also be possible to solve this with the logic synthesis tools mentioned
 		
 			<article>
     <header>
-        <h2><a href="https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/">Playing Hard Mastermind Games with a SAT-based AI</a></h2>
+        <h2><a href="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/">Generating Crosswords via SAT/SMT</a></h2>
         <div class="metadata">
-    <time datetime="2020-03-12">March 12, 2020</time>
+    <time datetime="2020-10-24">October 24, 2020</time>
     <ul>
-        <li><a class="tag-block" href="/tags/sat">sat</a></li>
-        <li><a class="tag-block" href="/tags/ai">ai</a></li>
-        <li><a class="tag-block" href="/tags/puzzle">puzzle</a></li>
+        <li><a class="tag-block" href="/tags/sat">SAT</a></li>
+        <li><a class="tag-block" href="/tags/puzzle">Puzzle</a></li>
     </ul>
 </div>
-    </header><p>Back in the day, <a href="https://en.wikipedia.org/wiki/Mastermind_(board_game)">Mastermind</a> was a popular two player code-breaking game, and many <a href="https://en.wikipedia.org/wiki/Mastermind_(board_game)#Variations">variations thereof</a> still exist as both standalone games and puzzles within other games.
-Although it is difficult for a human player to make <em>optimal guesses</em> of the secret code, or at least guesses that do not conflict with the provided clues, the setting is usually simple enough for an AI to find such candidates via explicit exploration of the <a href="https://en.wikipedia.org/wiki/Game_tree">game tree</a>.</p>
-<p>However, such approaches becomes unfeasible when the number of possibilities for secret codes grows into the millions.
-This post illustrates the problem with standard approaches, and how finding consistent candidates can be approached with <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">SAT</a> solving &ndash; yielding an AI that can handle orders-of-magnitude harder Mastermind instances.</p>
-	<a class="read-more" href="https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/">
+    </header><p>Recently I got interested in designing personalised crosswords as a way to spice up photo book presents.
+This made me realise how hard generating <q>high-quality</q> crosswords actually is.
+Trying to create a crossword from a set of words &ndash; or a subset thereof &ndash; I checked out several tools but found all of them to be based on heuristics and yield rather sparse crosswords.</p>
+<p>In line with the general theme of my previous posts, this one illustrates how we can leverage <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">SAT solving</a> to solve this problem.
+In contrast to related approaches, which assume a fixed word placement and search for fitting words, we consider word placement as part of the problem and eventually end up with an integrated solution to generating crosswords of adjustable quality.</p>
+	<a class="read-more" href="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/">
         &raquo; Read more
     </a>
 </article>
 		
 			<article>
     <header>
-        <h2><a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/">SMT-based Reasoning About the Fast Inverse Square Root</a></h2>
+        <h2><a href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/">Playing Hard Mastermind Games with a SAT-based AI</a></h2>
+        <div class="metadata">
+    <time datetime="2020-03-12">March 12, 2020</time>
+    <ul>
+        <li><a class="tag-block" href="/tags/sat">SAT</a></li>
+        <li><a class="tag-block" href="/tags/ai">AI</a></li>
+        <li><a class="tag-block" href="/tags/puzzle">Puzzle</a></li>
+    </ul>
+</div>
+    </header><p>Back in the day, <a href="https://en.wikipedia.org/wiki/Mastermind_(board_game)">Mastermind</a> was a popular two player code-breaking game, and many <a href="https://en.wikipedia.org/wiki/Mastermind_(board_game)#Variations">variations thereof</a> still exist as both standalone games and puzzles within other games.
+Although it is difficult for a human player to make <em>optimal guesses</em> of the secret code, or at least guesses that do not conflict with the provided clues, the setting is usually simple enough for an AI to find such candidates via explicit exploration of the <a href="https://en.wikipedia.org/wiki/Game_tree">game tree</a>.</p>
+<p>However, such approaches becomes unfeasible when the number of possibilities for secret codes grows into the millions.
+This post illustrates the problem with standard approaches, and how finding consistent candidates can be approached with <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">SAT</a> solving &ndash; yielding an AI that can handle orders-of-magnitude harder Mastermind instances.</p>
+	<a class="read-more" href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/">
+        &raquo; Read more
+    </a>
+</article>
+		
+			<article>
+    <header>
+        <h2><a href="https://bohlender.pro/blog/smt-based-optimisation-of-fast-inverse-square-root/">SMT-based Reasoning About the Fast Inverse Square Root</a></h2>
         <div class="metadata">
     <time datetime="2019-09-26">September 26, 2019</time>
     <ul>
-        <li><a class="tag-block" href="/tags/smt">smt</a></li>
-        <li><a class="tag-block" href="/tags/smt-lib">smt-lib</a></li>
-        <li><a class="tag-block" href="/tags/software-verification">software verification</a></li>
+        <li><a class="tag-block" href="/tags/smt">SMT</a></li>
+        <li><a class="tag-block" href="/tags/smt-lib">SMT-LIB</a></li>
+        <li><a class="tag-block" href="/tags/software-verification">Software Verification</a></li>
     </ul>
 </div>
     </header><p>While there is a <a href="https://web.archive.org/web/20160308091758/http://www.daxia.com/bibis/upload/406Fast_Inverse_Square_Root.pdf">mathematical explanation</a> for the choice of <code>0x5F3759DF</code> in the <a href="https://en.wikipedia.org/wiki/Fast_inverse_square_root">famous bit-level hack</a> for approximating the multiplicative inverse of the square root of a 32-bit floating-point number, it is not immediately clear to what extent the reasoning is really applicable in the context of machine data types and their peculiarities.
 This post illustrates how this, and related aspects, can be investigated with <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a>-based reasoning about the actual implementation.</p>
-	<a class="read-more" href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/">
+	<a class="read-more" href="https://bohlender.pro/blog/smt-based-optimisation-of-fast-inverse-square-root/">
         &raquo; Read more
     </a>
 </article>

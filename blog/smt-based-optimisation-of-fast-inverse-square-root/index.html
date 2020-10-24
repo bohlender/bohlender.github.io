@@ -18,7 +18,7 @@
             {left: `$`, right: `$`, display: false},
         ]
     });"></script>
-	<link rel="alternate" type="application/rss+xml" href="https://bohlender.github.io/blog/index.xml" title="Dimitri Bohlender" />
+	<link rel="alternate" type="application/rss+xml" href="https://bohlender.pro/blog/index.xml" title="Dimitri Bohlender" />
 	
 	
 
@@ -27,7 +27,7 @@
 <meta property="og:description" content="While there is a mathematical explanation for the choice of 0x5F3759DF in the famous bit-level hack for approximating the multiplicative inverse of the square root of a 32-bit floating-point number, it is not immediately clear to what extent the reasoning is really applicable in the context of machine data types and their peculiarities.
 This post illustrates how this, and related aspects, can be investigated with SMT-based reasoning about the actual implementation." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/" />
+<meta property="og:url" content="https://bohlender.pro/blog/smt-based-optimisation-of-fast-inverse-square-root/" />
 <meta property="article:published_time" content="2019-09-26T00:00:00+00:00" />
 <meta property="article:modified_time" content="2019-09-12T09:31:28+02:00" />
 <meta property="og:site_name" content="Dimitri Bohlender" />
@@ -35,9 +35,9 @@ This post illustrates how this, and related aspects, can be investigated with SM
 <meta property="article:author" content="https://facebook.com/balddenimhero" />
 <meta property="article:publisher" content="https://facebook.com/balddenimhero" />
 <meta property="article:section" content="blog" />
-<meta property="article:tag" content="smt" />
-<meta property="article:tag" content="smt-lib" />
-<meta property="article:tag" content="software verification" />
+<meta property="article:tag" content="SMT" />
+<meta property="article:tag" content="SMT-LIB" />
+<meta property="article:tag" content="Software Verification" />
 
 	
 	<title>SMT-based Reasoning About the Fast Inverse Square Root | Dimitri Bohlender</title>
@@ -63,7 +63,7 @@ This post illustrates how this, and related aspects, can be investigated with SM
     
     <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="443" height="350" viewBox="0 0 443 350">
         <image xlink:href="/gfx/cup-rss.png" width="443" height="350"/>
-        <a href="https://bohlender.github.io/blog/index.xml" target="_top">
+        <a href="https://bohlender.pro/blog/index.xml" target="_top">
             <circle style="fill: transparent" cx="187" cy="165" r="110"/>
         </a>
     </svg>
@@ -79,9 +79,9 @@ This post illustrates how this, and related aspects, can be investigated with SM
 				<div class="metadata">
     <time datetime="2019-09-26">September 26, 2019</time>
     <ul>
-        <li><a class="tag-block" href="/tags/smt">smt</a></li>
-        <li><a class="tag-block" href="/tags/smt-lib">smt-lib</a></li>
-        <li><a class="tag-block" href="/tags/software-verification">software verification</a></li>
+        <li><a class="tag-block" href="/tags/smt">SMT</a></li>
+        <li><a class="tag-block" href="/tags/smt-lib">SMT-LIB</a></li>
+        <li><a class="tag-block" href="/tags/software-verification">Software Verification</a></li>
     </ul>
 </div>
 			</header>
@@ -164,11 +164,11 @@ For this post, let <code>Q_rsqrt</code> be correct if it achieves a maximum rela
 <p>Instead of investigating the property of interest through testing, or exhaustive exploration of possible in- and outputs, symbolic verification is based on characterising semantics in terms of constraints in <a href="https://en.wikipedia.org/wiki/First-order_logic">first-order logic</a>, and reasoning about their satisfiability.</p>
 <p>Just as $x^2+y^2 = 1$ characterises all points on the <a href="https://en.wikipedia.org/wiki/Unit_circle">unit circle</a>, we will establish constraints to characterise all realisable executions of <code>Q_rsqrt</code> &ndash; the essential difference to our use-case being that program variables are ultimately just fixed-size bit vectors, while $x,y\in \mathbb{R}$.
 A percise characterisation of program semantics has to take all the peculiarities of machine represented numbers into account, such as overflows, rounding errors and exceptions.</p>
-<p>The actual heavy lifting, that is checking the constraints&rsquo; satisfiability, is typically accomplished with an <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a> solver.
+<p>The actual heavy lifting, that is checking the constraints' satisfiability, is typically accomplished with an <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a> solver.
 Providing a proper characterisation of program semantics and properties of interest is up to us.
 Luckily the <a href="http://smtlib.cs.uiowa.edu/">SMT-LIB</a> standard provides a common language and interface that most SMT solvers are compliant with.
 In particular, it specifies the types and operations relevant for software verification.</p>
-<p>In the following we characterise both $\eta(x)$ and <code>Q_rsqrt</code> in SMT-LIB, using <a href="maxRelErr.c">this brute force search for the maximum relative error</a> as a reference for the functions&rsquo; expected outputs.
+<p>In the following we characterise both $\eta(x)$ and <code>Q_rsqrt</code> in SMT-LIB, using <a href="maxRelErr.c">this brute force search for the maximum relative error</a> as a reference for the functions' expected outputs.
 The characterisation is standard so feel free to skip it if you&rsquo;re just interested in finding out whether SMT solvers can handle the arising floating-point and bit vector constraints.</p>
 <h3 id="characterising-the-relative-error"><a href="#characterising-the-relative-error" class="hanchor" ariaLabel="Anchor">Characterising the Relative Error</a> </h3>
 <p>To start with a simple function, consider the following implementation of $\eta$ taken from our reference implementation.
@@ -227,7 +227,7 @@ Just as in $(1)$, it computes $\eta(x)$ from $\sqrt x$ and $\mathit{Q\_rsqrt}(x)
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/maxRelErr.c">maxRelErr.c</a>
+        <a href="https://bohlender.pro/blog/smt-based-optimisation-of-fast-inverse-square-root/maxRelErr.c">maxRelErr.c</a>
     </figcaption>
 </figure></p>
 <p>This already looks pretty much like a constraint that relates inputs and outputs, but what is wrong with something along the lines of</p>
@@ -318,7 +318,7 @@ Such decoupling of progamming languages and IRs, that all reasoning is actually 
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/maxRelErr.ll">maxRelErr.ll</a>
+        <a href="https://bohlender.pro/blog/smt-based-optimisation-of-fast-inverse-square-root/maxRelErr.ll">maxRelErr.ll</a>
     </figcaption>
 </figure>
 <p>Given this representation, all potential subtleties become explicit.
@@ -450,7 +450,7 @@ There is no branching of control flow, making the characterisation pretty straig
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.smt2">invsqrt.smt2</a>
+        <a href="https://bohlender.pro/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.smt2">invsqrt.smt2</a>
     </figcaption>
 </figure>
 <p>While this post is not a tutorial on the <a href="http://smtlib.cs.uiowa.edu/papers/smt-lib-reference-v2.6-r2017-07-18.pdf">SMT-LIB language</a>, it should still be pretty easy to get the general idea and intuition.
@@ -592,7 +592,7 @@ To be able to experiment with different constants in the hack later, we introduc
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/maxRelErr.c">maxRelErr.c</a>
+        <a href="https://bohlender.pro/blog/smt-based-optimisation-of-fast-inverse-square-root/maxRelErr.c">maxRelErr.c</a>
     </figcaption>
 </figure>
 <p>Compiling this to LLVM IR yields the following for both 32 and 64-bit targets:</p>
@@ -722,7 +722,7 @@ To be able to experiment with different constants in the hack later, we introduc
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/maxRelErr.ll">maxRelErr.ll</a>
+        <a href="https://bohlender.pro/blog/smt-based-optimisation-of-fast-inverse-square-root/maxRelErr.ll">maxRelErr.ll</a>
     </figcaption>
 </figure>
 <p>This example illustrates another advantage of characterising an IR over directly translating the source code.
@@ -957,7 +957,7 @@ As before, we introduce auxiliary functions <code>f0.5</code> and <code>f1.5</co
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.smt2">invsqrt.smt2</a>
+        <a href="https://bohlender.pro/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.smt2">invsqrt.smt2</a>
     </figcaption>
 </figure>
 <p>Two points may need further clarification though:</p>
@@ -1096,7 +1096,7 @@ The naïve reference implementation finds the <strong>input <code>0x016EB3C0</co
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.smt2">invsqrt.smt2</a>
+        <a href="https://bohlender.pro/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.smt2">invsqrt.smt2</a>
     </figcaption>
 </figure>
 <p>Feeding these constraints into an SMT solver, such as <a href="https://github.com/Z3Prover/z3/">Z3</a>, will return that they are indeed satisfiable.
@@ -1295,7 +1295,7 @@ true</code></pre></td></tr></table>
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.log">invsqrt.log</a>
+        <a href="https://bohlender.pro/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.log">invsqrt.log</a>
     </figcaption>
 </figure>
 <h3 id="checking-correctness"><a href="#checking-correctness" class="hanchor" ariaLabel="Anchor">Checking Correctness</a> </h3>
@@ -1452,7 +1452,7 @@ To prove that the relative error never exceeds 1% for any float, we leave the in
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.smt2">invsqrt.smt2</a>
+        <a href="https://bohlender.pro/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.smt2">invsqrt.smt2</a>
     </figcaption>
 </figure>
 <p>Here the solver returns <code>sat</code>, finding that picking infinity (<code>#x7f800000</code>) as input results in a greater relative error.
@@ -1508,7 +1508,7 @@ Indeed, the hack turns out to not be applicable to all floating point numbers.</
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.smt2">invsqrt.smt2</a>
+        <a href="https://bohlender.pro/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.smt2">invsqrt.smt2</a>
     </figcaption>
 </figure>
 <p>However, the solver returns <code>sat</code> again, finding that picking zero (<code>0x00000000</code>) as input results in a greater relative error, too.
@@ -1563,7 +1563,7 @@ Granted, this is a rather special input, so what about restricting the input to 
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.smt2">invsqrt.smt2</a>
+        <a href="https://bohlender.pro/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.smt2">invsqrt.smt2</a>
     </figcaption>
 </figure>
 <p>Again, the solver finds the constraints to be satisfiable.
@@ -1619,7 +1619,7 @@ When also requiring the input to <strong>not be subnormal</strong>, the SMT solv
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.smt2">invsqrt.smt2</a>
+        <a href="https://bohlender.pro/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.smt2">invsqrt.smt2</a>
     </figcaption>
 </figure>
 <p>Since normal floats are not zero, infinite, or subnormal, the unsatisfiability of the accumulated set of constraints <strong>proves that for all normal floats</strong>, the predicate <code>relErr(..) &gt; 0.01</code> is not satisfiable.</p>
@@ -1780,7 +1780,7 @@ To determine whether <code>NaN</code> can ever be returned by <code>relErr</code
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.smt2">invsqrt.smt2</a>
+        <a href="https://bohlender.pro/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.smt2">invsqrt.smt2</a>
     </figcaption>
 </figure>
 <p>The result is sobering.
@@ -2140,7 +2140,7 @@ The maximal relative error is exactly 0.0017523765563964844 <span style="color:#
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.log">invsqrt.log</a>
+        <a href="https://bohlender.pro/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.log">invsqrt.log</a>
     </figcaption>
 </figure>
 <p>Unlike the previous constraints, these checks take a while (<strong>hours</strong>), but eventually <strong>prove the maximum relative error to be <code>0x3AE5B000</code></strong> (~0.00175237).
@@ -2357,7 +2357,7 @@ We, instead, follow the conceptually simpler approach of letting the SMT solver 
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.smt2">invsqrt.smt2</a>
+        <a href="https://bohlender.pro/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.smt2">invsqrt.smt2</a>
     </figcaption>
 </figure>
 <p>Using these constraints, and the initial bound 0.001752, Z3 will output the following for the refinement sequence chosen in our <a href="invsqrt.smt2">SMT-LIB script</a>:</p>
@@ -2509,13 +2509,13 @@ We, instead, follow the conceptually simpler approach of letting the SMT solver 
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">93
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">94
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">95
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">96
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">97
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">98
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">99
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 93
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 94
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 95
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 96
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 97
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 98
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 99
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">100
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">101
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">102
@@ -2555,7 +2555,7 @@ For no magic number is the maximal relative error below 0.0017513036.. <span sty
 </div>
 </div>
     <figcaption>
-        <a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.log">invsqrt.log</a>
+        <a href="https://bohlender.pro/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.log">invsqrt.log</a>
     </figcaption>
 </figure>
 <p>Solving these instances takes about <strong>two days</strong> on an i5-4210M, but Z3 (v4.8.5) eventually determines that the <code>magic</code> constant <code>0x5f375a81</code> achieves a maximum relative error of <code>0x3ae58c00</code> (~0.0017513).
@@ -2598,21 +2598,21 @@ Does the solver come up with the same instructions that were used in the origina
 		
 			<article>
     <header>
-        <h2><a href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/">Solving a Logic Synthesis Puzzle via SAT/SMT</a></h2>
+        <h2><a href="https://bohlender.pro/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/">Solving a Logic Synthesis Puzzle via SAT/SMT</a></h2>
         <div class="metadata">
     <time datetime="2019-12-12">December 12, 2019</time>
     <ul>
-        <li><a class="tag-block" href="/tags/sat">sat</a></li>
-        <li><a class="tag-block" href="/tags/smt">smt</a></li>
-        <li><a class="tag-block" href="/tags/logic-synthesis">logic synthesis</a></li>
-        <li><a class="tag-block" href="/tags/puzzle">puzzle</a></li>
+        <li><a class="tag-block" href="/tags/sat">SAT</a></li>
+        <li><a class="tag-block" href="/tags/smt">SMT</a></li>
+        <li><a class="tag-block" href="/tags/logic-synthesis">Logic Synthesis</a></li>
+        <li><a class="tag-block" href="/tags/puzzle">Puzzle</a></li>
     </ul>
 </div>
     </header><p>A few weeks ago, I was asked the following riddle:
 <q>Design a <a href="https://en.wikipedia.org/wiki/Logic_gate">logic circuit</a> with three inputs and three outputs, such that the outputs are the inverted inputs. You may use arbitrary many AND and OR gates, but at most two NOT gates</q>.
 Although the characterisation of this problem as an <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a> instance is straightforward, I found it necessary to reduce it to <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">SAT</a> and incorporate further assumptions to achieve reasonable performance.</p>
 <p>This post illustrates said process, ranging from the original idea to a standard formulation of SAT-based logic synthesis to a problem-specific and more constrained instance.</p>
-	<a class="read-more" href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/">
+	<a class="read-more" href="https://bohlender.pro/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/">
         &raquo; Read more
     </a>
 </article>

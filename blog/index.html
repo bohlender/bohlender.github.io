@@ -8,7 +8,7 @@
 	<link rel="stylesheet" href="/css/style.css">
 	<link rel="stylesheet" href="/css/perfundo.with-icons.min.css">
 	
-	<link rel="alternate" type="application/rss+xml" href="https://bohlender.github.io/blog/index.xml" title="Dimitri Bohlender" />
+	<link rel="alternate" type="application/rss+xml" href="https://bohlender.pro/blog/index.xml" title="Dimitri Bohlender" />
 	
 	
 
@@ -16,8 +16,8 @@
 <meta property="og:title" content="Latest Posts" />
 <meta property="og:description" content="Thoughts on formal methods, computer science, art &amp; society" />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://bohlender.github.io/blog/" />
-<meta property="og:image" content="https://bohlender.github.io/portrait.jpg" />
+<meta property="og:url" content="https://bohlender.pro/blog/" />
+<meta property="og:image" content="https://bohlender.pro/portrait.jpg" />
 <meta property="og:updated_time" content="2019-08-21T17:23:49+02:00" />
 <meta property="og:site_name" content="Dimitri Bohlender" />
 
@@ -45,7 +45,7 @@
     
     <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="443" height="350" viewBox="0 0 443 350">
         <image xlink:href="/gfx/cup-rss.png" width="443" height="350"/>
-        <a href="https://bohlender.github.io/blog/index.xml" target="_top">
+        <a href="https://bohlender.pro/blog/index.xml" target="_top">
             <circle style="fill: transparent" cx="187" cy="165" r="110"/>
         </a>
     </svg>
@@ -64,7 +64,27 @@
         
         <article>
     <header>
-        <h2><a href="https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/">Playing Hard Mastermind Games with a SAT-based AI</a></h2>
+        <h2><a href="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/">Generating Crosswords via SAT/SMT</a></h2>
+        <div class="metadata">
+    <time datetime="2020-10-24">October 24, 2020</time>
+    <ul>
+        <li><a class="tag-block" href="/tags/sat">SAT</a></li>
+        <li><a class="tag-block" href="/tags/puzzle">Puzzle</a></li>
+    </ul>
+</div>
+    </header><p>Recently I got interested in designing personalised crosswords as a way to spice up photo book presents.
+This made me realise how hard generating <q>high-quality</q> crosswords actually is.
+Trying to create a crossword from a set of words &ndash; or a subset thereof &ndash; I checked out several tools but found all of them to be based on heuristics and yield rather sparse crosswords.</p>
+<p>In line with the general theme of my previous posts, this one illustrates how we can leverage <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">SAT solving</a> to solve this problem.
+In contrast to related approaches, which assume a fixed word placement and search for fitting words, we consider word placement as part of the problem and eventually end up with an integrated solution to generating crosswords of adjustable quality.</p>
+	<a class="read-more" href="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/">
+        &raquo; Read more
+    </a>
+</article>
+        
+        <article>
+    <header>
+        <h2><a href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/">Playing Hard Mastermind Games with a SAT-based AI</a></h2>
         <div class="metadata">
     <time datetime="2020-03-12">March 12, 2020</time>
     <ul>
@@ -77,14 +97,14 @@
 Although it is difficult for a human player to make <em>optimal guesses</em> of the secret code, or at least guesses that do not conflict with the provided clues, the setting is usually simple enough for an AI to find such candidates via explicit exploration of the <a href="https://en.wikipedia.org/wiki/Game_tree">game tree</a>.</p>
 <p>However, such approaches becomes unfeasible when the number of possibilities for secret codes grows into the millions.
 This post illustrates the problem with standard approaches, and how finding consistent candidates can be approached with <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">SAT</a> solving &ndash; yielding an AI that can handle orders-of-magnitude harder Mastermind instances.</p>
-	<a class="read-more" href="https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/">
+	<a class="read-more" href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/">
         &raquo; Read more
     </a>
 </article>
         
         <article>
     <header>
-        <h2><a href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/">Solving a Logic Synthesis Puzzle via SAT/SMT</a></h2>
+        <h2><a href="https://bohlender.pro/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/">Solving a Logic Synthesis Puzzle via SAT/SMT</a></h2>
         <div class="metadata">
     <time datetime="2019-12-12">December 12, 2019</time>
     <ul>
@@ -98,25 +118,25 @@ This post illustrates the problem with standard approaches, and how finding cons
 <q>Design a <a href="https://en.wikipedia.org/wiki/Logic_gate">logic circuit</a> with three inputs and three outputs, such that the outputs are the inverted inputs. You may use arbitrary many AND and OR gates, but at most two NOT gates</q>.
 Although the characterisation of this problem as an <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a> instance is straightforward, I found it necessary to reduce it to <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">SAT</a> and incorporate further assumptions to achieve reasonable performance.</p>
 <p>This post illustrates said process, ranging from the original idea to a standard formulation of SAT-based logic synthesis to a problem-specific and more constrained instance.</p>
-	<a class="read-more" href="https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/">
+	<a class="read-more" href="https://bohlender.pro/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/">
         &raquo; Read more
     </a>
 </article>
         
         <article>
     <header>
-        <h2><a href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/">SMT-based Reasoning About the Fast Inverse Square Root</a></h2>
+        <h2><a href="https://bohlender.pro/blog/smt-based-optimisation-of-fast-inverse-square-root/">SMT-based Reasoning About the Fast Inverse Square Root</a></h2>
         <div class="metadata">
     <time datetime="2019-09-26">September 26, 2019</time>
     <ul>
-        <li><a class="tag-block" href="/tags/smt">smt</a></li>
-        <li><a class="tag-block" href="/tags/smt-lib">smt-lib</a></li>
-        <li><a class="tag-block" href="/tags/software-verification">software verification</a></li>
+        <li><a class="tag-block" href="/tags/smt">SMT</a></li>
+        <li><a class="tag-block" href="/tags/smt-lib">SMT-LIB</a></li>
+        <li><a class="tag-block" href="/tags/software-verification">Software Verification</a></li>
     </ul>
 </div>
     </header><p>While there is a <a href="https://web.archive.org/web/20160308091758/http://www.daxia.com/bibis/upload/406Fast_Inverse_Square_Root.pdf">mathematical explanation</a> for the choice of <code>0x5F3759DF</code> in the <a href="https://en.wikipedia.org/wiki/Fast_inverse_square_root">famous bit-level hack</a> for approximating the multiplicative inverse of the square root of a 32-bit floating-point number, it is not immediately clear to what extent the reasoning is really applicable in the context of machine data types and their peculiarities.
 This post illustrates how this, and related aspects, can be investigated with <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a>-based reasoning about the actual implementation.</p>
-	<a class="read-more" href="https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/">
+	<a class="read-more" href="https://bohlender.pro/blog/smt-based-optimisation-of-fast-inverse-square-root/">
         &raquo; Read more
     </a>
 </article>
@@ -135,54 +155,54 @@ This post illustrates how this, and related aspects, can be investigated with <a
         
             <article>
                 <header>
-                    <h2><a href="https://zipcpu.com/dsp/2020/03/12/quadpll.html">Adjusting our logic PLL to handle I&amp;Q</a></h2>
+                    <h2><a href="https://artificial-mind.net/blog/2020/10/24/range_ref">range_ref&lt;T&gt;</a></h2>
                     <div class="metadata">
-                        <time datetime="March 12, 2020">March 12, 2020</time>
+                        <time datetime="October 20, 2020">October 24, 2020</time>
                         <ul><li>
-                            <a class="source" href="https://zipcpu.com/">The ZipCPU by Gisselquist Technology</a>
+                            <a class="source" href="https://artificial-mind.net">artificial::mind blog</a>
                         </li></ul>
                     </div>
                 </header>
-                <p>Some time ago, I posted an article on how to create a basic logic PLL
-in Verilog.  The
-design
-was simple, basic, and easy to implement in an FPGA.  It worked by tracking
-the most significant bit of any
-sinewave
-given to it, giving it a nice gain invariance whic…</p>
-	            <a class="read-more" href="https://zipcpu.com/dsp/2020/03/12/quadpll.html">
+                <p>A fast, lightweight, compositable, non-owning view of a range</p>
+	            <a class="read-more" href="https://artificial-mind.net/blog/2020/10/24/range_ref">
                     &raquo; Read more
                 </a>
             </article>
         
             <article>
                 <header>
-                    <h2><a href="https://deepnight.net/tutorial/using-my-gamebase-to-create-a-heaps-game/">Using GameBase to create an Haxe+Heaps game</a></h2>
+                    <h2><a href="https://deepnight.net/games/petit-tracteur-bleu/">Petit Tracteur Bleu</a></h2>
                     <div class="metadata">
-                        <time datetime="March 6, 2020">March 6, 2020</time>
+                        <time datetime="October 19, 2020">October 19, 2020</time>
                         <ul><li>
                             <a class="source" href="https://deepnight.net">deepnight.net</a>
                         </li></ul>
                     </div>
                 </header>
-                <p>An easy way to get started making a 2D game using Haxe + Heaps</p>
-	            <a class="read-more" href="https://deepnight.net/tutorial/using-my-gamebase-to-create-a-heaps-game/">
+                <p>Download (Windows) Itch.io page Source code You are Little Blue Tractor and your goal is to find all the cows and bring them back home before night falls (the game lasts about 3 mins). “Petit Tracteur Bleu” is a game I created for my 2.5 years old son, Ga…</p>
+	            <a class="read-more" href="https://deepnight.net/games/petit-tracteur-bleu/">
                     &raquo; Read more
                 </a>
             </article>
         
             <article>
                 <header>
-                    <h2><a href="https://www.msoos.org/2019/12/weighted-to-unweighted-counting-and-sampling/">Weighted to Unweighted Counting and Sampling</a></h2>
+                    <h2><a href="https://zipcpu.com/formal/2020/10/17/friday.html">A fun Friday evening&ndash;verifying an AXI-lite slave</a></h2>
                     <div class="metadata">
-                        <time datetime="December 212, 2019">December 23, 2019</time>
+                        <time datetime="October 17, 2020">October 17, 2020</time>
                         <ul><li>
-                            <a class="source" href="https://www.msoos.org">Wonderings of a SAT geek</a>
+                            <a class="source" href="https://zipcpu.com/">The ZipCPU by Gisselquist Technology</a>
                         </li></ul>
                     </div>
                 </header>
-                <p>This blog post is to promote the tool here (paper here) that converts weighted counting and sampling to their unweighted counterparts. It turns out that weighted counting and sampling is a thing. It’s basically a conjunctive normal form formula, a CNF, wi…</p>
-	            <a class="read-more" href="https://www.msoos.org/2019/12/weighted-to-unweighted-counting-and-sampling/">
+                <p><p>On a whim, at the end of a long week, I decided to try something new yesterday.
+I decided to try to verify an AXI
+design
+in front of others.  My goal was to do something fun and perhaps to have a
+little excitement.</p>
+<p>Sadly, one of the challenges of writing blog …</p>
+</p>
+	            <a class="read-more" href="https://zipcpu.com/formal/2020/10/17/friday.html">
                     &raquo; Read more
                 </a>
             </article>

@@ -2,71 +2,75 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://bohlender.github.io/tags/ai/</loc>
+    <loc>https://bohlender.pro/blog/generating-crosswords-with-sat-smt/</loc>
+    <lastmod>2020-09-27T16:03:37+02:00</lastmod>
+  </url>
+  <url>
+    <loc>https://bohlender.pro/tags/puzzle/</loc>
+    <lastmod>2020-09-27T16:03:37+02:00</lastmod>
+  </url>
+  <url>
+    <loc>https://bohlender.pro/tags/sat/</loc>
+    <lastmod>2020-09-27T16:03:37+02:00</lastmod>
+  </url>
+  <url>
+    <loc>https://bohlender.pro/tags/</loc>
+    <lastmod>2020-09-27T16:03:37+02:00</lastmod>
+  </url>
+  <url>
+    <loc>https://bohlender.pro/tags/ai/</loc>
     <lastmod>2020-03-08T16:12:02+01:00</lastmod>
   </url>
   <url>
-    <loc>https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/</loc>
+    <loc>https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/</loc>
     <lastmod>2020-03-08T16:12:02+01:00</lastmod>
   </url>
   <url>
-    <loc>https://bohlender.github.io/tags/puzzle/</loc>
-    <lastmod>2020-03-08T16:12:02+01:00</lastmod>
-  </url>
-  <url>
-    <loc>https://bohlender.github.io/tags/sat/</loc>
-    <lastmod>2020-03-08T16:12:02+01:00</lastmod>
-  </url>
-  <url>
-    <loc>https://bohlender.github.io/tags/</loc>
-    <lastmod>2020-03-08T16:12:02+01:00</lastmod>
-  </url>
-  <url>
-    <loc>https://bohlender.github.io/tags/logic-synthesis/</loc>
+    <loc>https://bohlender.pro/tags/logic-synthesis/</loc>
     <lastmod>2019-11-30T22:54:10+01:00</lastmod>
   </url>
   <url>
-    <loc>https://bohlender.github.io/tags/smt/</loc>
+    <loc>https://bohlender.pro/tags/smt/</loc>
     <lastmod>2019-11-30T22:54:10+01:00</lastmod>
   </url>
   <url>
-    <loc>https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/</loc>
+    <loc>https://bohlender.pro/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/</loc>
     <lastmod>2019-11-30T22:54:10+01:00</lastmod>
   </url>
   <url>
-    <loc>https://bohlender.github.io/blog/smt-based-optimisation-of-fast-inverse-square-root/</loc>
+    <loc>https://bohlender.pro/blog/smt-based-optimisation-of-fast-inverse-square-root/</loc>
     <lastmod>2019-09-12T09:31:28+02:00</lastmod>
   </url>
   <url>
-    <loc>https://bohlender.github.io/tags/smt-lib/</loc>
+    <loc>https://bohlender.pro/tags/smt-lib/</loc>
     <lastmod>2019-09-12T09:31:28+02:00</lastmod>
   </url>
   <url>
-    <loc>https://bohlender.github.io/tags/software-verification/</loc>
+    <loc>https://bohlender.pro/tags/software-verification/</loc>
     <lastmod>2019-09-12T09:31:28+02:00</lastmod>
   </url>
   <url>
-    <loc>https://bohlender.github.io/projects/</loc>
+    <loc>https://bohlender.pro/projects/</loc>
     <lastmod>2019-09-02T13:33:18+02:00</lastmod>
   </url>
   <url>
-    <loc>https://bohlender.github.io/photography/</loc>
+    <loc>https://bohlender.pro/photography/</loc>
     <lastmod>2019-08-27T17:05:05+02:00</lastmod>
   </url>
   <url>
-    <loc>https://bohlender.github.io/cv/</loc>
+    <loc>https://bohlender.pro/cv/</loc>
     <lastmod>2019-08-27T00:14:04+02:00</lastmod>
   </url>
   <url>
-    <loc>https://bohlender.github.io/blog/</loc>
+    <loc>https://bohlender.pro/blog/</loc>
     <lastmod>2019-08-21T17:23:49+02:00</lastmod>
   </url>
   <url>
-    <loc>https://bohlender.github.io/legal/</loc>
+    <loc>https://bohlender.pro/legal/</loc>
     <lastmod>2019-08-19T13:32:35+02:00</lastmod>
   </url>
   <url>
-    <loc>https://bohlender.github.io/</loc>
+    <loc>https://bohlender.pro/</loc>
     <lastmod>2019-08-17T22:52:06+02:00</lastmod>
   </url>
 </urlset>

@@ -2,24 +2,20 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Logic Synthesis on Dimitri Bohlender</title>
-    <link>https://bohlender.github.io/tags/logic-synthesis/</link>
+    <link>https://bohlender.pro/tags/logic-synthesis/</link>
     <description>Recent content in Logic Synthesis on Dimitri Bohlender</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-gb</language>
     <managingEditor>contact@bohlender.pro (Dimitri Bohlender)</managingEditor>
     <webMaster>contact@bohlender.pro (Dimitri Bohlender)</webMaster>
     <copyright>© Dimitri Bohlender</copyright>
-    <lastBuildDate>Sat, 30 Nov 2019 22:54:10 +0100</lastBuildDate>
-    
-	<atom:link href="https://bohlender.github.io/tags/logic-synthesis/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Sat, 30 Nov 2019 22:54:10 +0100</lastBuildDate><atom:link href="https://bohlender.pro/tags/logic-synthesis/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Solving a Logic Synthesis Puzzle via SAT/SMT</title>
-      <link>https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/</link>
+      <link>https://bohlender.pro/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/</link>
       <pubDate>Sat, 30 Nov 2019 22:54:10 +0100</pubDate>
       <author>contact@bohlender.pro (Dimitri Bohlender)</author>
-      <guid>https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/</guid>
+      <guid>https://bohlender.pro/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/</guid>
       <description>&lt;p&gt;A few weeks ago, I was asked the following riddle:
 &lt;q&gt;Design a &lt;a href=&#34;https://en.wikipedia.org/wiki/Logic_gate&#34;&gt;logic circuit&lt;/a&gt; with three inputs and three outputs, such that the outputs are the inverted inputs. You may use arbitrary many AND and OR gates, but at most two NOT gates&lt;/q&gt;.
 Although the characterisation of this problem as an &lt;a href=&#34;https://en.wikipedia.org/wiki/Satisfiability_modulo_theories&#34;&gt;SMT&lt;/a&gt; instance is straightforward, I found it necessary to reduce it to &lt;a href=&#34;https://en.wikipedia.org/wiki/Boolean_satisfiability_problem&#34;&gt;SAT&lt;/a&gt; and incorporate further assumptions to achieve reasonable performance.&lt;/p&gt;

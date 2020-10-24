@@ -2,78 +2,74 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tags on Dimitri Bohlender</title>
-    <link>https://bohlender.github.io/tags/</link>
+    <link>https://bohlender.pro/tags/</link>
     <description>Recent content in Tags on Dimitri Bohlender</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-gb</language>
     <managingEditor>contact@bohlender.pro (Dimitri Bohlender)</managingEditor>
     <webMaster>contact@bohlender.pro (Dimitri Bohlender)</webMaster>
     <copyright>© Dimitri Bohlender</copyright>
-    <lastBuildDate>Sun, 08 Mar 2020 16:12:02 +0100</lastBuildDate>
-    
-	<atom:link href="https://bohlender.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
-    
-    
-    <item>
-      <title>AI</title>
-      <link>https://bohlender.github.io/tags/ai/</link>
-      <pubDate>Sun, 08 Mar 2020 16:12:02 +0100</pubDate>
-      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
-      <guid>https://bohlender.github.io/tags/ai/</guid>
-      <description></description>
-    </item>
-    
+    <lastBuildDate>Sun, 27 Sep 2020 16:03:37 +0200</lastBuildDate><atom:link href="https://bohlender.pro/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Puzzle</title>
-      <link>https://bohlender.github.io/tags/puzzle/</link>
-      <pubDate>Sun, 08 Mar 2020 16:12:02 +0100</pubDate>
+      <link>https://bohlender.pro/tags/puzzle/</link>
+      <pubDate>Sun, 27 Sep 2020 16:03:37 +0200</pubDate>
       <author>contact@bohlender.pro (Dimitri Bohlender)</author>
-      <guid>https://bohlender.github.io/tags/puzzle/</guid>
+      <guid>https://bohlender.pro/tags/puzzle/</guid>
       <description></description>
     </item>
     
     <item>
       <title>SAT</title>
-      <link>https://bohlender.github.io/tags/sat/</link>
+      <link>https://bohlender.pro/tags/sat/</link>
+      <pubDate>Sun, 27 Sep 2020 16:03:37 +0200</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.pro/tags/sat/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>AI</title>
+      <link>https://bohlender.pro/tags/ai/</link>
       <pubDate>Sun, 08 Mar 2020 16:12:02 +0100</pubDate>
       <author>contact@bohlender.pro (Dimitri Bohlender)</author>
-      <guid>https://bohlender.github.io/tags/sat/</guid>
+      <guid>https://bohlender.pro/tags/ai/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Logic Synthesis</title>
-      <link>https://bohlender.github.io/tags/logic-synthesis/</link>
+      <link>https://bohlender.pro/tags/logic-synthesis/</link>
       <pubDate>Sat, 30 Nov 2019 22:54:10 +0100</pubDate>
       <author>contact@bohlender.pro (Dimitri Bohlender)</author>
-      <guid>https://bohlender.github.io/tags/logic-synthesis/</guid>
+      <guid>https://bohlender.pro/tags/logic-synthesis/</guid>
       <description></description>
     </item>
     
     <item>
       <title>SMT</title>
-      <link>https://bohlender.github.io/tags/smt/</link>
+      <link>https://bohlender.pro/tags/smt/</link>
       <pubDate>Sat, 30 Nov 2019 22:54:10 +0100</pubDate>
       <author>contact@bohlender.pro (Dimitri Bohlender)</author>
-      <guid>https://bohlender.github.io/tags/smt/</guid>
+      <guid>https://bohlender.pro/tags/smt/</guid>
       <description></description>
     </item>
     
     <item>
       <title>SMT-LIB</title>
-      <link>https://bohlender.github.io/tags/smt-lib/</link>
+      <link>https://bohlender.pro/tags/smt-lib/</link>
       <pubDate>Thu, 12 Sep 2019 09:31:28 +0200</pubDate>
       <author>contact@bohlender.pro (Dimitri Bohlender)</author>
-      <guid>https://bohlender.github.io/tags/smt-lib/</guid>
+      <guid>https://bohlender.pro/tags/smt-lib/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Software Verification</title>
-      <link>https://bohlender.github.io/tags/software-verification/</link>
+      <link>https://bohlender.pro/tags/software-verification/</link>
       <pubDate>Thu, 12 Sep 2019 09:31:28 +0200</pubDate>
       <author>contact@bohlender.pro (Dimitri Bohlender)</author>
-      <guid>https://bohlender.github.io/tags/software-verification/</guid>
+      <guid>https://bohlender.pro/tags/software-verification/</guid>
       <description></description>
     </item>
     

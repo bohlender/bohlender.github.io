@@ -1,0 +1,2286 @@
+<!DOCTYPE html>
+<html lang="en-gb">
+    <head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	
+	<link rel="stylesheet" href="/css/style.css">
+	<link rel="stylesheet" href="/css/perfundo.with-icons.min.css">
+	
+
+<link rel="stylesheet" href="/katex/katex.min.css" integrity="sha384-BdGj8xC2eZkQaxoQ8nSLefg4AV4/AwB3Fj+8SUSo7pnKP6Eoy18liIKTPn9oBYNG" >
+<script defer src="/katex/katex.min.js" integrity="sha384-JiKN5O8x9Hhs/UE5cT5AAJqieYlOZbGT3CHws/y97o3ty4R7/O5poG9F3JoiOYw1" ></script>
+<script defer src="/katex/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" 
+        onload="renderMathInElement(document.body, {
+        delimiters: [
+            {left: `$$`, right: `$$`, display: true},
+            {left: `$`, right: `$`, display: false},
+        ]
+    });"></script>
+	<link rel="alternate" type="application/rss+xml" href="https://bohlender.pro/blog/index.xml" title="Dimitri Bohlender" />
+	
+	
+
+
+<meta property="og:title" content="Generating Crosswords via SAT/SMT" />
+<meta property="og:description" content="Recently I got interested in designing personalised crosswords as a way to spice up photo book presents.
+This made me realise how hard generating high-quality crosswords actually is.
+Trying to create a crossword from a set of words &ndash; or a subset thereof &ndash; I checked out several tools but found all of them to be based on heuristics and yield rather sparse crosswords.
+In line with the general theme of my previous posts, this one illustrates how we can leverage SAT solving to solve this problem.
+In contrast to related approaches, which assume a fixed word placement and search for fitting words, we consider word placement as part of the problem and eventually end up with an integrated solution to generating crosswords of adjustable quality." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/" />
+<meta property="og:image" content="https://bohlender.pro/gfx/12x12_q104.svg" />
+<meta property="article:published_time" content="2020-10-24T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-09-27T16:03:37+02:00" />
+<meta property="og:site_name" content="Dimitri Bohlender" />
+
+<meta property="article:author" content="https://facebook.com/balddenimhero" />
+<meta property="article:publisher" content="https://facebook.com/balddenimhero" />
+<meta property="article:section" content="blog" />
+<meta property="article:tag" content="SAT" />
+<meta property="article:tag" content="Puzzle" />
+
+	
+	<title>Generating Crosswords via SAT/SMT | Dimitri Bohlender</title>
+</head>
+    <body class="blog">
+        <header>
+	<nav>
+		<input type="checkbox" id="show-menu" role="button">
+		<ul class="dropdown">
+			<label for="show-menu" class="show-menu"><img class="icon" src="/gfx/fa-icons.svg#bars" /></label>
+			<li><a href="/">Home</a></li>
+			<li><a href="/cv/">CV</a></li>
+			<li><a href="/projects/">Projects</a></li>
+			<li><a href="/blog/">Blog</a></li>
+			<li><a href="/photography/">Photography</a></li>
+		</ul>
+	</nav>
+</header>
+        <div class="container">
+        <div class="content">
+<div class="banner">
+	
+    
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="443" height="350" viewBox="0 0 443 350">
+        <image xlink:href="/gfx/cup-rss.png" width="443" height="350"/>
+        <a href="https://bohlender.pro/blog/index.xml" target="_top">
+            <circle style="fill: transparent" cx="187" cy="165" r="110"/>
+        </a>
+    </svg>
+</div>
+<div class="notepad-wrapper">
+	
+	<div class="notepad">
+		<main>
+		<article>
+			<header>
+				
+				<h1>Generating Crosswords via SAT/SMT</h1>
+				<div class="metadata">
+    <time datetime="2020-10-24">October 24, 2020</time>
+    <ul>
+        <li><a class="tag-block" href="/tags/sat">SAT</a></li>
+        <li><a class="tag-block" href="/tags/puzzle">Puzzle</a></li>
+    </ul>
+</div>
+			</header>
+			<p>Recently I got interested in designing personalised crosswords as a way to spice up photo book presents.
+This made me realise how hard generating <q>high-quality</q> crosswords actually is.
+Trying to create a crossword from a set of words &ndash; or a subset thereof &ndash; I checked out several tools but found all of them to be based on heuristics and yield rather sparse crosswords.</p>
+<p>In line with the general theme of my previous posts, this one illustrates how we can leverage <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">SAT solving</a> to solve this problem.
+In contrast to related approaches, which assume a fixed word placement and search for fitting words, we consider word placement as part of the problem and eventually end up with an integrated solution to generating crosswords of adjustable quality.</p>
+<h2 id="the-problem-statement"><a href="#the-problem-statement" class="hanchor" ariaLabel="Anchor">The Problem Statement</a> </h2>
+<p>When designing a crossword puzzle on a specific theme or topic, one will likely start with <strong>a set of words</strong> (and clever clues) that fit the setting and a rough idea of <strong>the crossword&rsquo;s dimensions</strong>.
+For example, when designing a crossword for a magazine, the page size will probably limit the crossword&rsquo;s width to less than 20 cells to keep the characters legible.</p>
+<p>For the sake of exposition, assume that we want to design a square crossword of size 12 on the topic of (mostly retro) games and let the following be the words we came up with:</p>
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">256
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">257
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">258
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">259
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">260
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">261
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">262
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">263
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">264
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">265
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#e6db74">&#39;WARCRAFT&#39;</span>, <span style="color:#e6db74">&#39;RAYMAN&#39;</span>, <span style="color:#e6db74">&#39;MYST&#39;</span>, <span style="color:#e6db74">&#39;DOOM&#39;</span>, <span style="color:#e6db74">&#39;EARTHWORMJIM&#39;</span>,
+<span style="color:#e6db74">&#39;COMMANDOS&#39;</span>, <span style="color:#e6db74">&#39;NOX&#39;</span>, <span style="color:#e6db74">&#39;DIABLO&#39;</span>, <span style="color:#e6db74">&#39;GIANTS&#39;</span>, <span style="color:#e6db74">&#39;ANOTHERWORLD&#39;</span>,
+<span style="color:#e6db74">&#39;FLASHBACK&#39;</span>, <span style="color:#e6db74">&#39;STARCONTROL&#39;</span>, <span style="color:#e6db74">&#39;DUNE&#39;</span>, <span style="color:#e6db74">&#39;MARIO&#39;</span>, <span style="color:#e6db74">&#39;TETRIS&#39;</span>,
+<span style="color:#e6db74">&#39;SACRIFICE&#39;</span>, <span style="color:#e6db74">&#39;FALLOUT&#39;</span>, <span style="color:#e6db74">&#39;CONTRA&#39;</span>, <span style="color:#e6db74">&#39;TANKWARS&#39;</span>, <span style="color:#e6db74">&#39;SETTLERS&#39;</span>,
+<span style="color:#e6db74">&#39;ALADDIN&#39;</span>, <span style="color:#e6db74">&#39;METROID&#39;</span>, <span style="color:#e6db74">&#39;PRINCE&#39;</span>, <span style="color:#e6db74">&#39;CIVILIZATION&#39;</span>, <span style="color:#e6db74">&#39;KEEPER&#39;</span>,
+<span style="color:#e6db74">&#39;POPULOUS&#39;</span>, <span style="color:#e6db74">&#39;XCOM&#39;</span>, <span style="color:#e6db74">&#39;SIMCITY&#39;</span>, <span style="color:#e6db74">&#39;HERETIC&#39;</span>, <span style="color:#e6db74">&#39;QUAKE&#39;</span>, <span style="color:#e6db74">&#39;ZORK&#39;</span>,
+<span style="color:#e6db74">&#39;DIGGER&#39;</span>, <span style="color:#e6db74">&#39;ZELDA&#39;</span>, <span style="color:#e6db74">&#39;FFVII&#39;</span>, <span style="color:#e6db74">&#39;CLAW&#39;</span>, <span style="color:#e6db74">&#39;BLOODOMEN&#39;</span>, <span style="color:#e6db74">&#39;SPYRO&#39;</span>,
+<span style="color:#e6db74">&#39;BLOOD&#39;</span>, <span style="color:#e6db74">&#39;DUKENUKEM&#39;</span>, <span style="color:#e6db74">&#39;DESCENT&#39;</span>, <span style="color:#e6db74">&#39;LOSTVIKINGS&#39;</span>, <span style="color:#e6db74">&#39;GOBLINS&#39;</span>,
+<span style="color:#e6db74">&#39;LOTUS&#39;</span>, <span style="color:#e6db74">&#39;OUTRUN&#39;</span>, <span style="color:#e6db74">&#39;PIRATES&#39;</span>, <span style="color:#e6db74">&#39;WACKYWHEELS&#39;</span>, <span style="color:#e6db74">&#39;LARRY&#39;</span>,
+<span style="color:#e6db74">&#39;EXAPUNKS&#39;</span>, <span style="color:#e6db74">&#39;SKUNNY&#39;</span>, <span style="color:#e6db74">&#39;RAPTOR&#39;</span>, <span style="color:#e6db74">&#39;BLACKTHORNE&#39;</span></code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/crossword.py">crossword.py</a>
+    </figcaption>
+</figure>
+<p>Clearly, we can&rsquo;t put all of them in a 12x12 grid.
+Not only do they amount to more than 144 characters but there are also certain <strong>rules regarding allowed word placement</strong> in a crossword.
+That is,</p>
+<ol>
+<li>the words must be placed horizontally or vertically within the crossword grid,</li>
+<li>the words may not be placed within each other,</li>
+<li>each word may only be placed once,</li>
+<li>every horizontal and vertical contiguous sequence of characters in the grid must correspond to a word placement,</li>
+<li>the placed words must form a single <a href="https://en.wikipedia.org/wiki/Connected_component_%28graph_theory%29">connected component</a>.</li>
+</ol>
+<aside>
+    <p>
+    We consider horizontal character sequences to be read from left to right, and vertical ones from top to bottom.
+    </p>
+</aside>
+<p>Overall, the problem of crossword generation amounts to selecting the subset of words that allows for a placement which is compliant with the rules but also achieves some level of <q>quality</q>.
+While <q>quality</q> may be subjective, the following is an <q>optimal</q> placement for the quality metric I chose:</p>
+
+
+
+
+
+
+
+<figure class="figure-outer" id="an-optimal-word-placement">
+    <figure class="figure-inner">
+        <img src="gfx/12x12_q104.svg" width="380px"/> 
+            <figcaption>
+                An optimal word placement
+            </figcaption>
+    </figure>
+    
+</figure>
+<p>To really appreciate the result, try to come up with a subset and placement of words that looks better to you or at least contains a similar number of words.
+For reference, you can also give <a href="https://duckduckgo.com/?q=best+crossword+puzzle+generator">existing tools</a> a try.</p>
+<h2 id="overview-of-sat-based-problem-solving"><a href="#overview-of-sat-based-problem-solving" class="hanchor" ariaLabel="Anchor">Overview of SAT-based Problem Solving</a> </h2>
+<p>Given a Boolean formula, a <a href="https://en.wikipedia.org/wiki/SAT_solver">SAT solver</a> determines whether a variable assignment exists which makes the formula evaluate to $\mathit{true}$.
+To leverage this functionality for problem solving the problem must be characterised in terms of a Boolean formula, such that a solution to the formula can be interpreted as a solution for the original problem.
+This process is also reflected in the structure of our main function:</p>
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">generateCrossword</span>(words, size, minQuality):
+    <span style="color:#75715e"># Input validation</span>
+    words <span style="color:#f92672">=</span> list(set(words))
+    <span style="color:#66d9ef">assert</span> minQuality <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>
+    <span style="color:#66d9ef">assert</span> size <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>, f<span style="color:#e6db74">&#39;Grid size ({size}) too small&#39;</span>
+    <span style="color:#66d9ef">assert</span> size <span style="color:#f92672">&gt;=</span> max(len(w) <span style="color:#66d9ef">for</span> w <span style="color:#f92672">in</span> words), \
+        f<span style="color:#e6db74">&#39;&#34;{max(words, key=len)}&#34; has more than size={size} characters&#39;</span>
+
+    <span style="color:#75715e"># Encode valid word placements (over some set of placement variables)</span>
+    constraints, placement_vars <span style="color:#f92672">=</span> encodeProblem(words, size, minQuality)
+
+    <span style="color:#75715e"># Dump CNF (for experimenting with SAT solvers)</span>
+    exportCNF(<span style="color:#e6db74">&#39;crossword.cnf&#39;</span>, constraints)
+
+    <span style="color:#75715e"># Solve SMT instance &amp; pretty-print result (if one exists)</span>
+    model <span style="color:#f92672">=</span> solve(constraints)
+    <span style="color:#66d9ef">if</span> model:
+        placement <span style="color:#f92672">=</span> interpret(model, placement_vars)
+        printPlacement(placement, size)
+    <span style="color:#66d9ef">else</span>:
+        <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;Constraints unsatisfiable&#34;</span>)</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/crossword.py">crossword.py</a>
+    </figcaption>
+</figure>
+<p>Given a set of words, a sensible crossword size, and a minimal value for the required <q>quality</q>, <code>encodeProblem</code> shall return the Boolean constraints that &ndash; in conjunction &ndash; characterise word placements which meet these criteria.
+Furthermore, we need to know which variables in these formulas represent which placement.
+This is the information that will be stored in <code>placement_vars</code> (cf. line 35).
+It will be used to interpret the satisfying assignment, or <em>model</em>, if one exists (cf. line 43).</p>
+<p>Don&rsquo;t be surprised that we use the Python bindings of the <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a> solver <a href="https://github.com/Z3Prover/z3">Z3</a>, although the claim was that we will use SAT solving machinery.
+Since the resulting constraints are expressed over finite domains &ndash; as both the crossword grid and the words are finite &ndash; they can easily be <a href="https://theory.stanford.edu/~nikolaj/programmingz3.html#sec-sat-core">translated to SAT instances</a>.
+Furthermore, it is often advantageous to use dedicated SAT solvers for such instances, so &ndash; besides solving the SMT instance with Z3 in line 41 &ndash; we also export the problem in the standard <a href="http://www.satcompetition.org/2011/format-benchmarks2011.html">format for SAT solvers</a> in line 38.</p>
+<h2 id="encoding-the-problem"><a href="#encoding-the-problem" class="hanchor" ariaLabel="Anchor">Encoding the Problem</a> </h2>
+<p>Before looking into how the constraints mentioned in <a href="#the-problem-statement">the problem statement</a> can be expressed as propositional SAT, let&rsquo;s start by compiling the set of variables and constants that we will clearly need for the characterisation of our problem.</p>
+<p>When talking about word placement, what we typically have in mind are a word&rsquo;s start coordinates and its orientation.
+For example, in the generated <a href="#an-optimal-word-placement">crossword shown above</a>, the phrase <q>MYST</q> starts at $(x,y)=(0,0)$ and is oriented vertically.
+Since there is only a finite number of possible placements, a simple way of encoding the placement of a word $w$ in terms of Boolean variables is by means of a variable
+$$w_{x,y,o}$$
+for each position $(x,y)$ within the grid and orientation $o\in\{\mathit{horizontal},\mathit{vertical}\}$.
+We will use these placement variables in such a way that
+$w_{x,y,o}$ being assigned $\mathit{true}$ in the SAT solver&rsquo;s solution will indicate that $w$ should be placed at $(x,y)$ in orientation $o$.
+<aside>
+    <p>
+    Of course we could have used two bounded integers $w_x,w_y$ and a Boolean $w_o$ just as well to encode the attributes separately.
+However, this would ultimately have complicated the use of a SAT solver and the interpretation of its solution.
+    </p>
+</aside></p>
+<p>In addition to the placement, we also need a way to characterise the subset of words that is actually used in the solution.
+Only the placement of those selected words will be constrained and make sense.
+Since the choice whether a word shall be part of the crossword is Boolean, it suffices to introduce a variable
+$$w_\mathit{selected}$$
+for each word $w$.</p>
+<p>The first lines of <code>encodeProblem</code> do just that:</p>
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">51
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">52
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">53
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">58
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">59
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">60
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">61
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">encodeProblem</span>(words, size, minQuality):
+    <span style="color:#75715e"># Variables encoding the placement of each word, i.e. setting</span>
+    <span style="color:#75715e"># `placement_vars[&#39;doom&#39;][0][3][1]` to `True` denotes</span>
+    <span style="color:#75715e"># &#39;doom&#39; being placed vertically at (x=3, y=0)</span>
+    placement_vars <span style="color:#f92672">=</span> {word: [[[Bool(f<span style="color:#e6db74">&#39;{word}_{x},{y}_{orientation}&#39;</span>)
+                               <span style="color:#66d9ef">for</span> orientation <span style="color:#f92672">in</span> [<span style="color:#e6db74">&#39;horizontal&#39;</span>, <span style="color:#e6db74">&#39;vertical&#39;</span>]]
+                              <span style="color:#66d9ef">for</span> x <span style="color:#f92672">in</span> range(size)]
+                             <span style="color:#66d9ef">for</span> y <span style="color:#f92672">in</span> range(size)]
+                      <span style="color:#66d9ef">for</span> word <span style="color:#f92672">in</span> words}
+
+    <span style="color:#75715e"># Variables encoding the subset of words actually put on the grid</span>
+    word_selection <span style="color:#f92672">=</span> {word: Bool(f<span style="color:#e6db74">&#39;{word}_selected&#39;</span>) <span style="color:#66d9ef">for</span> word <span style="color:#f92672">in</span> words}</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/crossword.py">crossword.py</a>
+    </figcaption>
+</figure>
+<p>We now have variables to symbolise the placement of a word and whether it is part of the crossword.
+What we still need is a characterisation of the grid, i.e. which character is placed in which grid cell, so we can relate a word&rsquo;s placement with the state of the grid.</p>
+<p>Before we can relate words and characters in grid cells, we have to characterise characters logically as well.
+Instead of supporting a fixed set of characters, e.g. lowercase alphanumeric characters, and denoting each by a corresponding logical symbol, it suffices to only create a constant $c$ for each distinct character <q>c</q> in our set of words.
+Note that, to denote empty grid cells, we also introduce a special <q>empty</q> character:</p>
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">63
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">64
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">65
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">66
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">67
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#75715e"># Constants representing the words&#39; characters (and &#34;no character&#34;)</span>
+chars <span style="color:#f92672">=</span> list(set(<span style="color:#e6db74">&#34;&#34;</span><span style="color:#f92672">.</span>join(words)))
+char_sort, char_constants <span style="color:#f92672">=</span> EnumSort(<span style="color:#e6db74">&#39;Chars&#39;</span>, chars <span style="color:#f92672">+</span> [<span style="color:#e6db74">&#39;empty&#39;</span>])
+char_empty <span style="color:#f92672">=</span> char_constants[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]
+chars_enc <span style="color:#f92672">=</span> {c: sym <span style="color:#66d9ef">for</span> c, sym <span style="color:#f92672">in</span> zip(chars, char_constants)}</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/crossword.py">crossword.py</a>
+    </figcaption>
+</figure>
+<p><code>char_sort</code> is the finite domain of all characters that occur in our words (plus the empty one).
+Here, it is fine to use a finite domain instead of Booleans since we will not interpret the grid&rsquo;s characters but derive everything from the placement of words.
+We essentially do not care if the automated translation to SAT makes this information harder to extract.</p>
+<p>With <code>char_sort</code> at hand, we can represent the characters in the grid as an array of such <code>char_sort</code> variables:</p>
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">69
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">70
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">71
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#75715e"># Variables encoding the character in each grid cell</span>
+grid <span style="color:#f92672">=</span> [[Const(f<span style="color:#e6db74">&#39;grid_{x}_{y}&#39;</span>, char_sort) <span style="color:#66d9ef">for</span> x <span style="color:#f92672">in</span> range(size)]
+        <span style="color:#66d9ef">for</span> y <span style="color:#f92672">in</span> range(size)]</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/crossword.py">crossword.py</a>
+    </figcaption>
+</figure>
+<h3 id="word-placement"><a href="#word-placement" class="hanchor" ariaLabel="Anchor">Word Placement</a> </h3>
+<p>With the variable creation out of the way, let&rsquo;s see how we can express the first few rules from <a href="#the-problem-statement">the problem statement</a> as constraints over these variables.</p>
+<p>Depending on how and whether a word is placed, other characters must appear in the corresponding grid cells.
+So to encode <a href="#the-problem-statement">rule (1)</a>, we can iterate over each word and placement within the grid bounds, and assert that the characters match.
+For example, to cover the placement of <q>MYST</q> in the <a href="#an-optimal-word-placement">introductory crossword</a>, we need the following constraint:</p>
+<div>$$ 
+\begin{aligned}
+\mathit{MYST}_{0,0,\mathit{vertical}} \rightarrow &~ grid_{0,0}=M\\
+\wedge &~ grid_{0,1}=Y\\
+\wedge &~ grid_{0,2}=S\\
+\wedge &~ grid_{0,3}=T
+\end{aligned}
+ $$</div>
+<p>Lines 91 to 94 take care of creating such constraints for horizontal placement, but the vertical placement can be handled analogously:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">73
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">74
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">75
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">76
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">77
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">78
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">79
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">80
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">81
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">82
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">83
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">84
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">85
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">86
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">87
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">88
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">89
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">90
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">91
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">92
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">93
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">94
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#75715e"># `possible_placements[y][x][0]` will contain the placement variables</span>
+<span style="color:#75715e"># of all words what can be placed horizontally at coord (x,y)</span>
+possible_placements <span style="color:#f92672">=</span> [[[[]
+                         <span style="color:#66d9ef">for</span> orientation <span style="color:#f92672">in</span> [<span style="color:#e6db74">&#39;horizontal&#39;</span>, <span style="color:#e6db74">&#39;vertical&#39;</span>]]
+                        <span style="color:#66d9ef">for</span> x <span style="color:#f92672">in</span> range(size)]
+                       <span style="color:#66d9ef">for</span> y <span style="color:#f92672">in</span> range(size)]
+
+<span style="color:#75715e"># Word placement determines characters on grid</span>
+res <span style="color:#f92672">=</span> []
+<span style="color:#66d9ef">for</span> word <span style="color:#f92672">in</span> words:
+    word_placement_vars <span style="color:#f92672">=</span> []
+    <span style="color:#66d9ef">for</span> x, y <span style="color:#f92672">in</span> product(range(size), repeat<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>):
+        <span style="color:#75715e"># Fits horizontally</span>
+        <span style="color:#66d9ef">if</span> x <span style="color:#f92672">+</span> len(word) <span style="color:#f92672">&lt;=</span> size:
+            <span style="color:#75715e"># Keep track that this is a possible placement</span>
+            word_placement_vars<span style="color:#f92672">.</span>append(placement_vars[word][y][x][<span style="color:#ae81ff">0</span>])
+            possible_placements[y][x][<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>append(placement_vars[word][y][x][<span style="color:#ae81ff">0</span>])
+
+            <span style="color:#75715e"># Effect (of this placement) on grid</span>
+            word_symbols <span style="color:#f92672">=</span> grid[y][x:x <span style="color:#f92672">+</span> len(word)]
+            match_expr <span style="color:#f92672">=</span> And([chars_enc[c] <span style="color:#f92672">==</span> sym <span style="color:#66d9ef">for</span> c, sym <span style="color:#f92672">in</span> zip(word, word_symbols)])
+            res<span style="color:#f92672">.</span>append(Implies(placement_vars[word][y][x][<span style="color:#ae81ff">0</span>], match_expr))</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/crossword.py">crossword.py</a>
+    </figcaption>
+</figure></p>
+<p>Note that the utility of <code>possible_placements</code> and <code>word_placement_vars</code> may not be obvious yet, but tracking all words' possible placements in a cell and all possible placement of a word will come in handy later.</p>
+<p>Besides relating the placement and grid variables, we also have to ensure that words are not placed within each other (cf. <a href="#the-problem-statement">rule (2)</a>).
+This can be achieved by requiring the characters before and after each placed word to be empty (or out of grid bounds).
+In the case of our running example, this amounts to</p>
+<div>$$ 
+\begin{aligned}
+\mathit{MYST}_{0,0,\mathit{vertical}} \rightarrow &~ \cancel{grid_{0,-1}=\mathit{empty}}\\
+\wedge &~ grid_{0,4}=\mathit{empty}
+\end{aligned}
+ $$</div>
+<p>where the coordinates $(0,-1)$ lie outside the grid.</p>
+<p>The corresponding constraints can be created right after the previous ones:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 96
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 97
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 98
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 99
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">100
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">101
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">102
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">103
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#75715e"># Word must be bounded by spaces (or grid borders)</span>
+bounding_chars <span style="color:#f92672">=</span> []
+<span style="color:#66d9ef">if</span> x <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>:
+    bounding_chars<span style="color:#f92672">.</span>append(grid[y][x <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>])
+<span style="color:#66d9ef">if</span> x <span style="color:#f92672">+</span> len(word) <span style="color:#f92672">&lt;</span> size:
+    bounding_chars<span style="color:#f92672">.</span>append(grid[y][x <span style="color:#f92672">+</span> len(word)])
+bounded_by_spaces <span style="color:#f92672">=</span> And([sym <span style="color:#f92672">==</span> char_empty <span style="color:#66d9ef">for</span> sym <span style="color:#f92672">in</span> bounding_chars])
+res<span style="color:#f92672">.</span>append(Implies(placement_vars[word][y][x][<span style="color:#ae81ff">0</span>], bounded_by_spaces))</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/crossword.py">crossword.py</a>
+    </figcaption>
+</figure></p>
+<p>Now, each word&rsquo;s possible placement has been characterised and related to the grid&rsquo;s characters.
+However, there is nothing stopping the SAT solver from picking two placements for the same word and violating <a href="#the-problem-statement">rule (3)</a>.
+To account for this, we require at most one variable $w_{x,y,o}$ to be $\mathit{true}$ for each word $w$, while at least one of them should be if the word is selected for inclusion in the crossword, i.e. if $w_\mathit{selected}$ is $\mathit{true}$.</p>
+<p>Considering our example word <q>MYST</q>, we have to add</p>
+<p><div>$$ 
+\begin{aligned}
+&~ \mathit{MYST}_{0,0,\mathit{horizontal}}\\
++ &~ \dots\\
++ &~ \mathit{MYST}_{8,11,\mathit{horizontal}}\\
++ &~ \mathit{MYST}_{0,0,\mathit{vertical}}\\
++ &~ \dots \\
++ &~ \mathit{MYST}_{11,8,\mathit{vertical}}\\
+\leq &~ 1
+\end{aligned}
+ $$</div>
+and
+<div>$$ 
+\begin{aligned}
+\mathit{MYST}_\mathit{selected} \rightarrow &~ \mathit{MYST}_{0,0,\mathit{horizontal}}\\
+\vee &~ \dots\\
+\vee &~ \mathit{MYST}_{11,8,\mathit{vertical}}
+\end{aligned}
+ $$</div></p>
+<p>The following lines take care of creating such constraints for each word:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">125
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">126
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">127
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#75715e"># If the word is selected, exactly one placement must be used</span>
+res<span style="color:#f92672">.</span>append(AtMost(<span style="color:#f92672">*</span>word_placement_vars, <span style="color:#ae81ff">1</span>))
+res<span style="color:#f92672">.</span>append(Implies(word_selection[word], Or(word_placement_vars)))</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/crossword.py">crossword.py</a>
+    </figcaption>
+</figure></p>
+<h3 id="only-sequences-of-words"><a href="#only-sequences-of-words" class="hanchor" ariaLabel="Anchor">Only Sequences of Words</a> </h3>
+<p>If we were to use a SAT solver on the constraints accumulated so far, we may find that some grid cell variables are assigned seemingly random characters which do not even form a word.
+This is to be expected, as there is no constraint to enforce that all character sequences must correspond to a word placement yet (cf.  <a href="#the-problem-statement">rule (4)</a>).</p>
+<p>A simple way to achieve this, is to require the start coordinates of each sequence to correspond to the coordinates of a word placement.
+The following lines handle horizontal character sequences but vertical ones can be treated analogously:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">129
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">130
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">131
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">132
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">133
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">134
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">135
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">136
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#75715e"># Every non-empty sequence (of length &gt; 1) must match a word</span>
+<span style="color:#66d9ef">for</span> x, y <span style="color:#f92672">in</span> product(range(size), repeat<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>):
+    <span style="color:#75715e"># Start of horizontal sequence</span>
+    <span style="color:#66d9ef">if</span> x <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">&lt;</span> size:
+        seq_start <span style="color:#f92672">=</span> And(grid[y][x <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>] <span style="color:#f92672">==</span> char_empty <span style="color:#66d9ef">if</span> x <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span> <span style="color:#66d9ef">else</span> True,
+                        grid[y][x] <span style="color:#f92672">!=</span> char_empty,
+                        grid[y][x <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>] <span style="color:#f92672">!=</span> char_empty)
+        res<span style="color:#f92672">.</span>append(seq_start <span style="color:#f92672">==</span> Or(possible_placements[y][x][<span style="color:#ae81ff">0</span>]))</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/crossword.py">crossword.py</a>
+    </figcaption>
+</figure></p>
+<h3 id="connectedness"><a href="#connectedness" class="hanchor" ariaLabel="Anchor">Connectedness</a> </h3>
+<p>The last and most complex requirement is <a href="#the-problem-statement">rule (5)</a>, which demands the placed words to form a single crossword rather than several disjoint ones.
+That is, understanding the placed words as vertices of an <a href="https://en.wikipedia.org/wiki/Undirected_graph">undirected graph</a>, which are connected if the words intersect, should result in a graph with only one <a href="https://en.wikipedia.org/wiki/Connected_component_%28graph_theory%29">connected component</a>.</p>
+<p>The following figure illustrates the graph corresponding to our <a href="#an-optimal-word-placement">introductory example</a>:
+
+
+
+
+
+
+
+<figure class="figure-outer" id="understanding-words-as-vertices">
+    <figure class="figure-inner">
+        <img src="gfx/12x12_q104_edgeRelationOfWords.svg" width="380px"/> 
+            <figcaption>
+                Understanding words as vertices
+            </figcaption>
+    </figure>
+    
+</figure></p>
+<p>For a fixed graph, computing the components can be <a href="https://en.wikipedia.org/wiki/Connected_component_(graph_theory)#Algorithms">done in linear time</a>, and the connectedness is also easy to see in the above figure.
+However, in our application, the graph is not fixed but parametrised by the solutions to the other constraints.
+Therefore, we have to come up with a formula that characterises the connectedness of any word placement, i.e. it should be satisfiable if the encoded word placement forms a single component.</p>
+<p>Since neither the subset of words that will be placed nor the intersections of these words are known beforehand, a Boolean encoding of the word intersection relation will have to introduce variables $\mathit{connected}_{w_1,w_2}$ for each pair of words $w_1, w_2$.
+Even when avoiding symmetrical entries, the number of such variables will grow polynomially in the number of words that can potentially be placed.
+This is problematic since even our example crossword of size 12 already features 51 words to choose from.</p>
+<p>Alternatively, by understanding the grid cells as vertices of a graph where the edges connect neighbouring (non-empty) cells, we can get around this problem:
+<aside>
+    <p>
+    When talking about the neighbours of a cell at position $(x,y)$, we exclude the diagonal neighbours, i.e. we only refer to those at positions $(x, y-1)$, $(x, y+1)$, $(x-1, y)$ and $(x+1, y)$.
+    </p>
+</aside>
+
+
+
+
+
+
+
+<figure class="figure-outer" id="understanding-cells-as-vertices">
+    <figure class="figure-inner">
+        <img src="gfx/12x12_q104_edgeRelationOfCells.svg" width="380px"/> 
+            <figcaption>
+                Understanding cells as vertices
+            </figcaption>
+    </figure>
+    
+</figure></p>
+<p>Here, the edge relation grows linearly in the number of cells as every cell can at most be connected to four others.
+The size of our word set has no impact.</p>
+<p>From this perspective, the connectedness check amounts to proving that we can reach every placed character from every other placed character by some path over neighbouring (non-empty) cells.
+In fact, it already suffices to show that <strong>there is one cell that can be reached from all others</strong>.</p>
+<p>To approach the connectedness check in the suggested way, we first have to characterise a non-empty cell for which we will try to prove reachability from all others.
+Since it is unknown where words will be placed, let&rsquo;s just pick the uppermost-leftmost non-empty cell as the <q>start cell</q> of the connected component.
+We introduce the variables</p>
+<p>$$\mathit{ccStart}_y,\mathit{ccStart}_{x,y}$$</p>
+<p>for all coordinates $(x,y)$ within the grid bounds, to identify the row and exact coordinates of the <q>start cell</q>.
+Clearly, $\mathit{ccStart}_y$ must be $\mathit{true}$ for the first row that is not empty, i.e.</p>
+<div>$$ 
+\begin{aligned}
+\mathit{ccStart}_y =&~ \bigwedge_{0\leq x < \mathit{size}} \mathit{grid}_{x,y} \neq \mathit{empty}\\
+\wedge&~ \bigwedge_{0\leq i < y} \neg \mathit{ccStart}_i
+\end{aligned}
+ $$</div>
+<p>and $\mathit{ccStart}_{x,y}$ must be $\mathit{true}$ for the first non-empty cell in that row, i.e.</p>
+<div>$$ 
+\begin{aligned}
+\mathit{ccStart}_{x,y} =&~ \mathit{ccStart}_y\\
+\wedge&~ \mathit{grid}_{x,y} \neq \mathit{empty}\\
+\wedge&~ \bigwedge_{0\leq i < x} \neg \mathit{ccStart}_{i,y}
+\end{aligned}
+ $$</div>
+<p>Lines 151 to 161 take care of creating such constraints:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">145
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">146
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">147
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">148
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">149
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">150
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">151
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">152
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">153
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">154
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">155
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">156
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">157
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">158
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">159
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">160
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">161
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">162
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">163
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">164
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">165
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">166
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">167
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">168
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">169
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">170
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">171
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">172
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">173
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">174
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">175
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">176
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">177
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">178
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">179
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#75715e"># Require grid symbols to form a single connected component (CC)</span>
+ccStartRow <span style="color:#f92672">=</span> [Bool(f<span style="color:#e6db74">&#39;ccStart_{y}&#39;</span>) <span style="color:#66d9ef">for</span> y <span style="color:#f92672">in</span> range(size)]
+ccStart <span style="color:#f92672">=</span> [[Bool(f<span style="color:#e6db74">&#39;ccStart_{x},{y}&#39;</span>) <span style="color:#66d9ef">for</span> x <span style="color:#f92672">in</span> range(size)]
+           <span style="color:#66d9ef">for</span> y <span style="color:#f92672">in</span> range(size)]
+inCc <span style="color:#f92672">=</span> [[[Bool(f<span style="color:#e6db74">&#39;reach{i}_{x},{y}&#39;</span>) <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(maxDistance(size) <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>)]
+         <span style="color:#66d9ef">for</span> x <span style="color:#f92672">in</span> range(size)] <span style="color:#66d9ef">for</span> y <span style="color:#f92672">in</span> range(size)]
+<span style="color:#66d9ef">for</span> y <span style="color:#f92672">in</span> range(size):
+    <span style="color:#75715e"># CC starts in row y</span>
+    notInPrevRows <span style="color:#f92672">=</span> And([Not(ccStartRow[i]) <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(y)])
+    inCurRow <span style="color:#f92672">=</span> Or([grid[y][x] <span style="color:#f92672">!=</span> char_empty <span style="color:#66d9ef">for</span> x <span style="color:#f92672">in</span> range(size)])
+    res<span style="color:#f92672">.</span>append(And(inCurRow, notInPrevRows) <span style="color:#f92672">==</span> ccStartRow[y])
+
+    <span style="color:#66d9ef">for</span> x <span style="color:#f92672">in</span> range(size):
+        <span style="color:#75715e"># CC starts at x,y</span>
+        notInPrevPos <span style="color:#f92672">=</span> And([Not(ccStart[y][i]) <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(x)])
+        inCurPos <span style="color:#f92672">=</span> grid[y][x] <span style="color:#f92672">!=</span> char_empty
+        res<span style="color:#f92672">.</span>append(And(ccStartRow[y], inCurPos, notInPrevPos) <span style="color:#f92672">==</span> ccStart[y][x])
+
+        <span style="color:#75715e"># Only CC start position reaches itself in 0 steps</span>
+        res<span style="color:#f92672">.</span>append(ccStart[y][x] <span style="color:#f92672">==</span> inCc[y][x][<span style="color:#ae81ff">0</span>])
+
+        <span style="color:#75715e"># Symbol at x,y reaches CC start in `i` steps if</span>
+        <span style="color:#75715e"># - it already reaches it in `i-1` steps, or</span>
+        <span style="color:#75715e"># - neighbour symbol reaches it in `i-1` steps</span>
+        <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">1</span>, maxDistance(size) <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>):
+            reasons <span style="color:#f92672">=</span> [inCc[y][x][i <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>]]
+            <span style="color:#66d9ef">if</span> x <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>: reasons<span style="color:#f92672">.</span>append(inCc[y][x <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>][i <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>])
+            <span style="color:#66d9ef">if</span> x <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">&lt;</span> size: reasons<span style="color:#f92672">.</span>append(inCc[y][x <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>][i <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>])
+            <span style="color:#66d9ef">if</span> y <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>: reasons<span style="color:#f92672">.</span>append(inCc[y <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>][x][i <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>])
+            <span style="color:#66d9ef">if</span> y <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">&lt;</span> size: reasons<span style="color:#f92672">.</span>append(inCc[y <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>][x][i <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>])
+            res<span style="color:#f92672">.</span>append(Implies(inCc[y][x][i],
+                               And(grid[y][x] <span style="color:#f92672">!=</span> char_empty, Or(reasons))))
+
+        <span style="color:#75715e"># All non-empty grid entries must reach the CC start</span>
+        res<span style="color:#f92672">.</span>append(Implies(grid[y][x] <span style="color:#f92672">!=</span> char_empty, inCc[y][x][maxDistance(size)]))</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/crossword.py">crossword.py</a>
+    </figcaption>
+</figure></p>
+<p>It only remains to assert that all the other non-empty cells in the grid can reach the <q>start cell</q>.
+Considering that the grid is square and its <code>size</code> is finite, all other non-empty cells must be reachable within $\mathit{size}^2$ steps.
+<aside>
+    <p>
+    Note that $\mathit{size}^2$ is not the tightest upper bound.
+The example code actually uses a lower <code>maxDistance</code>, which is easy to come up with by assessing the longest possible paths in some example grids.
+    </p>
+</aside></p>
+<p>To identify states that can reach the <q>start</q> of the connected component within $n$ steps (or less), we introduce the variables
+$$\mathit{reach}_{i,x,y}$$
+for each position $(x,y)$ and maximal distance $i\in[0,\mathit{maxDistance(size)}]$ to the start.</p>
+<p>Of course only the <q>start cell</q> can reach itself in zero steps, so we assert
+$$\mathit{reach}_{0,x,y} = \mathit{ccStart}_{x,y}$$
+for all coordinates $(x,y)$ in the grid (cf. line 164).
+Furthermore, we know that a cell can reach the <q>start</q> in $i$ steps only if an adjacent cell can do so in $i-1$ steps, i.e.</p>
+<div>$$ 
+\begin{aligned}
+\mathit{reach}_{i,x,y} \rightarrow &~ \mathit{grid}_{x,y}\neq \mathit{empty}\\
+\wedge &~ (\mathit{reach}_{i-1,x,y}\vee\bigvee_{(nx,ny)} \mathit{reach}_{i-1,nx,ny})
+\end{aligned}
+ $$</div>
+<p>where $(nx,ny)$ are neighbours of $(x,y)$.
+This is what the rest of the above listing takes care of, ultimately requiring in line 179 that all non-empty cells must reach the <q>start cell</q> within the <code>maxDistance</code> &ndash; otherwise we&rsquo;d have more than one connected component.</p>
+<h3 id="quality"><a href="#quality" class="hanchor" ariaLabel="Anchor">Quality</a> </h3>
+<p>At this point we&rsquo;ve constructed all constraints that are needed to generate valid crosswords.
+However, solving the constraints at this point will yield rather sobering results as even an empty crossword is a valid crossword &ndash; we do not require anything but compliance with the rules yet.
+It&rsquo;s time to introduce a quality criterion.</p>
+<p>Quality is subjective, but I guess everyone agrees that a sparse crossword is worse than a tightly packed one.
+Therefore, it may be reasonable to measure quality in terms of the number of words or characters put in the grid.
+The problem I see with both approaches is that they do not reward crossing words, so I&rsquo;ve settled for <strong>the sum of the placed words' lengths</strong>:
+$$\sum_{w\in\mathit{words}} w_\mathit{selected}*\mathit{length}(w)$$
+This effectively values every character in the grid as 1 but also counts each crossing as another 1.
+With this metric, the <a href="#an-optimal-word-placement">introductory crossword</a> achieves a quality of 104.</p>
+<p>By requiring this sum to be greater or equal to a provided <code>minQuality</code>, we can force the SAT solver to only produce crosswords that meet our expectations:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">181
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">182
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">183
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#75715e"># Require the solution to satisfy some quality criterion</span>
+<span style="color:#75715e"># Here: Quality corresponds to the sum of the selected words&#39; lengths</span>
+res<span style="color:#f92672">.</span>append(PbGe([(var, len(w)) <span style="color:#66d9ef">for</span> w, var <span style="color:#f92672">in</span> word_selection<span style="color:#f92672">.</span>items()], minQuality))</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/crossword.py">crossword.py</a>
+    </figcaption>
+</figure></p>
+<p>That&rsquo;s all there is to it conceptually.
+The <a href="crossword.py">rest of the code</a> is just generic plumbing to feed the constraints <code>res</code> into <a href="https://github.com/Z3Prover/z3">Z3</a> and interpret the returned assignment of Boolean values to our variables.</p>
+<h2 id="cnf-export"><a href="#cnf-export" class="hanchor" ariaLabel="Anchor">CNF Export</a> </h2>
+<p>Although Z3 is feature-rich and state of the art, it nevertheless pays off to use a competitive SAT solver instead for our particular use-case.
+I recommend sticking to SMT solving during development and switching to SAT solving for the more complex instances.
+Z3 provides <a href="https://theory.stanford.edu/~nikolaj/programmingz3.html#sec-tactics">tactics</a> to reduce the finite-domain SMT constraints to a SAT instance in <a href="https://en.wikipedia.org/wiki/Conjunctive_normal_form">CNF</a>, which can then be exported in the <a href="http://www.satcompetition.org/2011/format-benchmarks2011.html">standard format for SAT solvers</a>:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">189
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">190
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">191
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">192
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">193
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">194
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">195
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">196
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">197
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">198
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">199
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">200
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">exportCNF</span>(filepath, assertions):
+    goal <span style="color:#f92672">=</span> Goal()
+    goal<span style="color:#f92672">.</span>add(assertions)
+
+    p <span style="color:#f92672">=</span> ParamsRef()
+    p<span style="color:#f92672">.</span>set(<span style="color:#e6db74">&#39;pb.solver&#39;</span>, <span style="color:#e6db74">&#39;binary_merge&#39;</span>)  <span style="color:#75715e"># use any setting but &#39;solver&#39;</span>
+    to_cnf <span style="color:#f92672">=</span> WithParams(Then(<span style="color:#e6db74">&#39;simplify&#39;</span>, <span style="color:#e6db74">&#39;dt2bv&#39;</span>, <span style="color:#e6db74">&#39;card2bv&#39;</span>, <span style="color:#e6db74">&#39;bit-blast&#39;</span>, <span style="color:#e6db74">&#39;tseitin-cnf&#39;</span>), p)
+    subgoals <span style="color:#f92672">=</span> to_cnf(goal)
+    <span style="color:#66d9ef">assert</span> len(subgoals) <span style="color:#f92672">==</span> <span style="color:#ae81ff">1</span>, <span style="color:#e6db74">&#34;Tactic should have resulted in a single goal&#34;</span>
+    <span style="color:#66d9ef">assert</span> <span style="color:#f92672">not</span> subgoals[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>inconsistent(), <span style="color:#e6db74">&#34;Found to be UNSAT during pre-processing&#34;</span>
+    <span style="color:#66d9ef">with</span> open(filepath, <span style="color:#e6db74">&#39;w&#39;</span>) <span style="color:#66d9ef">as</span> f:
+        f<span style="color:#f92672">.</span>write(subgoals[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>dimacs() <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#39;</span>)</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/crossword.py">crossword.py</a>
+    </figcaption>
+</figure></p>
+<h2 id="experiments"><a href="#experiments" class="hanchor" ariaLabel="Anchor">Experiments</a> </h2>
+<p>Now that we got the crossword generation pipeline up an running it is interesting to see how long it takes to assemble <a href="#the-problem-statement">the words from our example</a> into crosswords of size 12 with varying quality requirements.
+Following the proposed approach, I generated crosswords of increasing quality and measured the time needed to solve the SAT instances with various solvers.
+Since not all steps of the SAT encoding and solving are fully deterministic, some repetitions are necessary to get a better overview of the solvers' average performance.
+As implied in the previous section Z3 didn&rsquo;t perform too well on these instances and was therefore excluded from the evaluation.</p>
+
+
+
+
+
+
+
+<figure class="figure-outer" id="solving-time-for-varying-sat-solvers-and-qualities">
+    <figure class="figure-inner">
+        <img src="gfx/eval.svg"/> 
+            <figcaption>
+                Solving time for varying SAT solvers and qualities
+            </figcaption>
+    </figure>
+    
+</figure>
+<aside>
+    <p>
+    Note that the first two configurations &ndash; <a href="https://github.com/arminbiere/cadical/tree/c622a490ec3d9a1a1e998b08120c9b8d0b67a123">cadical</a> and <a href="https://github.com/msoos/cryptominisat/releases/tag/5.8.0">cryptominisat</a> &ndash; run single-threaded, while both <a href="https://github.com/arminbiere/lingeling/tree/7d5db72420b95ab356c98ca7f7a4681ed2c59c70">plingeling</a> and <a href="https://github.com/msoos/cryptominisat/releases/tag/5.8.0">cryptominisat -t4</a> use four worker threads on a i7-7700K CPU.
+Some of the experiments, such as the single-threaded ones for quality 100, are still pending but will eventually be incorporated.
+    </p>
+</aside>
+<p>As to be expected, the higher the quality requirements are the longer it takes to solve the corresponding SAT instance.
+It is easy to see that computing an optimal word placement may be unfeasible in practice: the time investment ramps up significantly as we approach unsatisfiable quality requirements.
+However, even the instances of quality 95 do already look pretty good and are solved by <a href="https://github.com/arminbiere/lingeling/tree/7d5db72420b95ab356c98ca7f7a4681ed2c59c70">plingeling</a> within 336s on average:</p>
+
+
+
+
+
+
+
+<figure class="figure-outer" id="a-crossword-of-quality-95">
+    <figure class="figure-inner">
+        <img src="gfx/12x12_q95.svg" width="380px"/> 
+            <figcaption>
+                A crossword of quality 95
+            </figcaption>
+    </figure>
+    
+</figure>
+<p>Feel free to process <a href="eval.csv">the measurements</a> on your own if you&rsquo;re interested in specific figures.</p>
+<p>If this seems slow to you, keep in mind that <strong>you can speed up the generation process</strong> by providing more words to choose from.
+For example, by adding the following words to our word set, the average time to generate a crossword of quality 95 via <a href="https://github.com/arminbiere/lingeling/tree/7d5db72420b95ab356c98ca7f7a4681ed2c59c70">plingeling</a> reduces from 336s to just 53s.</p>
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">268
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">269
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">270
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">271
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#e6db74">&#39;LBA&#39;</span>, <span style="color:#e6db74">&#39;LODERUNNER&#39;</span>, <span style="color:#e6db74">&#39;CIVILIZATION&#39;</span>, <span style="color:#e6db74">&#39;SILENTHILL&#39;</span>, <span style="color:#e6db74">&#39;GOTHIC&#39;</span>,
+<span style="color:#e6db74">&#39;CRUSADER&#39;</span>, <span style="color:#e6db74">&#39;TYRIAN&#39;</span>, <span style="color:#e6db74">&#39;MDK&#39;</span>, <span style="color:#e6db74">&#39;CASTLEVANIA&#39;</span>, <span style="color:#e6db74">&#39;STARFLIGHT&#39;</span>,
+<span style="color:#e6db74">&#39;AQUANOX&#39;</span>, <span style="color:#e6db74">&#39;POD&#39;</span>, <span style="color:#e6db74">&#39;JAZZ&#39;</span>, <span style="color:#e6db74">&#39;MONKEYISLAND&#39;</span>, <span style="color:#e6db74">&#39;SPIRITABYSS&#39;</span>,
+<span style="color:#e6db74">&#39;TERRARIA&#39;</span>, <span style="color:#e6db74">&#39;KEEN&#39;</span>, <span style="color:#e6db74">&#39;TIM&#39;</span>, <span style="color:#e6db74">&#39;ARCHON&#39;</span>, <span style="color:#e6db74">&#39;IHNMAIMS&#39;</span>, <span style="color:#e6db74">&#39;SANITARIUM&#39;</span></code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/crossword.py">crossword.py</a>
+    </figcaption>
+</figure>
+<p>However, when designing a custom crossword, it may be tricky to come up with a large set of words (and witty clues).</p>
+<h2 id="do-try-this-at-home"><a href="#do-try-this-at-home" class="hanchor" ariaLabel="Anchor">Do Try This at Home!</a> </h2>
+<p>The presented solution works well for my use case but obviously leaves room for further improvements.
+Instead of building infrastructure around the crossword generation, e.g. turning it into rich client application or a service, I&rsquo;d rather point out some conceptual alleys worth exploring:</p>
+<ul>
+<li>What about non-square or hexagonal grids?
+Adapting the encoding to other grids should be pretty easy to do.</li>
+<li>Experiment with other metrics of quality.
+For example, the number of word crossings could make for an interesting metric.</li>
+<li>Instead of requiring a fixed minimal quality, iteratively increase the required quality until the resulting SAT instance becomes unsatisfiable.
+This will leave you with a sequence of crosswords of increasing quality and <a href="https://en.wikipedia.org/wiki/Anytime_algorithm">allow you to stop at any time</a> or wait for the optimal placement to be determined.</li>
+<li>As a follow-up to the previous point, refactor your solution to leverage <a href="https://theory.stanford.edu/~nikolaj/programmingz3.html#sec-incrementality">incremental SMT</a> or <a href="https://satcompetition.github.io/2020/track_incremental.html">incremental SAT</a> solving, such that the solver does not have to start from scratch when the quality requirements increase.</li>
+<li>By <a href="https://en.wikipedia.org/wiki/Transpose">transposing</a> a crossword we get another valid crossword.
+This symmetry increases the search space unnecessarily.
+Can you come up with symmetry-breaking constraints to avoid wasting time on symmetrical word placements?</li>
+<li>Instead of selecting the best subset of words for a fixed grid size, one might potentially want to place all the provided words as compact as possible.
+Adapt the encoding to optimise for the smallest grid size.</li>
+<li>I used a SAT/SMT backend to solve the crossword generation since this is what I&rsquo;m most comfortable with.
+However, I wonder whether discrete optimisation algorithms would work even better here.
+Analogous to <a href="http://smtlib.cs.uiowa.edu/">SMT-LIB</a> in the satisfiability community, there is <a href="https://www.minizinc.org/">MiniZinc</a> to express discrete optimisation problems in a solver-independent way.
+You could give it a try.</li>
+</ul>
+<p>As usual, there are tons of alternatives to encode various aspects of the problem but it is unclear whether they pay off.
+In any case, let me know if you find a better way to generate <strong>personalised</strong> crosswords that meet configurable quality criteria.</p>
+<!-- TODO: Update "optimal" solution graphic, once computed -->
+<!-- Update formulas to latest example -->
+<!-- TODO: Create proper visuals -->
+<hr style="margin-top: 2em">
+<div class="links">
+
+    <a href="/blog/generating-crosswords-with-sat-smt/crossword.py" class="button">crossword.py</a>
+
+    <a href="/blog/generating-crosswords-with-sat-smt/eval.csv" class="button">eval.csv</a>
+
+</div>
+		</article>
+		</main>
+	</div>
+	
+	<div class="notepad related-posts">
+		<h1>Related Posts</h1>
+		<hr>
+		
+			<article>
+    <header>
+        <h2><a href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/">Playing Hard Mastermind Games with a SAT-based AI</a></h2>
+        <div class="metadata">
+    <time datetime="2020-03-12">March 12, 2020</time>
+    <ul>
+        <li><a class="tag-block" href="/tags/sat">SAT</a></li>
+        <li><a class="tag-block" href="/tags/ai">AI</a></li>
+        <li><a class="tag-block" href="/tags/puzzle">Puzzle</a></li>
+    </ul>
+</div>
+    </header><p>Back in the day, <a href="https://en.wikipedia.org/wiki/Mastermind_(board_game)">Mastermind</a> was a popular two player code-breaking game, and many <a href="https://en.wikipedia.org/wiki/Mastermind_(board_game)#Variations">variations thereof</a> still exist as both standalone games and puzzles within other games.
+Although it is difficult for a human player to make <em>optimal guesses</em> of the secret code, or at least guesses that do not conflict with the provided clues, the setting is usually simple enough for an AI to find such candidates via explicit exploration of the <a href="https://en.wikipedia.org/wiki/Game_tree">game tree</a>.</p>
+<p>However, such approaches becomes unfeasible when the number of possibilities for secret codes grows into the millions.
+This post illustrates the problem with standard approaches, and how finding consistent candidates can be approached with <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">SAT</a> solving &ndash; yielding an AI that can handle orders-of-magnitude harder Mastermind instances.</p>
+	<a class="read-more" href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/">
+        &raquo; Read more
+    </a>
+</article>
+		
+			<article>
+    <header>
+        <h2><a href="https://bohlender.pro/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/">Solving a Logic Synthesis Puzzle via SAT/SMT</a></h2>
+        <div class="metadata">
+    <time datetime="2019-12-12">December 12, 2019</time>
+    <ul>
+        <li><a class="tag-block" href="/tags/sat">SAT</a></li>
+        <li><a class="tag-block" href="/tags/smt">SMT</a></li>
+        <li><a class="tag-block" href="/tags/logic-synthesis">Logic Synthesis</a></li>
+        <li><a class="tag-block" href="/tags/puzzle">Puzzle</a></li>
+    </ul>
+</div>
+    </header><p>A few weeks ago, I was asked the following riddle:
+<q>Design a <a href="https://en.wikipedia.org/wiki/Logic_gate">logic circuit</a> with three inputs and three outputs, such that the outputs are the inverted inputs. You may use arbitrary many AND and OR gates, but at most two NOT gates</q>.
+Although the characterisation of this problem as an <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a> instance is straightforward, I found it necessary to reduce it to <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">SAT</a> and incorporate further assumptions to achieve reasonable performance.</p>
+<p>This post illustrates said process, ranging from the original idea to a standard formulation of SAT-based logic synthesis to a problem-specific and more constrained instance.</p>
+	<a class="read-more" href="https://bohlender.pro/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/">
+        &raquo; Read more
+    </a>
+</article>
+		
+	</div>
+	
+</div>
+
+        </div>
+        </div>
+        <footer>
+	<p>© Dimitri Bohlender</p>
+	<p><a href="/legal">Legal Notice</a></p>
+</footer>
+    </body>
+</html>

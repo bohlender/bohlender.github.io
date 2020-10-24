@@ -2,24 +2,33 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Puzzle on Dimitri Bohlender</title>
-    <link>https://bohlender.github.io/tags/puzzle/</link>
+    <link>https://bohlender.pro/tags/puzzle/</link>
     <description>Recent content in Puzzle on Dimitri Bohlender</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-gb</language>
     <managingEditor>contact@bohlender.pro (Dimitri Bohlender)</managingEditor>
     <webMaster>contact@bohlender.pro (Dimitri Bohlender)</webMaster>
     <copyright>© Dimitri Bohlender</copyright>
-    <lastBuildDate>Sun, 08 Mar 2020 16:12:02 +0100</lastBuildDate>
-    
-	<atom:link href="https://bohlender.github.io/tags/puzzle/index.xml" rel="self" type="application/rss+xml" />
-    
+    <lastBuildDate>Sun, 27 Sep 2020 16:03:37 +0200</lastBuildDate><atom:link href="https://bohlender.pro/tags/puzzle/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Generating Crosswords via SAT/SMT</title>
+      <link>https://bohlender.pro/blog/generating-crosswords-with-sat-smt/</link>
+      <pubDate>Sun, 27 Sep 2020 16:03:37 +0200</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.pro/blog/generating-crosswords-with-sat-smt/</guid>
+      <description>&lt;p&gt;Recently I got interested in designing personalised crosswords as a way to spice up photo book presents.
+This made me realise how hard generating &lt;q&gt;high-quality&lt;/q&gt; crosswords actually is.
+Trying to create a crossword from a set of words &amp;ndash; or a subset thereof &amp;ndash; I checked out several tools but found all of them to be based on heuristics and yield rather sparse crosswords.&lt;/p&gt;
+&lt;p&gt;In line with the general theme of my previous posts, this one illustrates how we can leverage &lt;a href=&#34;https://en.wikipedia.org/wiki/Boolean_satisfiability_problem&#34;&gt;SAT solving&lt;/a&gt; to solve this problem.
+In contrast to related approaches, which assume a fixed word placement and search for fitting words, we consider word placement as part of the problem and eventually end up with an integrated solution to generating crosswords of adjustable quality.&lt;/p&gt;</description>
+    </item>
     
     <item>
       <title>Playing Hard Mastermind Games with a SAT-based AI</title>
-      <link>https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/</link>
+      <link>https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/</link>
       <pubDate>Sun, 08 Mar 2020 16:12:02 +0100</pubDate>
       <author>contact@bohlender.pro (Dimitri Bohlender)</author>
-      <guid>https://bohlender.github.io/blog/playing-hard-mastermind-games-with-a-sat-based-ai/</guid>
+      <guid>https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/</guid>
       <description>&lt;p&gt;Back in the day, &lt;a href=&#34;https://en.wikipedia.org/wiki/Mastermind_(board_game)&#34;&gt;Mastermind&lt;/a&gt; was a popular two player code-breaking game, and many &lt;a href=&#34;https://en.wikipedia.org/wiki/Mastermind_(board_game)#Variations&#34;&gt;variations thereof&lt;/a&gt; still exist as both standalone games and puzzles within other games.
 Although it is difficult for a human player to make &lt;em&gt;optimal guesses&lt;/em&gt; of the secret code, or at least guesses that do not conflict with the provided clues, the setting is usually simple enough for an AI to find such candidates via explicit exploration of the &lt;a href=&#34;https://en.wikipedia.org/wiki/Game_tree&#34;&gt;game tree&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;However, such approaches becomes unfeasible when the number of possibilities for secret codes grows into the millions.
@@ -28,10 +37,10 @@ This post illustrates the problem with standard approaches, and how finding cons
     
     <item>
       <title>Solving a Logic Synthesis Puzzle via SAT/SMT</title>
-      <link>https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/</link>
+      <link>https://bohlender.pro/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/</link>
       <pubDate>Sat, 30 Nov 2019 22:54:10 +0100</pubDate>
       <author>contact@bohlender.pro (Dimitri Bohlender)</author>
-      <guid>https://bohlender.github.io/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/</guid>
+      <guid>https://bohlender.pro/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/</guid>
       <description>&lt;p&gt;A few weeks ago, I was asked the following riddle:
 &lt;q&gt;Design a &lt;a href=&#34;https://en.wikipedia.org/wiki/Logic_gate&#34;&gt;logic circuit&lt;/a&gt; with three inputs and three outputs, such that the outputs are the inverted inputs. You may use arbitrary many AND and OR gates, but at most two NOT gates&lt;/q&gt;.
 Although the characterisation of this problem as an &lt;a href=&#34;https://en.wikipedia.org/wiki/Satisfiability_modulo_theories&#34;&gt;SMT&lt;/a&gt; instance is straightforward, I found it necessary to reduce it to &lt;a href=&#34;https://en.wikipedia.org/wiki/Boolean_satisfiability_problem&#34;&gt;SAT&lt;/a&gt; and incorporate further assumptions to achieve reasonable performance.&lt;/p&gt;
