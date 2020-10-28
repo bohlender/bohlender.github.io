@@ -21,7 +21,7 @@
 This made me realise how hard generating &lt;q&gt;high-quality&lt;/q&gt; crosswords actually is.
 Trying to create a crossword from a set of words &amp;ndash; or a subset thereof &amp;ndash; I checked out several tools but found all of them to be based on heuristics and yield rather sparse crosswords.&lt;/p&gt;
 &lt;p&gt;In line with the general theme of my previous posts, this one illustrates how we can leverage &lt;a href=&#34;https://en.wikipedia.org/wiki/Boolean_satisfiability_problem&#34;&gt;SAT solving&lt;/a&gt; to solve this problem.
-In contrast to related approaches, which assume a fixed word placement and search for fitting words, we consider word placement as part of the problem and eventually end up with an integrated solution to generating crosswords of adjustable quality.&lt;/p&gt;</description>
+In contrast to related approaches, which assume a fixed grid structure and search for fitting words, we consider word placement as part of the problem and eventually end up with an integrated solution to generating crosswords of adjustable quality.&lt;/p&gt;</description>
     </item>
     <item>
       <title>Playing Hard Mastermind Games with a SAT-based AI</title>

@@ -28,7 +28,7 @@
 This made me realise how hard generating high-quality crosswords actually is.
 Trying to create a crossword from a set of words &ndash; or a subset thereof &ndash; I checked out several tools but found all of them to be based on heuristics and yield rather sparse crosswords.
 In line with the general theme of my previous posts, this one illustrates how we can leverage SAT solving to solve this problem.
-In contrast to related approaches, which assume a fixed word placement and search for fitting words, we consider word placement as part of the problem and eventually end up with an integrated solution to generating crosswords of adjustable quality." />
+In contrast to related approaches, which assume a fixed grid structure and search for fitting words, we consider word placement as part of the problem and eventually end up with an integrated solution to generating crosswords of adjustable quality." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/" />
 <meta property="og:image" content="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/gfx/12x12_q104.svg" />
@@ -83,7 +83,7 @@ In contrast to related approaches, which assume a fixed word placement and searc
 This made me realise how hard generating <q>high-quality</q> crosswords actually is.
 Trying to create a crossword from a set of words &ndash; or a subset thereof &ndash; I checked out several tools but found all of them to be based on heuristics and yield rather sparse crosswords.</p>
 <p>In line with the general theme of my previous posts, this one illustrates how we can leverage <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">SAT solving</a> to solve this problem.
-In contrast to related approaches, which assume a fixed word placement and search for fitting words, we consider word placement as part of the problem and eventually end up with an integrated solution to generating crosswords of adjustable quality.</p>
+In contrast to related approaches, which assume a fixed grid structure and search for fitting words, we consider word placement as part of the problem and eventually end up with an integrated solution to generating crosswords of adjustable quality.</p>
 <h2 id="the-problem-statement"><a href="#the-problem-statement" class="hanchor" ariaLabel="Anchor">The Problem Statement</a> </h2>
 <p>When designing a crossword puzzle on a specific theme or topic, one will likely start with <strong>a set of words</strong> (and clever clues) that fit the setting and a rough idea of <strong>the crossword&rsquo;s dimensions</strong>.
 For example, when designing a crossword for a magazine, the page size will probably limit the crossword&rsquo;s width to less than 20 cells to keep the characters legible.
