@@ -2077,19 +2077,19 @@ As implied in the previous section Z3 didn&rsquo;t perform too well on these ins
 
 
 
-<figure class="figure-outer" id="solving-time-for-varying-sat-solvers-and-qualities">
+<figure class="figure-outer" id="solving-time-for-varying-sat-solvers-and-qualities-given-51-words">
     <figure class="figure-inner">
-        <img src="gfx/eval.svg"/> 
+        <img src="gfx/eval_51words.svg"/> 
             <figcaption>
-                Solving time for varying SAT solvers and qualities
+                Solving time for varying SAT solvers and qualities [given 51 words]
             </figcaption>
     </figure>
     
 </figure>
 <aside>
     <p>
-    Note that the first two configurations &ndash; <a href="https://github.com/arminbiere/cadical/tree/c622a490ec3d9a1a1e998b08120c9b8d0b67a123">cadical</a> and <a href="https://github.com/msoos/cryptominisat/releases/tag/5.8.0">cryptominisat</a> &ndash; run single-threaded, while both <a href="https://github.com/arminbiere/lingeling/tree/7d5db72420b95ab356c98ca7f7a4681ed2c59c70">plingeling</a> and <a href="https://github.com/msoos/cryptominisat/releases/tag/5.8.0">cryptominisat -t4</a> use four worker threads on a i7-7700K CPU.
-Some of the experiments, such as the single-threaded ones for quality 100, are still pending but will eventually be incorporated.
+    Note that the first two configurations (<a href="https://github.com/arminbiere/cadical/tree/c622a490ec3d9a1a1e998b08120c9b8d0b67a123">cadical</a> and <a href="https://github.com/msoos/cryptominisat/releases/tag/5.8.0">cryptominisat</a>) run single-threaded, while both <a href="https://github.com/arminbiere/lingeling/tree/7d5db72420b95ab356c98ca7f7a4681ed2c59c70">plingeling</a> and <a href="https://github.com/msoos/cryptominisat/releases/tag/5.8.0">cryptominisat -t4</a> use four worker threads on a i7-7700K CPU.
+Some of the experiments, such as the single-threaded ones for quality 100, are still pending but I will probably not finish those as proper evaluation would take unreasonably long.
     </p>
 </aside>
 <p>As to be expected, the higher the quality requirements are the longer it takes to solve the corresponding SAT instance.
@@ -2111,9 +2111,9 @@ However, even the instances of quality 95 do already look pretty good and are so
     </figure>
     
 </figure>
-<p>Feel free to process <a href="eval.csv">the measurements</a> on your own if you&rsquo;re interested in specific figures.</p>
+<p>Feel free to process <a href="eval_51words.csv">the measurements</a> on your own if you&rsquo;re interested in specific figures.</p>
 <p>If this seems slow to you, keep in mind that <strong>you can speed up the generation process</strong> by providing more words to choose from.
-For example, by adding the following words to our word set, the average time to generate a crossword of quality 95 via <a href="https://github.com/arminbiere/lingeling/tree/7d5db72420b95ab356c98ca7f7a4681ed2c59c70">plingeling</a> reduces from 336s to just 53s.</p>
+For example, by adding the following words to our word set, the average time to generate a crossword of quality 95 via <a href="https://github.com/arminbiere/lingeling/tree/7d5db72420b95ab356c98ca7f7a4681ed2c59c70">plingeling</a> reduces from 336s to just 45s.</p>
 
 
 
@@ -2121,73 +2121,17 @@ For example, by adding the following words to our word set, the average time to 
 
 
 
-
+<figure class="figure-outer" id="solving-time-for-varying-sat-solvers-and-qualities-given-73-words">
+    <figure class="figure-inner">
+        <img src="gfx/eval_73words.svg"/> 
+            <figcaption>
+                Solving time for varying SAT solvers and qualities [given 73 words]
+            </figcaption>
+    </figure>
     
-
-
-    
-    
-
-
-
-
-    
-    
-        
-    
-
-    
-    
-
-    
-    
-
-    
-    
-
-
-
-
-    
-        
-    
-    
-
-    
-        
-    
-    
-
-    
-        
-    
-    
-
-    
-        
-    
-    
-
-<figure class="highlight-figure">
-    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">268
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">269
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">270
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">271
-</span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#e6db74">&#39;LBA&#39;</span>, <span style="color:#e6db74">&#39;LODERUNNER&#39;</span>, <span style="color:#e6db74">&#39;CIVILIZATION&#39;</span>, <span style="color:#e6db74">&#39;SILENTHILL&#39;</span>, <span style="color:#e6db74">&#39;GOTHIC&#39;</span>,
-<span style="color:#e6db74">&#39;CRUSADER&#39;</span>, <span style="color:#e6db74">&#39;TYRIAN&#39;</span>, <span style="color:#e6db74">&#39;MDK&#39;</span>, <span style="color:#e6db74">&#39;CASTLEVANIA&#39;</span>, <span style="color:#e6db74">&#39;STARFLIGHT&#39;</span>,
-<span style="color:#e6db74">&#39;AQUANOX&#39;</span>, <span style="color:#e6db74">&#39;POD&#39;</span>, <span style="color:#e6db74">&#39;JAZZ&#39;</span>, <span style="color:#e6db74">&#39;MONKEYISLAND&#39;</span>, <span style="color:#e6db74">&#39;SPIRITABYSS&#39;</span>,
-<span style="color:#e6db74">&#39;TERRARIA&#39;</span>, <span style="color:#e6db74">&#39;KEEN&#39;</span>, <span style="color:#e6db74">&#39;TIM&#39;</span>, <span style="color:#e6db74">&#39;ARCHON&#39;</span>, <span style="color:#e6db74">&#39;IHNMAIMS&#39;</span>, <span style="color:#e6db74">&#39;SANITARIUM&#39;</span></code></pre></td></tr></table>
-</div>
-</div>
-    <figcaption>
-        <a href="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/crossword.py">crossword.py</a>
-    </figcaption>
 </figure>
-<p>However, when designing a custom crossword, it may be tricky to come up with a large set of words (and witty clues).</p>
+<p>For higher quality requirements, additional words may improve the runtime by more than an order-of-magnitude (cf. times for quality 100).
+However, when designing a custom crossword, it may be tricky to come up with a large set of words (and witty clues).</p>
 <h2 id="do-try-this-at-home"><a href="#do-try-this-at-home" class="hanchor" ariaLabel="Anchor">Do Try This at Home!</a> </h2>
 <p>The presented solution works well for my use case but obviously leaves room for further improvements.
 Instead of building infrastructure around the crossword generation, e.g. turning it into rich client application or a service, I&rsquo;d rather point out some conceptual alleys worth exploring:</p>
@@ -2219,7 +2163,9 @@ In any case, let me know if you find a better way to generate <strong>personalis
 
     <a href="/blog/generating-crosswords-with-sat-smt/crossword.py" class="button">crossword.py</a>
 
-    <a href="/blog/generating-crosswords-with-sat-smt/eval.csv" class="button">eval.csv</a>
+    <a href="/blog/generating-crosswords-with-sat-smt/eval_51words.csv" class="button">eval_51words.csv</a>
+
+    <a href="/blog/generating-crosswords-with-sat-smt/eval_73words.csv" class="button">eval_73words.csv</a>
 
 </div>
 		</article>
