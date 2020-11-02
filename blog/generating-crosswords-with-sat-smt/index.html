@@ -2114,6 +2114,79 @@ However, even the instances of quality 95 do already look pretty good and are so
 <p>Feel free to process <a href="eval_51words.csv">the measurements</a> on your own if you&rsquo;re interested in specific figures.</p>
 <p>If this seems slow to you, keep in mind that <strong>you can speed up the generation process</strong> by providing more words to choose from.
 For example, by adding the following words to our word set, the average time to generate a crossword of quality 95 via <a href="https://github.com/arminbiere/lingeling/tree/7d5db72420b95ab356c98ca7f7a4681ed2c59c70">plingeling</a> reduces from 336s to just 45s.</p>
+<p>
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">268
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">269
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">270
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">271
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#e6db74">&#39;LBA&#39;</span>, <span style="color:#e6db74">&#39;LODERUNNER&#39;</span>, <span style="color:#e6db74">&#39;CIVILIZATION&#39;</span>, <span style="color:#e6db74">&#39;SILENTHILL&#39;</span>, <span style="color:#e6db74">&#39;GOTHIC&#39;</span>,
+<span style="color:#e6db74">&#39;CRUSADER&#39;</span>, <span style="color:#e6db74">&#39;TYRIAN&#39;</span>, <span style="color:#e6db74">&#39;MDK&#39;</span>, <span style="color:#e6db74">&#39;CASTLEVANIA&#39;</span>, <span style="color:#e6db74">&#39;STARFLIGHT&#39;</span>,
+<span style="color:#e6db74">&#39;AQUANOX&#39;</span>, <span style="color:#e6db74">&#39;POD&#39;</span>, <span style="color:#e6db74">&#39;JAZZ&#39;</span>, <span style="color:#e6db74">&#39;MONKEYISLAND&#39;</span>, <span style="color:#e6db74">&#39;SPIRITABYSS&#39;</span>,
+<span style="color:#e6db74">&#39;TERRARIA&#39;</span>, <span style="color:#e6db74">&#39;KEEN&#39;</span>, <span style="color:#e6db74">&#39;TIM&#39;</span>, <span style="color:#e6db74">&#39;ARCHON&#39;</span>, <span style="color:#e6db74">&#39;IHNMAIMS&#39;</span>, <span style="color:#e6db74">&#39;SANITARIUM&#39;</span></code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/crossword.py">crossword.py</a>
+    </figcaption>
+</figure>
 
 
 
@@ -2129,7 +2202,7 @@ For example, by adding the following words to our word set, the average time to 
             </figcaption>
     </figure>
     
-</figure>
+</figure></p>
 <p>For higher quality requirements, additional words may improve the runtime by more than an order-of-magnitude (cf. times for quality 100).
 However, when designing a custom crossword, it may be tricky to come up with a large set of words (and witty clues).</p>
 <h2 id="do-try-this-at-home"><a href="#do-try-this-at-home" class="hanchor" ariaLabel="Anchor">Do Try This at Home!</a> </h2>
