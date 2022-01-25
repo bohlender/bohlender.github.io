@@ -18,7 +18,7 @@
             {left: `$`, right: `$`, display: false},
         ]
     });"></script>
-	<link rel="alternate" type="application/rss+xml" href="https://bohlender.pro/blog/index.xml" title="Dimitri Bohlender" />
+	<link rel="alternate" type="application/rss+xml" href="https://bohlender.pro/blog/index.xml" title="bohlender.pro" />
 	
 	
 
@@ -32,7 +32,7 @@ This post illustrates how this, and related aspects, can be investigated with SM
 <meta property="article:published_time" content="2019-09-26T00:00:00+00:00" />
 <meta property="article:modified_time" content="2019-09-12T09:31:28+02:00" />
 	
-	<title>SMT-based Reasoning About the Fast Inverse Square Root | Dimitri Bohlender</title>
+	<title>SMT-based Reasoning About the Fast Inverse Square Root | bohlender.pro</title>
 </head>
     <body class="blog">
         <header>
@@ -98,7 +98,7 @@ It boils down to treating the float as a 32-bit integer, and performing the tric
 The result could be returned after line 4, but adding a subsequent iteration of <a href="https://en.wikipedia.org/wiki/Newton%27s_method">Newton&rsquo;s method</a> improves the precision significantly, while being computationally cheap.</p>
 <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
@@ -109,8 +109,8 @@ The result could be returned after line 4, but adding a subsequent iteration of 
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">9
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#66d9ef">float</span> <span style="color:#a6e22e">Q_rsqrt</span>(<span style="color:#66d9ef">float</span> f) {
-	int32_t b <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>(int32_t<span style="color:#f92672">*</span>)<span style="color:#f92672">&amp;</span>f;
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#66d9ef">float</span> <span style="color:#a6e22e">Q_rsqrt</span>(<span style="color:#66d9ef">float</span> f) {
+	<span style="color:#66d9ef">int32_t</span> b <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>(<span style="color:#66d9ef">int32_t</span><span style="color:#f92672">*</span>)<span style="color:#f92672">&amp;</span>f;
 	b <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x5f3759df</span> <span style="color:#f92672">-</span> (b <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">1</span>); <span style="color:#75715e">// The actual bit-level hack
 </span><span style="color:#75715e"></span>	<span style="color:#66d9ef">float</span> res <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>(<span style="color:#66d9ef">float</span><span style="color:#f92672">*</span>)<span style="color:#f92672">&amp;</span>b;
 
@@ -208,12 +208,12 @@ Just as in $(1)$, it computes $\eta(x)$ from $\sqrt x$ and $\mathit{Q\_rsqrt}(x)
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#66d9ef">float</span> <span style="color:#a6e22e">relErr</span>(<span style="color:#66d9ef">float</span> fSqrt, <span style="color:#66d9ef">float</span> fFast) {
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#66d9ef">float</span> <span style="color:#a6e22e">relErr</span>(<span style="color:#66d9ef">float</span> fSqrt, <span style="color:#66d9ef">float</span> fFast) {
     <span style="color:#66d9ef">return</span> fabs(<span style="color:#ae81ff">1.0f</span> <span style="color:#f92672">-</span> fFast<span style="color:#f92672">*</span>fSqrt);
 }</code></pre></td></tr></table>
 </div>
@@ -293,7 +293,7 @@ Such decoupling of progamming languages and IRs, that all reasoning is actually 
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
@@ -301,7 +301,7 @@ Such decoupling of progamming languages and IRs, that all reasoning is actually 
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-llvm" data-lang="llvm"><span style="color:#66d9ef">define</span> <span style="color:#960050;background-color:#1e0010">dso_local</span> <span style="color:#66d9ef">float</span> @relErr(<span style="color:#66d9ef">float</span>, <span style="color:#66d9ef">float</span>) <span style="color:#66d9ef">local_unnamed_addr</span> #1 {
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-llvm" data-lang="llvm"><span style="color:#66d9ef">define</span> <span style="color:#960050;background-color:#1e0010">dso_local</span> <span style="color:#66d9ef">float</span> @relErr(<span style="color:#66d9ef">float</span>, <span style="color:#66d9ef">float</span>) <span style="color:#66d9ef">local_unnamed_addr</span> #1 {
   %3 = <span style="color:#66d9ef">fmul</span> <span style="color:#66d9ef">float</span> %0, %1
   %4 = <span style="color:#66d9ef">fsub</span> <span style="color:#66d9ef">float</span> <span style="color:#ae81ff">1.000000e+00</span>, %3
   %5 = <span style="color:#66d9ef">tail</span> <span style="color:#66d9ef">call</span> <span style="color:#66d9ef">float</span> @llvm.fabs.f32(<span style="color:#66d9ef">float</span> %4)
@@ -413,7 +413,7 @@ There is no branching of control flow, making the characterisation pretty straig
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
@@ -427,7 +427,7 @@ There is no branching of control flow, making the characterisation pretty straig
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme"><span style="color:#75715e">; Auxiliary function to keep notation of 1.0f short</span>
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme"><span style="color:#75715e">; Auxiliary function to keep notation of 1.0f short</span>
 (<span style="color:#a6e22e">define-fun</span> f1<span style="color:#f92672">.</span><span style="color:#ae81ff">0</span> () Float32
     ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) RNE <span style="color:#ae81ff">1</span>)
 )
@@ -557,7 +557,7 @@ To be able to experiment with different constants in the hack later, we introduc
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
@@ -570,10 +570,10 @@ To be able to experiment with different constants in the hack later, we introduc
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#66d9ef">const</span> int32_t magic <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x5f3759df</span>;
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#66d9ef">const</span> <span style="color:#66d9ef">int32_t</span> magic <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x5f3759df</span>;
 
 <span style="color:#66d9ef">float</span> <span style="color:#a6e22e">Q_rsqrt</span>(<span style="color:#66d9ef">float</span> f) {
-    int32_t b <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>(int32_t<span style="color:#f92672">*</span>)<span style="color:#f92672">&amp;</span>f;
+    <span style="color:#66d9ef">int32_t</span> b <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>(<span style="color:#66d9ef">int32_t</span><span style="color:#f92672">*</span>)<span style="color:#f92672">&amp;</span>f;
     b <span style="color:#f92672">=</span> magic <span style="color:#f92672">-</span> (b <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">1</span>); <span style="color:#75715e">// The actual bit-level hack
 </span><span style="color:#75715e"></span>    <span style="color:#66d9ef">float</span> res <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>(<span style="color:#66d9ef">float</span><span style="color:#f92672">*</span>)<span style="color:#f92672">&amp;</span>b;
 
@@ -685,7 +685,7 @@ To be able to experiment with different constants in the hack later, we introduc
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
@@ -699,7 +699,7 @@ To be able to experiment with different constants in the hack later, we introduc
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-llvm" data-lang="llvm"><span style="color:#66d9ef">define</span> <span style="color:#960050;background-color:#1e0010">dso_local</span> <span style="color:#66d9ef">float</span> @Q_rsqrt(<span style="color:#66d9ef">float</span>) <span style="color:#66d9ef">local_unnamed_addr</span> #0 {
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-llvm" data-lang="llvm"><span style="color:#66d9ef">define</span> <span style="color:#960050;background-color:#1e0010">dso_local</span> <span style="color:#66d9ef">float</span> @Q_rsqrt(<span style="color:#66d9ef">float</span>) <span style="color:#66d9ef">local_unnamed_addr</span> #0 {
   %2 = <span style="color:#66d9ef">bitcast</span> <span style="color:#66d9ef">float</span> %0 <span style="color:#66d9ef">to</span> <span style="color:#66d9ef">i32</span>
   %3 = <span style="color:#66d9ef">ashr</span> <span style="color:#66d9ef">i32</span> %2, <span style="color:#ae81ff">1</span>
   %4 = <span style="color:#66d9ef">sub</span> <span style="color:#66d9ef">nsw</span> <span style="color:#66d9ef">i32</span> <span style="color:#ae81ff">1597463007</span>, %3
@@ -894,7 +894,7 @@ As before, we introduce auxiliary functions <code>f0.5</code> and <code>f1.5</co
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
@@ -921,7 +921,7 @@ As before, we introduce auxiliary functions <code>f0.5</code> and <code>f1.5</co
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">declare-const</span> magic (<span style="color:#a6e22e">_</span> BitVec <span style="color:#ae81ff">32</span>)) <span style="color:#75715e">; magic number used in hack</span>
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">declare-const</span> magic (<span style="color:#a6e22e">_</span> BitVec <span style="color:#ae81ff">32</span>)) <span style="color:#75715e">; magic number used in hack</span>
 
 <span style="color:#75715e">; Auxiliary functions to keep notation short</span>
 (<span style="color:#a6e22e">define-fun</span> f0<span style="color:#f92672">.</span><span style="color:#ae81ff">5</span> () Float32
@@ -970,7 +970,7 @@ Therefore we feed both the float <code>%0%</code> and its bit vector representat
 <p>Having defined both functions, we can start checking the satisfiability of constraints that involve them.
 Although we are pretty sure that our logical characterisation is correct, we may have mixed things up or introduced typos.
 It is a good idea to first test whether it performs the same computations as the <a href="maxRelErr.c">reference implementation</a>:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-zsh" data-lang="zsh">arch: 64-bit
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-zsh" data-lang="zsh">arch: 64-bit
 magic: 0x5F3759DF
 worst: 0x016EB3C0 <span style="color:#f92672">(</span>0.000000000000<span style="color:#f92672">)</span>
 fSqrt: 0x20773327 <span style="color:#f92672">(</span>0.000000000000<span style="color:#f92672">)</span>
@@ -1067,7 +1067,7 @@ The naïve reference implementation finds the <strong>input <code>0x016EB3C0</co
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
@@ -1077,7 +1077,7 @@ The naïve reference implementation finds the <strong>input <code>0x016EB3C0</co
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (= magic <span style="color:#f92672">#</span>x5F3759DF))     <span style="color:#75715e">; original magic number</span>
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (= magic <span style="color:#f92672">#</span>x5F3759DF))     <span style="color:#75715e">; original magic number</span>
 
 (<span style="color:#a6e22e">declare-const</span> f Float32)         <span style="color:#75715e">; input float</span>
 (<span style="color:#a6e22e">declare-const</span> b (<span style="color:#a6e22e">_</span> BitVec <span style="color:#ae81ff">32</span>))   <span style="color:#75715e">; input float&#39;s bitvector representation (asserted below)</span>
@@ -1093,7 +1093,7 @@ The naïve reference implementation finds the <strong>input <code>0x016EB3C0</co
 </figure>
 <p>Feeding these constraints into an SMT solver, such as <a href="https://github.com/Z3Prover/z3/">Z3</a>, will return that they are indeed satisfiable.
 To determine whether the characterised functions actually compute the expected values, we could also have added the following assertions (prior to <code>check-sat</code>):</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (= f ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) <span style="color:#f92672">#</span>x016EB3C0))) <span style="color:#75715e">; f = (float)0x016EB3C0</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (= f ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) <span style="color:#f92672">#</span>x016EB3C0))) <span style="color:#75715e">; f = (float)0x016EB3C0</span>
 (<span style="color:#a6e22e">assert</span> (=                                 <span style="color:#75715e">; fSqrt = (float)0x20773327</span>
     (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>sqrt RNE f)				 
     ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) <span style="color:#f92672">#</span>x20773327)
@@ -1108,7 +1108,7 @@ To determine whether the characterised functions actually compute the expected v
 ))
 </code></pre></div><p>However, all these assertions do is evaluate whether applying various functions to the values picked by the solver for <code>f</code> and <code>b</code> yields the expected values.
 Instead of adding these unnecessary assertions, and making it harder for the solver to find a solution, it is more appropriate to use Z3&rsquo;s <code>eval</code> command, to do these evaluations <em>after</em> <code>check-sat</code>:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(eval (= f ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) <span style="color:#f92672">#</span>x016EB3C0))) <span style="color:#75715e">; f = (float)0x016EB3C0</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(eval (= f ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) <span style="color:#f92672">#</span>x016EB3C0))) <span style="color:#75715e">; f = (float)0x016EB3C0</span>
 (eval (=                                 <span style="color:#75715e">; fSqrt = (float)0x20773327</span>
     (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>sqrt RNE f)				 
     ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) <span style="color:#f92672">#</span>x20773327)
@@ -1248,7 +1248,7 @@ The computed <strong>values do indeed match those of the executable</strong>:</p
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
@@ -1267,7 +1267,7 @@ The computed <strong>values do indeed match those of the executable</strong>:</p
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-zsh" data-lang="zsh"><span style="color:#f92672">===========[</span> Test encoding <span style="color:#f92672">]===========</span>
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-zsh" data-lang="zsh"><span style="color:#f92672">===========[</span> Test encoding <span style="color:#f92672">]===========</span>
 sat
 f <span style="color:#f92672">(</span>should be 0x016EB3C0<span style="color:#f92672">)</span>:
 <span style="color:#f92672">(</span>fp <span style="color:#75715e">#b0 #x02 #b11011101011001111000000)</span>
@@ -1415,7 +1415,7 @@ To prove that the relative error never exceeds 1% for any float, we leave the in
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">85
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">85
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">86
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">87
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">88
@@ -1429,7 +1429,7 @@ To prove that the relative error never exceeds 1% for any float, we leave the in
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">96
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (= magic <span style="color:#f92672">#</span>x5F3759DF))     <span style="color:#75715e">; original magic number</span>
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (= magic <span style="color:#f92672">#</span>x5F3759DF))     <span style="color:#75715e">; original magic number</span>
 
 (<span style="color:#a6e22e">declare-const</span> f Float32)         <span style="color:#75715e">; input float</span>
 (<span style="color:#a6e22e">declare-const</span> b (<span style="color:#a6e22e">_</span> BitVec <span style="color:#ae81ff">32</span>))   <span style="color:#75715e">; input float&#39;s bitvector representation (asserted below)</span>
@@ -1491,11 +1491,11 @@ Indeed, the hack turns out to not be applicable to all floating point numbers.</
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">105
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">105
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">106
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (not (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>isInfinite f)))
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (not (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>isInfinite f)))
 (<span style="color:#a6e22e">check-sat</span>)</code></pre></td></tr></table>
 </div>
 </div>
@@ -1546,11 +1546,11 @@ Granted, this is a rather special input, so what about restricting the input to 
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">115
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">115
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">116
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (not (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>isZero f)))
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (not (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>isZero f)))
 (<span style="color:#a6e22e">check-sat</span>)</code></pre></td></tr></table>
 </div>
 </div>
@@ -1602,11 +1602,11 @@ When also requiring the input to <strong>not be subnormal</strong>, the SMT solv
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">125
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">125
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">126
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (not (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>isSubnormal f)))
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (not (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>isSubnormal f)))
 (<span style="color:#a6e22e">check-sat</span>)</code></pre></td></tr></table>
 </div>
 </div>
@@ -1743,7 +1743,7 @@ To determine whether <code>NaN</code> can ever be returned by <code>relErr</code
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">134
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">134
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">135
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">136
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">137
@@ -1757,7 +1757,7 @@ To determine whether <code>NaN</code> can ever be returned by <code>relErr</code
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">145
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (= magic <span style="color:#f92672">#</span>x5F3759DF))     <span style="color:#75715e">; original magic number</span>
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (= magic <span style="color:#f92672">#</span>x5F3759DF))     <span style="color:#75715e">; original magic number</span>
 
 (<span style="color:#a6e22e">declare-const</span> f Float32)         <span style="color:#75715e">; input float</span>
 (<span style="color:#a6e22e">declare-const</span> b (<span style="color:#a6e22e">_</span> BitVec <span style="color:#ae81ff">32</span>))   <span style="color:#75715e">; input float&#39;s bitvector representation (asserted below)</span>
@@ -1787,7 +1787,7 @@ However, even if $f(x)$ were an arbitrary function, we could have achieved the s
 </aside>
 <p>With the assertion <code>(not (fp.isNegative f))</code> added, <code>relErr</code> cannot return <code>NaN</code> anymore, and the previous proof that <code>relErr(..) &gt; 0.01</code> is never satisfied becomes a proper proof of correctness.
 The following constraints are not satisfiable, proving <strong>within seconds</strong> that for all normal, non-negative floats <strong>the relative error never exceeds 1%</strong>.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (= magic <span style="color:#f92672">#</span>x5F3759DF))     <span style="color:#75715e">; original magic number</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (= magic <span style="color:#f92672">#</span>x5F3759DF))     <span style="color:#75715e">; original magic number</span>
 
 (<span style="color:#a6e22e">declare-const</span> f Float32)         <span style="color:#75715e">; input float</span>
 (<span style="color:#a6e22e">declare-const</span> b (<span style="color:#a6e22e">_</span> BitVec <span style="color:#ae81ff">32</span>))   <span style="color:#75715e">; input float&#39;s bitvector representation (asserted below)</span>
@@ -2055,7 +2055,7 @@ Unfortunately this machinery does not support floating-point constraints, which 
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">58
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">59
@@ -2093,7 +2093,7 @@ Unfortunately this machinery does not support floating-point constraints, which 
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">91
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-zsh" data-lang="zsh"><span style="color:#f92672">===[</span> Max. relative error &lt;<span style="color:#f92672">=</span> 0.001? <span style="color:#f92672">]===</span>
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-zsh" data-lang="zsh"><span style="color:#f92672">===[</span> Max. relative error &lt;<span style="color:#f92672">=</span> 0.001? <span style="color:#f92672">]===</span>
 sat
 SAT means that a violation is possible
 Problematic float:
@@ -2312,7 +2312,7 @@ We, instead, follow the conceptually simpler approach of letting the SMT solver 
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">243
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">243
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">244
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">245
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">246
@@ -2330,7 +2330,7 @@ We, instead, follow the conceptually simpler approach of letting the SMT solver 
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">258
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (<span style="color:#a6e22e">forall</span> ((<span style="color:#a6e22e">f</span> Float32) (<span style="color:#a6e22e">b</span> (<span style="color:#a6e22e">_</span> BitVec <span style="color:#ae81ff">32</span>)))
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Scheme" data-lang="Scheme">(<span style="color:#a6e22e">assert</span> (<span style="color:#a6e22e">forall</span> ((<span style="color:#a6e22e">f</span> Float32) (<span style="color:#a6e22e">b</span> (<span style="color:#a6e22e">_</span> BitVec <span style="color:#ae81ff">32</span>)))
     (<span style="color:#a6e22e">=&gt;</span>
         (<span style="color:#a6e22e">and</span>
             (<span style="color:#a6e22e">fp</span><span style="color:#f92672">.</span>isNormal f)          <span style="color:#75715e">; only consider normal floats</span>
@@ -2501,7 +2501,7 @@ We, instead, follow the conceptually simpler approach of letting the SMT solver 
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 93
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 93
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 94
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 95
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 96
@@ -2523,7 +2523,7 @@ We, instead, follow the conceptually simpler approach of letting the SMT solver 
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">112
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-zsh" data-lang="zsh"><span style="color:#f92672">==[</span> Is there a better magic number? <span style="color:#f92672">]==</span>
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-zsh" data-lang="zsh"><span style="color:#f92672">==[</span> Is there a better magic number? <span style="color:#f92672">]==</span>
 sat
 
 SAT means that a better one exists <span style="color:#f92672">(</span>max rel err &lt; 0.001752<span style="color:#f92672">)</span>

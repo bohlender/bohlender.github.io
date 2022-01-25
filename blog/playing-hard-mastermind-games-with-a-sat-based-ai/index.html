@@ -18,7 +18,7 @@
             {left: `$`, right: `$`, display: false},
         ]
     });"></script>
-	<link rel="alternate" type="application/rss+xml" href="https://bohlender.pro/blog/index.xml" title="Dimitri Bohlender" />
+	<link rel="alternate" type="application/rss+xml" href="https://bohlender.pro/blog/index.xml" title="bohlender.pro" />
 	
 	
 
@@ -26,7 +26,7 @@
 <meta property="og:title" content="Playing Hard Mastermind Games with a SAT-based AI" />
 <meta property="og:description" content="Back in the day, Mastermind was a popular two player code-breaking game, and many variations thereof still exist as both standalone games and puzzles within other games.
 Although it is difficult for a human player to make optimal guesses of the secret code, or at least guesses that do not conflict with the provided clues, the setting is usually simple enough for an AI to find such candidates via explicit exploration of the game tree.
-However, such approaches becomes unfeasible when the number of possibilities for secret codes grows into the millions.
+However, such approaches become unfeasible when the number of possibilities for secret codes grows into the millions.
 This post illustrates the problem with standard approaches, and how finding consistent candidates can be approached with SAT solving &ndash; yielding an AI that can handle orders-of-magnitude harder Mastermind instances." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/" />
@@ -34,7 +34,7 @@ This post illustrates the problem with standard approaches, and how finding cons
 <meta property="article:published_time" content="2020-03-12T00:00:00+00:00" />
 <meta property="article:modified_time" content="2020-03-08T16:12:02+01:00" />
 	
-	<title>Playing Hard Mastermind Games with a SAT-based AI | Dimitri Bohlender</title>
+	<title>Playing Hard Mastermind Games with a SAT-based AI | bohlender.pro</title>
 </head>
     <body class="blog">
         <header>
@@ -81,7 +81,7 @@ This post illustrates the problem with standard approaches, and how finding cons
 			</header>
 			<p>Back in the day, <a href="https://en.wikipedia.org/wiki/Mastermind_(board_game)">Mastermind</a> was a popular two player code-breaking game, and many <a href="https://en.wikipedia.org/wiki/Mastermind_(board_game)#Variations">variations thereof</a> still exist as both standalone games and puzzles within other games.
 Although it is difficult for a human player to make <em>optimal guesses</em> of the secret code, or at least guesses that do not conflict with the provided clues, the setting is usually simple enough for an AI to find such candidates via explicit exploration of the <a href="https://en.wikipedia.org/wiki/Game_tree">game tree</a>.</p>
-<p>However, such approaches becomes unfeasible when the number of possibilities for secret codes grows into the millions.
+<p>However, such approaches become unfeasible when the number of possibilities for secret codes grows into the millions.
 This post illustrates the problem with standard approaches, and how finding consistent candidates can be approached with <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">SAT</a> solving &ndash; yielding an AI that can handle orders-of-magnitude harder Mastermind instances.</p>
 <h2 id="introduction"><a href="#introduction" class="hanchor" ariaLabel="Anchor">Introduction</a> </h2>
 <p>Every now and then, my friends and I gather to play <a href="https://en.wikipedia.org/wiki/Mansions_of_Madness">Mansions of Madness</a> &ndash; a cooperative boardgame.
@@ -233,7 +233,7 @@ First, we get rid of all full matches from both the <code>guess</code> and <code
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
@@ -250,7 +250,7 @@ First, we get rid of all full matches from both the <code>guess</code> and <code
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">eval_guess</span>(secret, guess):
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">eval_guess</span>(secret, guess):
     <span style="color:#75715e"># Count full matches (position &amp; symbol)</span>
     guess_rest <span style="color:#f92672">=</span> [a <span style="color:#66d9ef">for</span> (a, b) <span style="color:#f92672">in</span> zip(guess, secret) <span style="color:#66d9ef">if</span> a <span style="color:#f92672">!=</span> b]
     secret_rest <span style="color:#f92672">=</span> [b <span style="color:#66d9ef">for</span> (a, b) <span style="color:#f92672">in</span> zip(guess, secret) <span style="color:#66d9ef">if</span> a <span style="color:#f92672">!=</span> b]
@@ -452,7 +452,7 @@ It requires a potential player or AI to be able to give a first guess at the beg
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
@@ -472,7 +472,7 @@ It requires a potential player or AI to be able to give a first guess at the beg
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">71
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Game</span>:
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Game</span>:
     <span style="color:#66d9ef">def</span> __init__(self, secret, player):
         self<span style="color:#f92672">.</span>secret <span style="color:#f92672">=</span> secret
         self<span style="color:#f92672">.</span>player <span style="color:#f92672">=</span> player
@@ -482,9 +482,9 @@ It requires a potential player or AI to be able to give a first guess at the beg
         num_guesses <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>
 
         <span style="color:#75715e"># Guess-Feedback loop until exact match is guessed</span>
-        <span style="color:#66d9ef">while</span> True:
+        <span style="color:#66d9ef">while</span> <span style="color:#66d9ef">True</span>:
             feedback <span style="color:#f92672">=</span> eval_guess(self<span style="color:#f92672">.</span>secret, guess)
-            <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;{} --&gt; {}&#34;</span><span style="color:#f92672">.</span>format(guess, feedback))
+            print(<span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{}</span><span style="color:#e6db74"> --&gt; </span><span style="color:#e6db74">{}</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>format(guess, feedback))
             <span style="color:#66d9ef">if</span> feedback<span style="color:#f92672">.</span>full_matches <span style="color:#f92672">==</span> NUM_POSITIONS:
                 <span style="color:#66d9ef">break</span>
             guess <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>player<span style="color:#f92672">.</span>make_guess(feedback)
@@ -571,11 +571,11 @@ Given $|s|$ and $|\Sigma|$, we can now easily enumerate all possible secrets wit
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">all_secrets</span>():
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">all_secrets</span>():
     <span style="color:#66d9ef">return</span> product(range(NUM_SYMBOLS), repeat<span style="color:#f92672">=</span>NUM_POSITIONS)</code></pre></td></tr></table>
 </div>
 </div>
@@ -626,11 +626,11 @@ For every guess-feedback pair from previous rounds the following function must r
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">is_consistent</span>(secret, guess, feedback):
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">is_consistent</span>(secret, guess, feedback):
     <span style="color:#66d9ef">return</span> feedback <span style="color:#f92672">==</span> eval_guess(secret, guess)</code></pre></td></tr></table>
 </div>
 </div>
@@ -748,7 +748,7 @@ For every guess-feedback pair from previous rounds the following function must r
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">82
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">82
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">83
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">84
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">85
@@ -764,9 +764,9 @@ For every guess-feedback pair from previous rounds the following function must r
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">95
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ExplicitConsistentAi</span>(Player):
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ExplicitConsistentAi</span>(Player):
     <span style="color:#66d9ef">def</span> __init__(self):
-        self<span style="color:#f92672">.</span>last_guess <span style="color:#f92672">=</span> None
+        self<span style="color:#f92672">.</span>last_guess <span style="color:#f92672">=</span> <span style="color:#66d9ef">None</span>
         self<span style="color:#f92672">.</span>candidates <span style="color:#f92672">=</span> list(all_secrets())
 
     <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">initial_guess</span>(self):
@@ -905,7 +905,7 @@ It enumerates the consistent combinations but only needs one candidate to be exp
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">136
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">136
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">137
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">138
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">139
@@ -921,7 +921,7 @@ It enumerates the consistent combinations but only needs one candidate to be exp
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">149
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">LazyExplicitConsistentAi</span>(Player):
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">LazyExplicitConsistentAi</span>(Player):
     <span style="color:#66d9ef">def</span> __init__(self):
         self<span style="color:#f92672">.</span>guesses <span style="color:#f92672">=</span> list()
         self<span style="color:#f92672">.</span>feedbacks <span style="color:#f92672">=</span> list()
@@ -997,18 +997,18 @@ It enumerates the consistent combinations but only needs one candidate to be exp
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">is_consistent_with_history</span>(secret, guesses, feedbacks):
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">is_consistent_with_history</span>(secret, guesses, feedbacks):
     <span style="color:#66d9ef">for</span> guess, feedback <span style="color:#f92672">in</span> zip(guesses, feedbacks):
         <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> is_consistent(secret, guess, feedback):
-            <span style="color:#66d9ef">return</span> False
-    <span style="color:#66d9ef">return</span> True</code></pre></td></tr></table>
+            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">False</span>
+    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">True</span></code></pre></td></tr></table>
 </div>
 </div>
     <figcaption>
@@ -1405,7 +1405,7 @@ According to the provided table, <em>a</em> best initial guess would be $(0,0,1,
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 98
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 98
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 99
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">100
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">101
@@ -1443,7 +1443,7 @@ According to the provided table, <em>a</em> best initial guess would be $(0,0,1,
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">133
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ExplicitMinimaxAi</span>(Player):
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ExplicitMinimaxAi</span>(Player):
     <span style="color:#66d9ef">def</span> __init__(self):
         self<span style="color:#f92672">.</span>candidates <span style="color:#f92672">=</span> list(all_secrets())
         self<span style="color:#f92672">.</span>not_candidates <span style="color:#f92672">=</span> list()
@@ -1455,7 +1455,7 @@ According to the provided table, <em>a</em> best initial guess would be $(0,0,1,
         not_tried_secrets <span style="color:#f92672">=</span> (c <span style="color:#66d9ef">for</span> c <span style="color:#f92672">in</span> chain(self<span style="color:#f92672">.</span>candidates, self<span style="color:#f92672">.</span>not_candidates)
                              <span style="color:#66d9ef">if</span> c <span style="color:#f92672">not</span> <span style="color:#f92672">in</span> self<span style="color:#f92672">.</span>guesses)
 
-        best_c <span style="color:#f92672">=</span> None
+        best_c <span style="color:#f92672">=</span> <span style="color:#66d9ef">None</span>
         best_size <span style="color:#f92672">=</span> math<span style="color:#f92672">.</span>inf
         <span style="color:#66d9ef">for</span> c <span style="color:#f92672">in</span> not_tried_secrets:
             <span style="color:#75715e"># Partition consistent candidates by feedback</span>
@@ -1620,7 +1620,7 @@ s_{3,0} + s_{3,1} + s_{3,2} + s_{3,3} + s_{3,4} + s_{3,5} &= 1\\
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">152
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">152
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">153
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">154
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">155
@@ -1635,13 +1635,13 @@ s_{3,0} + s_{3,1} + s_{3,2} + s_{3,3} + s_{3,4} + s_{3,5} &= 1\\
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">164
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">SymbolicConsistentAi</span>(Player):
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">SymbolicConsistentAi</span>(Player):
     <span style="color:#66d9ef">def</span> __init__(self):
-        self<span style="color:#f92672">.</span>last_guess <span style="color:#f92672">=</span> None
+        self<span style="color:#f92672">.</span>last_guess <span style="color:#f92672">=</span> <span style="color:#66d9ef">None</span>
         self<span style="color:#f92672">.</span>solver <span style="color:#f92672">=</span> SolverFor(<span style="color:#e6db74">&#34;QF_FD&#34;</span>)  <span style="color:#75715e"># Solver for quantifier-free constraints over finite domains</span>
 
         <span style="color:#75715e"># Possible values at secret positions, i.e. s_0_2 denotes position 0 of secret having symbol 2</span>
-        self<span style="color:#f92672">.</span>secret_vars <span style="color:#f92672">=</span> [[Bool(<span style="color:#e6db74">&#34;s_{}_{}&#34;</span><span style="color:#f92672">.</span>format(pos, sym)) <span style="color:#66d9ef">for</span> sym <span style="color:#f92672">in</span> range(NUM_SYMBOLS)]
+        self<span style="color:#f92672">.</span>secret_vars <span style="color:#f92672">=</span> [[Bool(<span style="color:#e6db74">&#34;s_</span><span style="color:#e6db74">{}</span><span style="color:#e6db74">_</span><span style="color:#e6db74">{}</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>format(pos, sym)) <span style="color:#66d9ef">for</span> sym <span style="color:#f92672">in</span> range(NUM_SYMBOLS)]
                             <span style="color:#66d9ef">for</span> pos <span style="color:#f92672">in</span> range(NUM_POSITIONS)]
 
         <span style="color:#75715e"># Exactly one symbol on each position</span>
@@ -1791,7 +1791,7 @@ s_{3,1} &= \mathit{fm}_3
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">182
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">182
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">183
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">184
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">185
@@ -1804,9 +1804,9 @@ s_{3,1} &= \mathit{fm}_3
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">192
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">make_guess</span>(self, feedback):
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">make_guess</span>(self, feedback):
     <span style="color:#75715e"># Fresh &#34;full match&#34; variables for each position</span>
-    fm <span style="color:#f92672">=</span> [FreshBool(<span style="color:#e6db74">&#34;fm_{}&#34;</span><span style="color:#f92672">.</span>format(pos)) <span style="color:#66d9ef">for</span> pos <span style="color:#f92672">in</span> range(NUM_POSITIONS)]
+    fm <span style="color:#f92672">=</span> [FreshBool(<span style="color:#e6db74">&#34;fm_</span><span style="color:#e6db74">{}</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>format(pos)) <span style="color:#66d9ef">for</span> pos <span style="color:#f92672">in</span> range(NUM_POSITIONS)]
 
     <span style="color:#75715e"># Full matches must be consistent with feedback</span>
     fm_coeffs <span style="color:#f92672">=</span> [(fm_pos, <span style="color:#ae81ff">1</span>) <span style="color:#66d9ef">for</span> fm_pos <span style="color:#f92672">in</span> fm]
@@ -2125,7 +2125,7 @@ $$\bigwedge_{\substack{0\leq\mathit{prev}&lt;\mathit{dst}\\ \mathit{prev} \neq \
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">194
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">194
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">195
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">196
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">197
@@ -2157,8 +2157,8 @@ $$\bigwedge_{\substack{0\leq\mathit{prev}&lt;\mathit{dst}\\ \mathit{prev} \neq \
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">223
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#75715e"># Fresh &#34;symbol match&#34; variables for each pair of positions</span>
-sm <span style="color:#f92672">=</span> [[FreshBool(<span style="color:#e6db74">&#34;sm_{}_{}&#34;</span><span style="color:#f92672">.</span>format(src_pos, dst_pos)) <span style="color:#66d9ef">for</span> dst_pos <span style="color:#f92672">in</span> range(NUM_POSITIONS)]
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#75715e"># Fresh &#34;symbol match&#34; variables for each pair of positions</span>
+sm <span style="color:#f92672">=</span> [[FreshBool(<span style="color:#e6db74">&#34;sm_</span><span style="color:#e6db74">{}</span><span style="color:#e6db74">_</span><span style="color:#e6db74">{}</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>format(src_pos, dst_pos)) <span style="color:#66d9ef">for</span> dst_pos <span style="color:#f92672">in</span> range(NUM_POSITIONS)]
       <span style="color:#66d9ef">for</span> src_pos <span style="color:#f92672">in</span> range(NUM_POSITIONS)]
 
 <span style="color:#75715e"># Symbol matches must be consistent with feedback</span>
@@ -2344,7 +2344,7 @@ Luckily, we can delegate this task to a SAT solver.</p>
 <figure class="highlight-figure">
     <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">166
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">166
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">167
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">168
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">169
@@ -2361,7 +2361,7 @@ Luckily, we can delegate this task to a SAT solver.</p>
 </span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">180
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">initial_guess</span>(self):
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">initial_guess</span>(self):
     status <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>solver<span style="color:#f92672">.</span>check()
 
     <span style="color:#75715e"># Extract guess from solution to constraints</span>

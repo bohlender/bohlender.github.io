@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>About on Dimitri Bohlender</title>
+    <title>About on bohlender.pro</title>
     <link>https://bohlender.pro/cv/</link>
-    <description>Recent content in About on Dimitri Bohlender</description>
+    <description>Recent content in About on bohlender.pro</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-gb</language>
     <managingEditor>contact@bohlender.pro (Dimitri Bohlender)</managingEditor>
@@ -173,12 +173,12 @@
     </item>
     
     <item>
-      <title>PhD candidate</title>
+      <title>PhD in Computer Science</title>
       <link>https://bohlender.pro/cv/education/2014-phd/</link>
       <pubDate>Sat, 01 Nov 2014 00:00:00 +0000</pubDate>
       <author>contact@bohlender.pro (Dimitri Bohlender)</author>
       <guid>https://bohlender.pro/cv/education/2014-phd/</guid>
-      <description>Working on formal verification of control software from the automation domain. I leverage SAT/SMT solving and abstract interpretation to develop techniques for proving a program&amp;rsquo;s compliance with various specifications, synthesis of safe parameters and automated test generation.</description>
+      <description>During this time I worked on formal verification of control software from the automation domain and graduated summa cum laude. In my thesis &amp;ldquo;Symbolic Methods for Formal Verification of Industrial Control Software&amp;rdquo; I leverage SMT solving and abstract interpretation to develop fully-automated procedures for proving a program&amp;rsquo;s compliance with various specifications that are relevant or unique to this domain.</description>
     </item>
     
     <item>
@@ -187,7 +187,7 @@
       <pubDate>Sat, 01 Nov 2014 00:00:00 +0000</pubDate>
       <author>contact@bohlender.pro (Dimitri Bohlender)</author>
       <guid>https://bohlender.pro/cv/work/2014-research-associate/</guid>
-      <description>Teaching and working on Arcade.PLC, a platform for verification of software for industrial controllers, featuring model checking procedures and static analyses. The work on this project involves abstracting the concrete program semantics to avoid exhaustive exploration of the program&amp;rsquo;s state space, and formalising and exploiting peculiarities of both the properties of interest and the domain.</description>
+      <description>Taught formal methods and worked on Arcade.PLC, a platform for verification of software for industrial controllers, featuring model checking procedures and static analyses. The work on this project involved abstracting the concrete program semantics to avoid exhaustive exploration of the program&amp;rsquo;s state space, and formalising &amp;amp; exploiting peculiarities of both the properties of interest and the domain.</description>
     </item>
     
     <item>
