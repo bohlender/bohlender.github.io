@@ -9,13 +9,31 @@
     <managingEditor>contact@bohlender.pro (Dimitri Bohlender)</managingEditor>
     <webMaster>contact@bohlender.pro (Dimitri Bohlender)</webMaster>
     <copyright>© Dimitri Bohlender</copyright>
-    <lastBuildDate>Sun, 27 Sep 2020 16:03:37 +0200</lastBuildDate><atom:link href="https://bohlender.pro/tags/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 22 Jan 2022 15:06:54 +0100</lastBuildDate><atom:link href="https://bohlender.pro/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Advent of Code</title>
+      <link>https://bohlender.pro/tags/advent-of-code/</link>
+      <pubDate>Sat, 22 Jan 2022 15:06:54 +0100</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.pro/tags/advent-of-code/</guid>
+      <description></description>
+    </item>
+    
     <item>
       <title>Puzzle</title>
       <link>https://bohlender.pro/tags/puzzle/</link>
-      <pubDate>Sun, 27 Sep 2020 16:03:37 +0200</pubDate>
+      <pubDate>Sat, 22 Jan 2022 15:06:54 +0100</pubDate>
       <author>contact@bohlender.pro (Dimitri Bohlender)</author>
       <guid>https://bohlender.pro/tags/puzzle/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>SMT</title>
+      <link>https://bohlender.pro/tags/smt/</link>
+      <pubDate>Sat, 22 Jan 2022 15:06:54 +0100</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.pro/tags/smt/</guid>
       <description></description>
     </item>
     
@@ -43,15 +61,6 @@
       <pubDate>Sat, 30 Nov 2019 22:54:10 +0100</pubDate>
       <author>contact@bohlender.pro (Dimitri Bohlender)</author>
       <guid>https://bohlender.pro/tags/logic-synthesis/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>SMT</title>
-      <link>https://bohlender.pro/tags/smt/</link>
-      <pubDate>Sat, 30 Nov 2019 22:54:10 +0100</pubDate>
-      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
-      <guid>https://bohlender.pro/tags/smt/</guid>
       <description></description>
     </item>
     

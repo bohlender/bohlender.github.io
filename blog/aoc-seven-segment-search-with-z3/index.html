@@ -1,0 +1,2934 @@
+<!DOCTYPE html>
+<html lang="en-gb">
+    <head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	
+	<link rel="stylesheet" href="/css/style.css">
+	<link rel="stylesheet" href="/css/perfundo.with-icons.min.css">
+	
+
+<link rel="stylesheet" href="/katex/katex.min.css" integrity="sha384-BdGj8xC2eZkQaxoQ8nSLefg4AV4/AwB3Fj+8SUSo7pnKP6Eoy18liIKTPn9oBYNG" >
+<script defer src="/katex/katex.min.js" integrity="sha384-JiKN5O8x9Hhs/UE5cT5AAJqieYlOZbGT3CHws/y97o3ty4R7/O5poG9F3JoiOYw1" ></script>
+<script defer src="/katex/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" 
+        onload="renderMathInElement(document.body, {
+        delimiters: [
+            {left: `$$`, right: `$$`, display: true},
+            {left: `$`, right: `$`, display: false},
+        ]
+    });"></script>
+	<link rel="alternate" type="application/rss+xml" href="https://bohlender.pro/blog/index.xml" title="bohlender.pro" />
+	
+	
+
+
+<meta property="og:title" content="Solving the &#34;Seven Segment Search&#34; Puzzle with Z3" />
+<meta property="og:description" content="This week I stumbled upon someone wondering whether the second part of the recent Advent of Code puzzle &ldquo;Seven Segment Search&rdquo; can be expressed as a constraint satisfaction problem.
+As attested by the replies and solutions: yes, it can.
+However, to my mind, the solutions could be more instructive and raise awareness for some of the tradeoffs or solver misuses they put up with.
+This post tries to do better.
+I assume that the reader is familiar with mathematical notation and
+
+just struggles to express the posed problem in a formal, declarative way, or
+is interested in seeing how the SMT solver Z3 can be used to express and solve the problem in several logics.
+It takes only few steps to get from a quantifier-laden high-level formulation to what is effectively propositional logic.
+" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://bohlender.pro/blog/aoc-seven-segment-search-with-z3/" />
+
+<meta property="og:image" content="https://bohlender.pro/blog/aoc-seven-segment-search-with-z3/gfx/display_4digit.svg" />
+
+<meta property="og:image" content="https://bohlender.pro/blog/aoc-seven-segment-search-with-z3/gfx/display_broken.svg" />
+
+<meta property="og:image" content="https://bohlender.pro/blog/aoc-seven-segment-search-with-z3/gfx/display_good.svg" />
+<meta property="article:published_time" content="2022-01-22T15:06:54+01:00" />
+<meta property="article:modified_time" content="2022-01-22T15:06:54+01:00" />
+	
+	<title>Solving the &#34;Seven Segment Search&#34; Puzzle with Z3 | bohlender.pro</title>
+</head>
+    <body class="blog">
+        <header>
+	<nav>
+		<input type="checkbox" id="show-menu" role="button">
+		<ul class="dropdown">
+			<label for="show-menu" class="show-menu"><img class="icon" src="/gfx/fa-icons.svg#bars" /></label>
+			<li><a href="/">Home</a></li>
+			<li><a href="/cv/">CV</a></li>
+			<li><a href="/projects/">Projects</a></li>
+			<li><a href="/blog/">Blog</a></li>
+			<li><a href="/photography/">Photography</a></li>
+		</ul>
+	</nav>
+</header>
+        <div class="container">
+        <div class="content">
+<div class="banner">
+	
+    
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="443" height="350" viewBox="0 0 443 350">
+        <image xlink:href="/gfx/cup-rss.png" width="443" height="350"/>
+        <a href="https://bohlender.pro/blog/index.xml" target="_top">
+            <circle style="fill: transparent" cx="187" cy="165" r="110"/>
+        </a>
+    </svg>
+</div>
+<div class="notepad-wrapper">
+	
+	<div class="notepad">
+		<main>
+		<article>
+			<header>
+				
+				<h1>Solving the &#34;Seven Segment Search&#34; Puzzle with Z3</h1>
+				<div class="metadata">
+    <time datetime="2022-01-22">January 22, 2022</time>
+    <ul>
+        <li><a class="tag-block" href="/tags/smt">SMT</a></li>
+        <li><a class="tag-block" href="/tags/puzzle">Puzzle</a></li>
+        <li><a class="tag-block" href="/tags/advent-of-code">Advent of Code</a></li>
+    </ul>
+</div>
+			</header>
+			<p>This week I stumbled upon <a href="https://www.reddit.com/r/adventofcode/comments/rbwnh5/2021_day_8_can_it_be_solved_as_a_constraint/">someone wondering</a> whether the <strong>second part</strong> of the recent <a href="https://adventofcode.com/2021/day/8">Advent of Code puzzle &ldquo;Seven Segment Search&rdquo;</a> can be expressed as a constraint satisfaction problem.
+As attested by the replies and solutions: yes, it can.
+However, to my mind, the solutions could be more instructive and raise awareness for some of the tradeoffs or solver misuses they put up with.
+This post tries to do better.</p>
+<p>I assume that the reader is familiar with mathematical notation and</p>
+<ul>
+<li>just struggles to express the posed problem in a formal, declarative way, <em>or</em></li>
+<li>is interested in seeing how the <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a> solver <a href="https://github.com/Z3Prover/z3/">Z3</a> can be used to express and solve the problem in several logics.
+It takes only few steps to get from a quantifier-laden high-level formulation to what is effectively <a href="https://en.wikipedia.org/wiki/Propositional_logic">propositional logic</a>.</li>
+</ul>
+<h2 id="the-problem-statement"><a href="#the-problem-statement" class="hanchor" ariaLabel="Anchor">The Problem Statement</a> </h2>
+<p>A functioning <a href="https://en.wikipedia.org/wiki/Seven-segment_display">seven-segment display</a> is supposed to represent digits as follows:
+
+
+
+
+
+
+
+<figure class="figure-outer" id="random-digits-on-a-functioning-display">
+    <figure class="figure-inner">
+        <img src="gfx/display_good.svg" width="450px"/> 
+            <figcaption>
+                Random digits on a functioning display
+            </figcaption>
+    </figure>
+    
+</figure></p>
+<p>By associating each segment with a character, we can clearly describe which segments are supposed to light up for each digit:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python">DIGIT_SEGMENTS <span style="color:#f92672">=</span> {
+    <span style="color:#ae81ff">0</span>: <span style="color:#e6db74">&#39;abcefg&#39;</span>,
+    <span style="color:#ae81ff">1</span>: <span style="color:#e6db74">&#39;cf&#39;</span>,
+    <span style="color:#ae81ff">2</span>: <span style="color:#e6db74">&#39;acdeg&#39;</span>,
+    <span style="color:#ae81ff">3</span>: <span style="color:#e6db74">&#39;acdfg&#39;</span>,
+    <span style="color:#ae81ff">4</span>: <span style="color:#e6db74">&#39;bcdf&#39;</span>,
+    <span style="color:#ae81ff">5</span>: <span style="color:#e6db74">&#39;abdfg&#39;</span>,
+    <span style="color:#ae81ff">6</span>: <span style="color:#e6db74">&#39;abdefg&#39;</span>,
+    <span style="color:#ae81ff">7</span>: <span style="color:#e6db74">&#39;acf&#39;</span>,
+    <span style="color:#ae81ff">8</span>: <span style="color:#e6db74">&#39;abcdefg&#39;</span>,
+    <span style="color:#ae81ff">9</span>: <span style="color:#e6db74">&#39;abcdfg&#39;</span>
+}</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.pro/blog/aoc-seven-segment-search-with-z3/aoc08.py">aoc08.py</a>
+    </figcaption>
+</figure></p>
+<p>The crux of the <a href="https://adventofcode.com/2021/day/8">Seven Segment Search</a> puzzle is that we are faced with a seven-segment display whose wiring got mixed up.
+As a result, instead of turning on segments <code>c</code> and <code>f</code> to display a <code>1</code>, our display may turn on segments <code>a</code> and <code>b</code> instead.
+We don&rsquo;t get to see how the wrong wiring looks like though.
+All we can observe is a sequence of patterns and our task is to make sense of it.
+That is, to find out which digit each pattern represents:
+
+
+
+
+
+
+
+<figure class="figure-outer" id="random-digits-on-a-malfunctioning-display">
+    <figure class="figure-inner">
+        <img src="gfx/display_broken.svg" width="450px"/> 
+            <figcaption>
+                Random digits on a malfunctioning display
+            </figcaption>
+    </figure>
+    
+</figure></p>
+<p>Once we&rsquo;ve figured out how to map the observable patterns to the digits they were originally intended to represent, we can use this knowledge to read the number shown on a four-digit seven-segment display that uses the very same wiring:
+
+
+
+
+
+
+
+<figure class="figure-outer" id="how-5353-shows-up-on-the-malfunctioning-display">
+    <figure class="figure-inner">
+        <img src="gfx/display_4digit.svg" width="450px"/> 
+            <figcaption>
+                How 5353 shows up on the malfunctioning display
+            </figcaption>
+    </figure>
+    
+</figure></p>
+<p>The decoded number 5353 is the solution to this problem instance.
+However, <a href="https://adventofcode.com">Advent of Code</a> is about programming, so &ndash; to make people solve the puzzle programmatically &ndash; there are actually 200 independent instances that need to be solved and their 4-digit numbers summed up.</p>
+<h3 id="puzzle-input-file"><a href="#puzzle-input-file" class="hanchor" ariaLabel="Anchor">Puzzle Input File</a> </h3>
+<p>The <a href="input.txt">puzzle input file</a> consists of 200 lines &ndash; each of which encodes an independent problem instance.
+The <strong>first part</strong> of a line describes the ten (unordered) patterns that can be observed on the malfunctioning seven-segment display.
+The <strong>second part</strong> represents the four-digit seven-segment display that needs be decoded.
+The above problem instance is in fact <a href="https://adventofcode.com/2021/day/8">the original introductory example</a>.
+It may appear as follows in the input file:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab | cdfeb fcadb cdfeb cdbaf
+</code></pre></div><h2 id="formalising-a-problem-instance"><a href="#formalising-a-problem-instance" class="hanchor" ariaLabel="Anchor">Formalising a Problem Instance</a> </h2>
+<p>If you give it some thought, it is easy to come up with efficient <a href="https://www.reddit.com/r/adventofcode/comments/rbj87a/2021_day_8_solutions/">procedures to solve</a> any problem instance of this puzzle by exploiting domain-specifics like the patterns' numbers of segments.
+For example, since <code>1</code> is the only digit that is displayed by exactly two segments, any observed pattern with just two lit segments must be representing it as well.
+However, in general, such procedures may require significant alterations and re-analysis of puzzle aspects to exploit even if seemingly small variations are introduced.</p>
+<p>Declarative approaches, which merely rely on a description of <em>what</em> a solution to a problem is, rather than <em>how</em> to find it, tend to be less prone to this.
+Therefore, instead of investing in a solution procedure tailored to a specific problem from the start, it may be sensible to first express the problem in a declarative formalism for which generic solvers exist.
+If, at some point, the tradeoff between flexibility and performance becomes problematic, one can still look into designing a dedicated procedure.</p>
+
+<aside >
+    
+    <p>This is similar to a common approach for solving math word problems.</p>
+<p>Instead of coming up with clever solution steps that exploit problem-specifics it is often easier to translate the problem into a system of equations.
+This system can then be solved by some generic procedure that doesn&rsquo;t even know what the equations characterise.</p>
+
+    
+</aside>
+<p>In the following, we will use <a href="https://en.wikipedia.org/wiki/First_order_logic">first-order logic</a> to express the puzzle in a formal, declarative way.
+This is a reasonably high-level logic which allows us to conveniently express the relations between the problem&rsquo;s entities and is amenable to automated theorem proving.</p>
+<h3 id="characterisation-in-first-order-logic"><a href="#characterisation-in-first-order-logic" class="hanchor" ariaLabel="Anchor">Characterisation in First-Order Logic</a> </h3>
+<p>Let us start by formalising the thing we know: <strong>how each digit maps to a set of segments on a (functioning) seven-segment display</strong>.
+In first-order logic sets are characterised by predicates.
+For example, if the domain of discourse is $\mathbb{Z}$, predicate $p(x) := x&lt;0$ chracterises the set of negative integers.
+Accordingly, to characterise the segments of each digit $d$, we could define 10 predicates $\mathit{segments}_d(s)$.
+However, it is probably more convenient to let one binary predicate
+$$\mathit{digitSegments}:\underset{\overbrace{\{0,1,2,3,4,5,6,7,8,9\}}}{\mathit{Digit}}\times \underset{\overbrace{\{a,b,c,d,e,f,g\}}}{\mathit{Segment}}$$
+characterise the digit&rsquo;s segments.
+That is, require the following to hold
+$$\tag{1}\mathit{digitSegments}(d,s) \iff s \text{ is a segment of } d$$
+for all digits $d$ and segments $s$.</p>
+<p>We&rsquo;d like to have a similar characterisation of the <strong>mapping of digits to segments on the broken seven-segment display</strong>, but that can&rsquo;t be stated directly as it depends on the (unknown) <a href="https://en.wikipedia.org/wiki/Permutation">permutation</a> of segments &ndash; or wires, if you will.
+Therefore, to first model the permutation, we introduce an uninterpreted function
+$$\mathit{Perm}:\mathit{Segment}\to\mathit{Segment}$$
+but restrict the possible interpretations of $\mathit{Perm}$ to permutations only.
+This is achieved by requiring the function to be bijective:
+$$\tag{2}\forall s,s'\in\mathit{Segment}\ldotp s = s' \iff \mathit{Perm}(s) = \mathit{Perm}(s')$$
+
+<aside >
+    <p>
+    In contrast to the predicate $\mathit{digitSegments}$, whose <a href="https://en.wikipedia.org/wiki/Extension_(predicate_logic)">extension</a> is provided, $\mathit{Perm}$ is an <em>uninterpreted</em> symbol.
+We follow the convention of logic programming literature and capitalise uninterpreted symbols.
+    </p>
+</aside></p>
+<p>Based on that, we can now characterise the permuted digit segments
+$$\mathit{PermDigitSegments}:\mathit{Digit}\times \mathit{Segment}$$
+by specifying that $\mathit{Perm}(s)$ must be a permuted segment of $d$ iff $s$ is a segment of $d$ on the functioning display:
+$$\tag{3}\mathit{PermDigitSegment}(d,\mathit{Perm}(s)) \iff \mathit{digitSegment}(d,s)$$</p>
+
+<aside  id="stepwise-composition" >
+    
+    <p>Alternatively, it may help to think of the relation as follows.
+If $s$ is a segment of $d$ on the functioning display, and $\mathit{Perm}$ maps $s$ to some $s'$, then $s'$ must be a segment of $d$ on the malfunctioning display, i.e.</p>
+<div>$$ 
+\begin{aligned}
+& \mathit{digitSegment}(d,s)\wedge \mathit{Perm}(s) = s'\\
+\rightarrow & \mathit{PermDigitSegment(d,s')}\\
+\end{aligned}
+ $$</div>
+<p>for all $s,s'\in\mathit{Segment},d\in\mathit{Digit}$.</p>
+
+    
+</aside>
+<p>Note that so far we&rsquo;ve only formalised aspects that are common to all problem instances.
+Even the permutation $\mathit{Perm}$, which differs from instance to instance, could be introduced without referring to instance-specific details.</p>
+<p>What distinguishes an instance are the ten <strong>patterns that can be observed on the (malfunctioning) display</strong>, i.e. the first part of each line of the input file.
+Just as $\mathit{digitSegments}$ characterises the segments behind each possible digit, the idea here is to introduce a predicate
+$$\mathit{patternSegment}: \underset{\overbrace{\{0,1,2,3,4,5,6,7,8,9\}}}{\mathit{Index}} \times \mathit{Segment}$$
+to characterise the segments behind each of the ten observable patterns.
+That is, assert for all indices $i$ and segments $s$:
+$$\tag{4}\mathit{patternSegment}(i,s) \iff s \text{ is a segment of the $i$-th pattern}$$</p>
+
+<aside >
+    
+    <p>Even though the domains $\mathit{Digit}$ and $\mathit{Index}$ seem to be equal they model different things.
+They happen to use the same symbols but their types just don&rsquo;t match.
+Accordingly, a $0\in\mathit{Digit}$ is uncomparable to a $0\in\mathit{Index}$.</p>
+<p>However, which domains are needed in a formalisation primarily derives from our understanding of the problem.
+Had our mental model of a problem instance been different, e.g. if the sequence of observed patterns would be interpreted as a first guess at the mapping from digits to segments, it would have been warranted to use</p>
+<div>$$ 
+\mathit{patternSegment}: \mathit{Digit} \times \mathit{Segment}
+ $$</div>
+<p>here, too.</p>
+
+    
+</aside>
+<p>The only thing that remains to be formalised is the <strong>relation between the observed patterns and the other &ldquo;objects&rdquo;</strong>.
+That&rsquo;s the actual puzzle.
+What we know from the puzzle description that each of the observable patterns matches the permuted segments of some digit.
+Therefore, there must be a &ldquo;decoding function&rdquo;
+$$\mathit{Idx2dig}: \mathit{Index} \to \mathit{Digit}$$
+which maps each observed pattern &ndash; more precisely its index $i$ &ndash; in such a way to a digit $d$ that the permuted segments of $d$ correspond to the observed pattern.
+Similar to $(3)$, we can constrain $\mathit{Idx2dig}$ to behave like this
+by specifying that $s$ must be a permuted segment of digit $\mathit{Idx2dig}(i)$ iff $s$ is a segment of the $i$-th observed pattern
+$$\tag{5}\mathit{PermDigitSegment}(\mathit{Idx2dig}(i),s) \iff \mathit{patternSegment}(i,s)$$
+for all indices $i$ and segments $s$.</p>
+<h3 id="the-characterisation-at-a-glance"><a href="#the-characterisation-at-a-glance" class="hanchor" ariaLabel="Anchor">The Characterisation at a Glance</a> </h3>
+<p>Overall, we end up with the following constraints
+<div>$$ 
+\begin{aligned}
+\mathit{digitSegments}(d,s) &\iff s \text{ is a segment of } d\\
+s = s' &\iff \mathit{Perm}(s) = \mathit{Perm}(s')\\
+\mathit{PermDigitSegment}(d,\mathit{Perm}(s)) &\iff \mathit{digitSegment}(d,s)\\
+\mathit{patternSegment}(i,s) &\iff s \text{ is a segment of the $i$-th pattern}\\
+\mathit{PermDigitSegment}(\mathit{Idx2dig}(i),s) &\iff \mathit{patternSegment}(i,s)
+\end{aligned}
+ $$</div>
+for all $d\in\mathit{Digit}$, $s,s'\in\mathit{Segment}$, and indices $i\in\mathit{Index}$.</p>
+<p>If we now manage to find an interpretation of the uninterpreted symbols that satisfies all these constraints, the puzzle instance will be solved.
+We can then simply use $\mathit{Idx2dig}$ to map the patterns on the malfunctioning four-digit seven-segment display back to digits, or use $\mathit{Perm}$ to undo the permutation of segments.</p>
+<h2 id="solving-the-puzzle-via-z3"><a href="#solving-the-puzzle-via-z3" class="hanchor" ariaLabel="Anchor">Solving the Puzzle via Z3</a> </h2>
+<p>While there are many solvers, formalisms, and technologies that we can leverage to obtain a satisfying interpretation of the above constraints, this post illustrates how to do it with the <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a> solver <a href="https://github.com/Z3Prover/z3/">Z3</a>.
+More precisely, with its <a href="https://z3prover.github.io/api/html/namespacez3py.html">Python bindings</a>.</p>
+<h3 id="domains"><a href="#domains" class="hanchor" ariaLabel="Anchor">Domains</a> </h3>
+<p>To express the above predicates we first have to introduce the domains, or <code>Sort</code>s, our values will be from.
+Finite domains of unrelated values can be created via <code>EnumSort</code>, and that&rsquo;s exactly the kind of values we&rsquo;re dealing with in the puzzle.
+Since we will also need to convert between these values and their Python counterparts &ndash; <code>int</code> for digits and indices, and <code>str</code> for segments &ndash; we accompany each domain with corresponding mappings:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#75715e"># Domain (and converters) to represent Digits</span>
+DigitSort, digits <span style="color:#f92672">=</span> EnumSort(<span style="color:#e6db74">&#39;Digit&#39;</span>, (<span style="color:#e6db74">&#39;0&#39;</span>, <span style="color:#e6db74">&#39;1&#39;</span>, <span style="color:#e6db74">&#39;2&#39;</span>, <span style="color:#e6db74">&#39;3&#39;</span>, <span style="color:#e6db74">&#39;4&#39;</span>, <span style="color:#e6db74">&#39;5&#39;</span>, <span style="color:#e6db74">&#39;6&#39;</span>, <span style="color:#e6db74">&#39;7&#39;</span>, <span style="color:#e6db74">&#39;8&#39;</span>, <span style="color:#e6db74">&#39;9&#39;</span>))
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">mk_digit</span>(i: int): <span style="color:#66d9ef">return</span> digits[i]
+digit2int <span style="color:#f92672">=</span> {d: int(str(d)) <span style="color:#66d9ef">for</span> d <span style="color:#f92672">in</span> digits}
+
+<span style="color:#75715e"># Domain (and converters) to index/identify the ten observable patterns</span>
+IndexSort, indices <span style="color:#f92672">=</span> EnumSort(<span style="color:#e6db74">&#39;Index&#39;</span>, (<span style="color:#e6db74">&#39;0&#39;</span>, <span style="color:#e6db74">&#39;1&#39;</span>, <span style="color:#e6db74">&#39;2&#39;</span>, <span style="color:#e6db74">&#39;3&#39;</span>, <span style="color:#e6db74">&#39;4&#39;</span>, <span style="color:#e6db74">&#39;5&#39;</span>, <span style="color:#e6db74">&#39;6&#39;</span>, <span style="color:#e6db74">&#39;7&#39;</span>, <span style="color:#e6db74">&#39;8&#39;</span>, <span style="color:#e6db74">&#39;9&#39;</span>))
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">mk_index</span>(i: int): <span style="color:#66d9ef">return</span> indices[i]
+index2int <span style="color:#f92672">=</span> {i: int(str(i)) <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> indices}
+
+<span style="color:#75715e"># Domain (and converters) to represent segments/wires</span>
+SegmentSort, segments <span style="color:#f92672">=</span> EnumSort(<span style="color:#e6db74">&#39;Segment&#39;</span>, (<span style="color:#e6db74">&#39;a&#39;</span>, <span style="color:#e6db74">&#39;b&#39;</span>, <span style="color:#e6db74">&#39;c&#39;</span>, <span style="color:#e6db74">&#39;d&#39;</span>, <span style="color:#e6db74">&#39;e&#39;</span>, <span style="color:#e6db74">&#39;f&#39;</span>, <span style="color:#e6db74">&#39;g&#39;</span>))
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">mk_segment</span>(char: str): <span style="color:#66d9ef">return</span> segments[ord(char) <span style="color:#f92672">-</span> ord(<span style="color:#e6db74">&#39;a&#39;</span>)]
+segment2char <span style="color:#f92672">=</span> {s: str(s) <span style="color:#66d9ef">for</span> s <span style="color:#f92672">in</span> segments}</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.pro/blog/aoc-seven-segment-search-with-z3/aoc08.py">aoc08.py</a>
+    </figcaption>
+</figure></p>
+
+<aside >
+    <p>
+    If you find the introduction of an <code>IndexSort</code> unnecessary, feel free to make the index-specific defines alias those of the <code>DigitSort</code>, i.e. let <code>IndexSort = DigitSort</code> etc.
+    </p>
+</aside>
+<p>Of course it is possible to use <code>IntSort</code> and <code>StringSort</code> to model digits, indices and segments instead of introducing dedicated finite domains, and some of the <a href="https://www.reddit.com/r/adventofcode/comments/rbwnh5/2021_day_8_can_it_be_solved_as_a_constraint/">suggested approaches</a> do resort to this.
+However, when doing so one must be aware of the implications.</p>
+<p>For example, to exploit problem-specifics, one of the posted solutions features integer addition in its constraints.
+The result of this is that the characterisation ends up in a more complex fragment of first-order logic than necessary &ndash; in <a href="http://smtlib.cs.uiowa.edu/logics.shtml">quantifier-free linear integer arithmetic (<code>QF_LIA</code>)</a>.
+This, in turn, forces SMT solvers to employ more complex techniques than necessary to solve the puzzle.
+However, if higher-level modelling better captures the semantics of the problem, it may pay off to use a more expressive (sub-)logic &ndash; even if reduction to a less expressive one is possible.
+One should just <strong>be careful to not add such complexity inadvertently</strong>.
+Otherwise, one can quickly end up expressing a decidable problem in terms of an <a href="https://en.wikipedia.org/wiki/Undecidable_problem">undecidable</a> one.</p>
+
+<aside >
+    <p>
+    The <a href="aoc08.py">solution</a> outlined by this post features three exchangeable encodings.
+This lets you see for yourself how a logic impacts modelling convenience, size of the characterisation, and solver performance.
+    </p>
+</aside>
+<h3 id="solving-the-puzzle-incrementally"><a href="#solving-the-puzzle-incrementally" class="hanchor" ariaLabel="Anchor">Solving the Puzzle Incrementally</a> </h3>
+<p>To solve the overall puzzle, we have to solve the 200 independent problem instances described in the <a href="input.txt">input file</a> and combine their solutions.
+Although it is possible to construct and solve the instances' constraints independently, as all of the <a href="https://www.reddit.com/r/adventofcode/comments/rbwnh5/2021_day_8_can_it_be_solved_as_a_constraint/">suggested solutions</a> do, it is more efficient to avoid starting from scratch 200 times.
+Closer inspection of constraints $(1)&ndash;(5)$ shows that the instances' formalisations only differ in $(4)$, i.e. the definition of $\mathit{patternSegment}$.
+Therefore, a simple way to avoid starting from scratch is by first adding the core constraints $(1)&ndash;(3),(5)$ to the solver&rsquo;s stack of constraints and then iteratively checking satisfiability with each of the 200 variants of $(4)$ swapped in at the top of the stack.</p>
+
+<aside >
+    <p>
+    Besides the possibility of using <a href="https://theory.stanford.edu/~nikolaj/programmingz3.html#sec-scopes">push/pop</a> to check satisfiability of assertions in an incremental way, there is also <a href="https://theory.stanford.edu/~nikolaj/programmingz3.html#sec-assumptions">solving under assumptions</a>.
+The latter is <a href="https://github.com/Z3Prover/z3/issues/1152#issuecomment-317625799">more incremental</a> since <q>learned clauses that don&rsquo;t contain the assumptions are thus independent of them and can be reused in the next SAT call. This is different from push/pop where all learned clauses under a push are removed.</q>
+    </p>
+</aside>
+<p>The following encoding-agnostic procedure implements the suggested approach.
+It uses the scope management operations <a href="https://theory.stanford.edu/~nikolaj/programmingz3.html#sec-scopes"><code>push</code> and <code>pop</code></a> to replace the definition of $\mathit{patternSegment}$ between satisfiability checks.
+When a satisfying interpretation &ndash; a so called model &ndash; is found we can inspect it to learn how the observed patterns map to digits:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">53
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">58
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">59
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">60
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">61
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">62
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">63
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">64
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">65
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">66
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">67
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">68
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">69
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">70
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">71
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">72
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">solve_puzzle</span>(filename: str, encoder: PuzzleEncoder):
+    s <span style="color:#f92672">=</span> SolverFor(encoder<span style="color:#f92672">.</span>logic())
+    s<span style="color:#f92672">.</span>add(encoder<span style="color:#f92672">.</span>encode_core())
+
+    <span style="color:#75715e"># Solve problem instance encoded in each line of the input file &amp; sum the decoded output</span>
+    acc <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+    <span style="color:#66d9ef">for</span> line <span style="color:#f92672">in</span> open(filename)<span style="color:#f92672">.</span>read()<span style="color:#f92672">.</span>splitlines():
+        observed_patterns, output <span style="color:#f92672">=</span> parse_line(line)
+
+        s<span style="color:#f92672">.</span>push()
+        s<span style="color:#f92672">.</span>add(encoder<span style="color:#f92672">.</span>encode_variant(observed_patterns))
+        <span style="color:#66d9ef">assert</span> s<span style="color:#f92672">.</span>check() <span style="color:#f92672">==</span> sat, <span style="color:#e6db74">&#39;Cannot find satisfying interpretation&#39;</span>
+        idx2dig <span style="color:#f92672">=</span> encoder<span style="color:#f92672">.</span>interpret(s<span style="color:#f92672">.</span>model())
+        s<span style="color:#f92672">.</span>pop()
+
+        <span style="color:#75715e"># Decode and add output value to accumulator</span>
+        output_digits <span style="color:#f92672">=</span> [idx2dig[observed_patterns<span style="color:#f92672">.</span>index(pattern)] <span style="color:#66d9ef">for</span> pattern <span style="color:#f92672">in</span> output]
+        acc <span style="color:#f92672">+=</span> sum(d <span style="color:#f92672">*</span> factor <span style="color:#66d9ef">for</span> d, factor <span style="color:#f92672">in</span> zip(output_digits, [<span style="color:#ae81ff">1000</span>, <span style="color:#ae81ff">100</span>, <span style="color:#ae81ff">10</span>, <span style="color:#ae81ff">1</span>]))
+
+    <span style="color:#66d9ef">return</span> acc</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.pro/blog/aoc-seven-segment-search-with-z3/aoc08.py">aoc08.py</a>
+    </figcaption>
+</figure></p>
+<p>The procedure is encoding-agnostic, in the sense that it only expects the characterisation code to implement the following self-explanatory interface:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">PuzzleEncoder</span>:
+    <span style="color:#e6db74">&#34;&#34;&#34;Characterises the decoding problem posed in a line of the puzzle input.&#34;&#34;&#34;</span>
+
+    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">logic</span>(self) <span style="color:#f92672">-&gt;</span> str:
+        <span style="color:#e6db74">&#34;&#34;&#34;The logic that the produced encoding is in.&#34;&#34;&#34;</span>
+        <span style="color:#66d9ef">pass</span>
+
+    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">encode_core</span>(self) <span style="color:#f92672">-&gt;</span> list[ExprRef]:
+        <span style="color:#e6db74">&#34;&#34;&#34;Characterise the part common to all decoding problems.&#34;&#34;&#34;</span>
+        <span style="color:#66d9ef">pass</span>
+
+    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">encode_variant</span>(self, patterns: list[str]) <span style="color:#f92672">-&gt;</span> list[ExprRef]:
+        <span style="color:#e6db74">&#34;&#34;&#34;Characterise the distinctive part of a decoding problem, i.e. the observed patterns.&#34;&#34;&#34;</span>
+        <span style="color:#66d9ef">pass</span>
+
+    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">interpret</span>(self, model: ModelRef) <span style="color:#f92672">-&gt;</span> list[int]:
+        <span style="color:#e6db74">&#34;&#34;&#34;Interpret the model to extract the mapping &#39;observed pattern index -&gt; represented digit&#39;.&#34;&#34;&#34;</span>
+        <span style="color:#66d9ef">pass</span></code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.pro/blog/aoc-seven-segment-search-with-z3/aoc08.py">aoc08.py</a>
+    </figcaption>
+</figure></p>
+
+<aside >
+    <p>
+    Implementations of <code>PuzzleEncoder</code> should strive to return the most specific (sub-)logic the produced encoding is in.
+The more specific it is, the more likely
+<q><a href="https://smtlib.cs.uiowa.edu/logics.shtml">it may possible to apply specialized and more efficient satisfiability techniques</a></q>.
+    </p>
+</aside>
+<p>As you can hopefully see, using an SMT solver incrementally is pretty straight forward in the context of this puzzle.
+Although we&rsquo;ve just started, our SMT-based puzzle solver is almost finished already.
+It merely remains to provide a concrete implementation of <code>PuzzleEncoder</code>.</p>
+<h3 id="high-level-encoding"><a href="#high-level-encoding" class="hanchor" ariaLabel="Anchor">High-level Encoding</a> </h3>
+<p>The most obvious solution is to just use the means Z3 provides to express the characterisation we came up with <a href="#the-characterisation-at-a-glance">above</a>.</p>
+<p>It is handy to keep the symbols that we use in our encoding around, e.g. to reference them in the encoding functions, or to look up their interpretation later.
+Therefore, we declare these symbols as members of the encoder.
+What may catch you by surprise is that, following the <a href="http://smtlib.cs.uiowa.edu/language.shtml">SMT-LIB standard</a>, there is no special way to create a predicate in Z3.
+Instead, predicates are understood as functions with a Boolean result:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">75
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">76
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">77
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">78
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">79
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">80
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">81
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">82
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">83
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">84
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">85
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">86
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">HighLevelEncoder</span>(PuzzleEncoder):
+    <span style="color:#e6db74">&#34;&#34;&#34;A high-level encoding featuring quantifiers, uninterpreted functions and finite domains&#34;&#34;&#34;</span>
+
+    <span style="color:#66d9ef">def</span> __init__(self):
+        self<span style="color:#f92672">.</span>digit_segment <span style="color:#f92672">=</span> Function(<span style="color:#e6db74">&#39;digitSegment&#39;</span>, DigitSort, SegmentSort, BoolSort())
+        self<span style="color:#f92672">.</span>perm <span style="color:#f92672">=</span> Function(<span style="color:#e6db74">&#39;Perm&#39;</span>, SegmentSort, SegmentSort)
+        self<span style="color:#f92672">.</span>perm_digit_segment <span style="color:#f92672">=</span> Function(<span style="color:#e6db74">&#39;PermDigitSegment&#39;</span>, DigitSort, SegmentSort, BoolSort())
+        self<span style="color:#f92672">.</span>pattern_segment <span style="color:#f92672">=</span> Function(<span style="color:#e6db74">&#39;patternSegment&#39;</span>, IndexSort, SegmentSort, BoolSort())
+        self<span style="color:#f92672">.</span>idx2dig <span style="color:#f92672">=</span> Function(<span style="color:#e6db74">&#39;Idx2dig&#39;</span>, IndexSort, DigitSort)
+
+    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">logic</span>(self) <span style="color:#f92672">-&gt;</span> str:
+        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#39;UF&#39;</span>  <span style="color:#75715e"># more precisely &#39;UFFD&#39; but that&#39;s not known to Z3</span></code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.pro/blog/aoc-seven-segment-search-with-z3/aoc08.py">aoc08.py</a>
+    </figcaption>
+</figure></p>
+
+<aside >
+    <p>
+    Be careful to not confuse <code>self.idx2dig</code> with the <code>idx2dig</code> from <code>solve_puzzle</code>.
+The former is a Z3 <a href="https://z3prover.github.io/api/html/classz3py_1_1_func_decl_ref.html">function declaration</a>.
+The latter is a Python list of integers that gives us more convenient access to the found interpretation of $\mathit{Idx2dig}$.
+    </p>
+</aside>
+<p>Besides the standard <a href="https://smtlib.cs.uiowa.edu/logics.shtml">logics</a> Z3 supports several others.
+However, instead of guesswork, I find it the easiest to just look up the <a href="https://github.com/Z3Prover/z3/blob/81e94b21541280cb7fbc3426419ed6c3a8f24dd4/src/solver/smt_logics.cpp">strings</a> that map to supported (sub-)logics.</p>
+<p>With the Python bindings, the expressions that represent our core constraints look very similar to the original ones.
+What stands out is that, in contrast to our formalisation, the variables we quantify over must be created beforehand.
+Furthermore, in code, the right-hand side of $(1)$ is a bit less readable than the <q>$s \text{ is a segment of }d$</q> (cf. lines 96-98):
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 88
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 89
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 90
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 91
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 92
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 93
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 94
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 95
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 96
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 97
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 98
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 99
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">100
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">101
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">102
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">103
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">104
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">105
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">106
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">107
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">108
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">109
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">110
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">111
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">112
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">113
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">114
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">115
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">116
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">117
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">encode_core</span>(self) <span style="color:#f92672">-&gt;</span> list[ExprRef]:
+    res <span style="color:#f92672">=</span> []
+
+    <span style="color:#75715e"># Characterise digitSegment according to DIGIT_SEGMENTS</span>
+    d <span style="color:#f92672">=</span> Const(<span style="color:#e6db74">&#39;d&#39;</span>, DigitSort)
+    s <span style="color:#f92672">=</span> Const(<span style="color:#e6db74">&#39;s&#39;</span>, SegmentSort)
+    res<span style="color:#f92672">.</span>append(
+        ForAll([d, s],
+               self<span style="color:#f92672">.</span>digit_segment(d, s) <span style="color:#f92672">==</span> Or([
+                   And(d <span style="color:#f92672">==</span> mk_digit(dig), Or([s <span style="color:#f92672">==</span> mk_segment(char) <span style="color:#66d9ef">for</span> char <span style="color:#f92672">in</span> string]))
+                   <span style="color:#66d9ef">for</span> dig, string <span style="color:#f92672">in</span> DIGIT_SEGMENTS<span style="color:#f92672">.</span>items()])))
+
+    <span style="color:#75715e"># Perm should be a bijection</span>
+    s_prime <span style="color:#f92672">=</span> Const(<span style="color:#e6db74">&#34;s&#39;&#34;</span>, SegmentSort)
+    res<span style="color:#f92672">.</span>append(ForAll([s, s_prime],
+                      (s <span style="color:#f92672">==</span> s_prime) <span style="color:#f92672">==</span> (self<span style="color:#f92672">.</span>perm(s) <span style="color:#f92672">==</span> self<span style="color:#f92672">.</span>perm(s_prime))))
+
+    <span style="color:#75715e"># Characterise how PermDigitSegment derives from digitSegment and Perm, i.e.</span>
+    <span style="color:#75715e"># PermDigitSegment(d, Perm(s)) == digitSegment(d, s)</span>
+    res<span style="color:#f92672">.</span>append(
+        ForAll([d, s],
+               self<span style="color:#f92672">.</span>perm_digit_segment(d, self<span style="color:#f92672">.</span>perm(s)) <span style="color:#f92672">==</span> self<span style="color:#f92672">.</span>digit_segment(d, s)))
+
+    <span style="color:#75715e"># Require Idx2dig to be correct wrt. its role as &#34;decoding function&#34;, i.e.</span>
+    <span style="color:#75715e"># PermDigitSegment(Idx2dig(i), s) == patternSegment(i, s)</span>
+    i <span style="color:#f92672">=</span> Const(<span style="color:#e6db74">&#39;i&#39;</span>, IndexSort)
+    res<span style="color:#f92672">.</span>append(ForAll([i, s],
+                      self<span style="color:#f92672">.</span>perm_digit_segment(self<span style="color:#f92672">.</span>idx2dig(i), s) <span style="color:#f92672">==</span> self<span style="color:#f92672">.</span>pattern_segment(i, s)))
+
+    <span style="color:#66d9ef">return</span> res</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.pro/blog/aoc-seven-segment-search-with-z3/aoc08.py">aoc08.py</a>
+    </figcaption>
+</figure></p>
+
+<aside >
+    <p>
+    A pitfall of the Python bindings is that, unlike <code>==</code>, the Boolean operators <code>and</code> and <code>or</code> are not overloaded.
+<code>And</code> and <code>Or</code> must be used instead.
+    </p>
+</aside>
+<p>Since the constraints $(1)$ and $(4)$ have the same form, <code>encode_variant</code> looks a lot like lines 91&ndash;98 from <code>encode_core</code>:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">119
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">120
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">121
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">122
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">123
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">124
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">125
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">126
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">127
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">128
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">129
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">130
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">131
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">encode_variant</span>(self, patterns: list[str]) <span style="color:#f92672">-&gt;</span> list[ExprRef]:
+    res <span style="color:#f92672">=</span> []
+
+    <span style="color:#75715e"># Characterise `patternSegment` according to `patterns`</span>
+    i <span style="color:#f92672">=</span> Const(<span style="color:#e6db74">&#39;i&#39;</span>, IndexSort)
+    s <span style="color:#f92672">=</span> Const(<span style="color:#e6db74">&#39;s&#39;</span>, SegmentSort)
+    res<span style="color:#f92672">.</span>append(
+        ForAll([i, s],
+               self<span style="color:#f92672">.</span>pattern_segment(i, s) <span style="color:#f92672">==</span> Or([
+                   And(i <span style="color:#f92672">==</span> mk_index(idx), Or([s <span style="color:#f92672">==</span> mk_segment(char) <span style="color:#66d9ef">for</span> char <span style="color:#f92672">in</span> string]))
+                   <span style="color:#66d9ef">for</span> idx, string <span style="color:#f92672">in</span> enumerate(patterns)])))
+
+    <span style="color:#66d9ef">return</span> res</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.pro/blog/aoc-seven-segment-search-with-z3/aoc08.py">aoc08.py</a>
+    </figcaption>
+</figure></p>
+<p>When our constraints are determined to be satisfiable, the returned model contains &ndash; among other things &ndash; the information how $\mathit{Idx2dig}$ maps indices to digits.
+Since only the encoder needs to know how exactly the encoding works, i.e. <code>solve_puzzle</code> shouldn&rsquo;t have to deal with the declared symbols, <code>interpret</code> looks up in the model what each input is mapped to and returns the findings as a plain list of integers.
+The integer at index $i$ denotes the digit encoded by the $i$-th observed pattern:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+
+
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">133
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">134
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">interpret</span>(self, model: ModelRef) <span style="color:#f92672">-&gt;</span> list[int]:
+    <span style="color:#66d9ef">return</span> [digit2int[model<span style="color:#f92672">.</span>eval(self<span style="color:#f92672">.</span>idx2dig(i))] <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> indices]</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.pro/blog/aoc-seven-segment-search-with-z3/aoc08.py">aoc08.py</a>
+    </figcaption>
+</figure></p>
+<p>At this point you can give <a href="aoc08.py">our puzzle solver</a> a try.
+Just make sure to pass an instance of <code>HighLevelEncoder</code> to <code>solve_puzzle</code>.
+This naïve solution isn&rsquo;t exactly fast, taking roughly 30s, but comping up with it didn&rsquo;t require much thought beyond <a href="#formalising-a-problem-instance">the original formalisation</a>.
+Let&rsquo;s see whether this can be improved by switching to a less expressive (sub-)logic.</p>
+<h3 id="mid-level-encoding"><a href="#mid-level-encoding" class="hanchor" ariaLabel="Anchor">Mid-level Encoding</a> </h3>
+<p>Although quantifiers facilitate concise characterisation they are also a source of complexity &ndash; especially in the context of small finite domains.
+Therefore, in the next step, we will bring our constraints into a quantifier-free fragment of first-order logic.</p>
+<p>Dropping the quantifiers does not entail any changes to the declared symbols, but the new encoder should communicate that the constraints it produces are free of quantifiers:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">137
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">138
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">139
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">140
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">141
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">142
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">143
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">144
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">145
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">146
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">147
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">148
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MidLevelEncoder</span>(PuzzleEncoder):
+    <span style="color:#e6db74">&#34;&#34;&#34;A quantifier-free mid-level encoding featuring uninterpreted functions and finite domains&#34;&#34;&#34;</span>
+
+    <span style="color:#66d9ef">def</span> __init__(self):
+        self<span style="color:#f92672">.</span>digit_segment <span style="color:#f92672">=</span> Function(<span style="color:#e6db74">&#39;digitSegment&#39;</span>, DigitSort, SegmentSort, BoolSort())
+        self<span style="color:#f92672">.</span>perm <span style="color:#f92672">=</span> Function(<span style="color:#e6db74">&#39;Perm&#39;</span>, SegmentSort, SegmentSort)
+        self<span style="color:#f92672">.</span>perm_digit_segment <span style="color:#f92672">=</span> Function(<span style="color:#e6db74">&#39;PermDigitSegment&#39;</span>, DigitSort, SegmentSort, BoolSort())
+        self<span style="color:#f92672">.</span>pattern_segment <span style="color:#f92672">=</span> Function(<span style="color:#e6db74">&#39;patternSegment&#39;</span>, IndexSort, SegmentSort, BoolSort())
+        self<span style="color:#f92672">.</span>idx2dig <span style="color:#f92672">=</span> Function(<span style="color:#e6db74">&#39;Idx2dig&#39;</span>, IndexSort, DigitSort)
+
+    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">logic</span>(self) <span style="color:#f92672">-&gt;</span> str:
+        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#39;QF_UFDT&#39;</span>  <span style="color:#75715e"># more precisely &#39;QF_UFFD&#39; but that&#39;s not known to Z3</span></code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.pro/blog/aoc-seven-segment-search-with-z3/aoc08.py">aoc08.py</a>
+    </figcaption>
+</figure></p>
+<p>The approach to get rid of a forall quantifier is simple: just <strong>explicitly enumerate the values and assert the nested constraint for each</strong>.
+This leaves us with a increased number of constraints but spares Z3 the necessity of dealing with quantifiers:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">150
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">151
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">152
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">153
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">154
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">155
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">156
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">157
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">158
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">159
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">160
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">161
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">162
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">163
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">164
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">165
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">166
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">167
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">168
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">169
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">170
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">171
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">172
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">encode_core</span>(self) <span style="color:#f92672">-&gt;</span> list[ExprRef]:
+    res <span style="color:#f92672">=</span> []
+
+    <span style="color:#75715e"># Characterise digitSegment according to DIGIT_SEGMENTS</span>
+    <span style="color:#66d9ef">for</span> d, s <span style="color:#f92672">in</span> product(digits, segments):
+        expected <span style="color:#f92672">=</span> segment2char[s] <span style="color:#f92672">in</span> DIGIT_SEGMENTS[digit2int[d]]
+        res<span style="color:#f92672">.</span>append(self<span style="color:#f92672">.</span>digit_segment(d, s) <span style="color:#f92672">==</span> expected)
+
+    <span style="color:#75715e"># Perm should be a bijection</span>
+    <span style="color:#66d9ef">for</span> s, other <span style="color:#f92672">in</span> product(segments, segments):
+        res<span style="color:#f92672">.</span>append((s <span style="color:#f92672">==</span> other) <span style="color:#f92672">==</span> (self<span style="color:#f92672">.</span>perm(s) <span style="color:#f92672">==</span> self<span style="color:#f92672">.</span>perm(other)))
+
+    <span style="color:#75715e"># Characterise how PermDigitSegment derives from digitSegment and Perm, i.e.</span>
+    <span style="color:#75715e"># PermDigitSegment(d, Perm(s)) == digitSegment(d, s)</span>
+    <span style="color:#66d9ef">for</span> d, s <span style="color:#f92672">in</span> product(digits, segments):
+        res<span style="color:#f92672">.</span>append(self<span style="color:#f92672">.</span>perm_digit_segment(d, self<span style="color:#f92672">.</span>perm(s)) <span style="color:#f92672">==</span> self<span style="color:#f92672">.</span>digit_segment(d, s))
+
+    <span style="color:#75715e"># Require Idx2dig to be correct wrt. its role as &#34;decoding function&#34;, i.e.</span>
+    <span style="color:#75715e"># PermDigitSegment(Idx2dig(i), s) == patternSegment(i, s)</span>
+    <span style="color:#66d9ef">for</span> i, s <span style="color:#f92672">in</span> product(indices, segments):
+        res<span style="color:#f92672">.</span>append(self<span style="color:#f92672">.</span>perm_digit_segment(self<span style="color:#f92672">.</span>idx2dig(i), s) <span style="color:#f92672">==</span> self<span style="color:#f92672">.</span>pattern_segment(i, s))
+
+    <span style="color:#66d9ef">return</span> res</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.pro/blog/aoc-seven-segment-search-with-z3/aoc08.py">aoc08.py</a>
+    </figcaption>
+</figure></p>
+<p>Aside from the substitution of quantification by iteration, the code is effectively the same as in our <a href="#high-level-encoding">first encoder</a>.
+I find this version even more readable that the previous one, mostly because it is so easy to express <q>$s \text{ is a segment of }d$</q> for a concrete pair $(d,s)$.</p>
+<p>The rest of the encoder does not provide any new insights and is only shown for the sake of completeness:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">174
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">175
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">176
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">177
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">178
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">179
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">180
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">181
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">182
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">183
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">184
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">185
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">encode_variant</span>(self, patterns: list[str]) <span style="color:#f92672">-&gt;</span> list[ExprRef]:
+    res <span style="color:#f92672">=</span> []
+
+    <span style="color:#75715e"># Characterise `patternSegment` according to `patterns`</span>
+    <span style="color:#66d9ef">for</span> i, seg <span style="color:#f92672">in</span> product(indices, segments):
+        expected <span style="color:#f92672">=</span> segment2char[seg] <span style="color:#f92672">in</span> patterns[index2int[i]]
+        res<span style="color:#f92672">.</span>append(self<span style="color:#f92672">.</span>pattern_segment(i, seg) <span style="color:#f92672">==</span> expected)
+
+    <span style="color:#66d9ef">return</span> res
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">interpret</span>(self, model: ModelRef) <span style="color:#f92672">-&gt;</span> list[int]:
+    <span style="color:#66d9ef">return</span> [digit2int[model<span style="color:#f92672">.</span>eval(self<span style="color:#f92672">.</span>idx2dig(i))] <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> indices]</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.pro/blog/aoc-seven-segment-search-with-z3/aoc08.py">aoc08.py</a>
+    </figcaption>
+</figure></p>
+<p>Now, try running <code>solve_puzzle</code> with this new encoder.
+It turns out that moving to a quantifier-free fragment of first-order logic reduces the runtime significantly (to ~6s).
+One might wonder whether going even lower will yield similar performance gains.</p>
+<h3 id="low-level-encoding"><a href="#low-level-encoding" class="hanchor" ariaLabel="Anchor">Low-level Encoding</a> </h3>
+<p>Similar to quantifiers, uninterpreted functions introduce some complexity but do not add any expressivity that is essential to our characterisation.
+If our constraints were free of both quantifiers and uninterpreted functions they&rsquo;d be effectively propositional.
+In fact, Z3 wouldn&rsquo;t even reach for SMT procedures but directly employ its <a href="https://theory.stanford.edu/~nikolaj/programmingz3.html#sec-sat-core">SAT solver</a>.</p>
+
+<aside >
+    <p>
+    The constraints are &ldquo;effectively&rdquo; propositional since enumeration data types and equality are not really in propositional logic but trivially reduced to it.
+Essentially, it is possible to encode the $k=|D|$ distinct values of a finite domain $D$ in propositional logic by means of $\lceil\log_2(k)\rceil$ Boolean variables.
+    </p>
+</aside>
+<p>Now, how do we get rid of the uninterpreted functions?
+Since all of our functions have finite domains, it is be possible to introduce symbolic values to <strong>replace each possible function application</strong> in our constraints.
+That is, for each function and input, introduce a variable to denote the result.
+This of course impacts the symbols we declare.
+For example, where we previously used an uninterpreted function
+$$\mathit{digitSegment}:\mathit{Digit}\times\mathit{Segment}\to\mathbb{B}$$
+to represent the predicate $\mathit{digitSegment}:\mathit{Digit}\times\mathit{Segment}$, we now have a Boolean variable for each pair $(d,s)\in\mathit{Digit}\times\mathit{Segment}$:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">188
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">189
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">190
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">191
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">192
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">193
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">194
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">195
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">196
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">197
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">198
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">199
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">LowLevelEncoder</span>(PuzzleEncoder):
+    <span style="color:#e6db74">&#34;&#34;&#34;A quantifier-free low-level encoding featuring finite domains. Effectively a SAT instance.&#34;&#34;&#34;</span>
+
+    <span style="color:#66d9ef">def</span> __init__(self):
+        self<span style="color:#f92672">.</span>digit_segment <span style="color:#f92672">=</span> {(d, s): Bool(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#39;digitSegment(</span><span style="color:#e6db74">{</span>d<span style="color:#e6db74">}</span><span style="color:#e6db74">,</span><span style="color:#e6db74">{</span>s<span style="color:#e6db74">}</span><span style="color:#e6db74">)&#39;</span>) <span style="color:#66d9ef">for</span> d, s <span style="color:#f92672">in</span> product(digits, segments)}
+        self<span style="color:#f92672">.</span>perm <span style="color:#f92672">=</span> {s: Const(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#39;Perm(</span><span style="color:#e6db74">{</span>s<span style="color:#e6db74">}</span><span style="color:#e6db74">)&#39;</span>, SegmentSort) <span style="color:#66d9ef">for</span> s <span style="color:#f92672">in</span> segments}
+        self<span style="color:#f92672">.</span>perm_digit_segment <span style="color:#f92672">=</span> {(d, s): Bool(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#39;PermDigitSegment(</span><span style="color:#e6db74">{</span>d<span style="color:#e6db74">}</span><span style="color:#e6db74">,</span><span style="color:#e6db74">{</span>s<span style="color:#e6db74">}</span><span style="color:#e6db74">)&#39;</span>) <span style="color:#66d9ef">for</span> d, s <span style="color:#f92672">in</span> product(digits, segments)}
+        self<span style="color:#f92672">.</span>pattern_segment <span style="color:#f92672">=</span> {(i, s): Bool(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#39;patternSegment(</span><span style="color:#e6db74">{</span>i<span style="color:#e6db74">}</span><span style="color:#e6db74">,</span><span style="color:#e6db74">{</span>s<span style="color:#e6db74">}</span><span style="color:#e6db74">)&#39;</span>) <span style="color:#66d9ef">for</span> i, s <span style="color:#f92672">in</span> product(indices, segments)}
+        self<span style="color:#f92672">.</span>idx2dig <span style="color:#f92672">=</span> {i: Const(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#39;Idx2dig(</span><span style="color:#e6db74">{</span>i<span style="color:#e6db74">}</span><span style="color:#e6db74">)&#39;</span>, DigitSort) <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> indices}
+
+    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">logic</span>(self) <span style="color:#f92672">-&gt;</span> str:
+        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#39;QF_FD&#39;</span></code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.pro/blog/aoc-seven-segment-search-with-z3/aoc08.py">aoc08.py</a>
+    </figcaption>
+</figure></p>
+
+<aside >
+    <p>
+    Be careful to not mistake the variable names for function applications.
+I just like naming the variables like the function applications they replace.
+    </p>
+</aside>
+<p>We can now use the freshly introduced variables within our constraints, in place of the original function applications.
+This does complicate constraints where we previously had nested function applications, such as $(3)$ and $(5)$.
+Here, the idea is similar to the <a href="#stepwise-composition">alternative formalisation</a> of $(3)$: we constrain the result of the outer function application depending on the result of the nested function application.
+However, without uninterpreted functions, some constraint simplification opportunities can become more obvious, too.
+Since the domain and value range of $\mathit{perm}$ are equal, $(2)$ amounts to requiring the result for every input to be distinct:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">201
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">202
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">203
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">204
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">205
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">206
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">207
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">208
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">209
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">210
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">211
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">212
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">213
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">214
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">215
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">216
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">217
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">218
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">219
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">220
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">221
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">222
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">223
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">224
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">encode_core</span>(self) <span style="color:#f92672">-&gt;</span> list[ExprRef]:
+    res <span style="color:#f92672">=</span> []
+
+    <span style="color:#75715e"># Characterise digitSegment according to DIGIT_SEGMENTS</span>
+    <span style="color:#66d9ef">for</span> d, s <span style="color:#f92672">in</span> product(digits, segments):
+        expected <span style="color:#f92672">=</span> segment2char[s] <span style="color:#f92672">in</span> DIGIT_SEGMENTS[digit2int[d]]
+        res<span style="color:#f92672">.</span>append(self<span style="color:#f92672">.</span>digit_segment[(d, s)] <span style="color:#f92672">==</span> expected)
+
+    <span style="color:#75715e"># Perm should be a bijection</span>
+    res<span style="color:#f92672">.</span>append(Distinct(list(self<span style="color:#f92672">.</span>perm<span style="color:#f92672">.</span>values())))
+
+    <span style="color:#75715e"># Characterise how PermDigitSegment derives from digitSegment and Perm, i.e.</span>
+    <span style="color:#75715e"># PermDigitSegment(d, Perm(s)) == digitSegment(d, s)</span>
+    <span style="color:#66d9ef">for</span> s, perm_s, d <span style="color:#f92672">in</span> product(segments, segments, digits):
+        res<span style="color:#f92672">.</span>append(Implies(self<span style="color:#f92672">.</span>perm[s] <span style="color:#f92672">==</span> perm_s,
+                           self<span style="color:#f92672">.</span>perm_digit_segment[(d, perm_s)] <span style="color:#f92672">==</span> self<span style="color:#f92672">.</span>digit_segment[(d, s)]))
+
+    <span style="color:#75715e"># Require Idx2dig to be correct wrt. its role as &#34;decoding function&#34;, i.e.</span>
+    <span style="color:#75715e"># PermDigitSegment(Idx2dig(i), s) == patternSegment(i, s)</span>
+    <span style="color:#66d9ef">for</span> i, d, s <span style="color:#f92672">in</span> product(indices, digits, segments):
+        res<span style="color:#f92672">.</span>append(Implies(self<span style="color:#f92672">.</span>idx2dig[i] <span style="color:#f92672">==</span> d,
+                           self<span style="color:#f92672">.</span>perm_digit_segment[(d, s)] <span style="color:#f92672">==</span> self<span style="color:#f92672">.</span>pattern_segment[(i, s)]))
+
+    <span style="color:#66d9ef">return</span> res</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.pro/blog/aoc-seven-segment-search-with-z3/aoc08.py">aoc08.py</a>
+    </figcaption>
+</figure></p>
+<p>As with the previous encodings, the rest of the encoder holds no surprises and is merely listed for the sake of completeness:
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+
+
+
+
+    
+    
+        
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+
+
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+    
+        
+    
+    
+
+<figure class="highlight-figure">
+    <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">226
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">227
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">228
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">229
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">230
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">231
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">232
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">233
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">234
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">235
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">236
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">237
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Python" data-lang="Python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">encode_variant</span>(self, patterns: list[str]) <span style="color:#f92672">-&gt;</span> list[ExprRef]:
+    res <span style="color:#f92672">=</span> []
+
+    <span style="color:#75715e"># Characterise `patternSegment` according to `patterns`</span>
+    <span style="color:#66d9ef">for</span> i, s <span style="color:#f92672">in</span> product(indices, segments):
+        expected <span style="color:#f92672">=</span> segment2char[s] <span style="color:#f92672">in</span> patterns[index2int[i]]
+        res<span style="color:#f92672">.</span>append(self<span style="color:#f92672">.</span>pattern_segment[(i, s)] <span style="color:#f92672">==</span> expected)
+
+    <span style="color:#66d9ef">return</span> res
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">interpret</span>(self, model: ModelRef) <span style="color:#f92672">-&gt;</span> list[int]:
+    <span style="color:#66d9ef">return</span> [digit2int[model<span style="color:#f92672">.</span>eval(self<span style="color:#f92672">.</span>idx2dig[i])] <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> indices]</code></pre></td></tr></table>
+</div>
+</div>
+    <figcaption>
+        <a href="https://bohlender.pro/blog/aoc-seven-segment-search-with-z3/aoc08.py">aoc08.py</a>
+    </figcaption>
+</figure></p>
+<p>This is where we stop tweaking the encoding.
+You will find that running <code>solve_puzzle</code> with an instance of <code>LowLevelEncoder</code> again reduces the runtime significantly (to ~1s).</p>
+<h2 id="do-try-this-at-home"><a href="#do-try-this-at-home" class="hanchor" ariaLabel="Anchor">Do Try This at Home</a> </h2>
+<p>Interestingly, each <code>check</code> in <code>solve_puzzle</code> takes only about 500µs if an instance of <code>LowLevelEncoder</code> is used.
+So why does <code>solve_puzzle</code> take 1s? That&rsquo;s an order of magnitude longer than 200 times 500µs.
+Profiling shows that most time wasted in the bindings &ndash; specifically in <code>ExprRef.__eq__</code>.</p>
+<p>There are several things you can do to squeeze out better execution times:</p>
+<ul>
+<li>Now that you&rsquo;ve seen how to express the constraints with the Python bindings, give the <a href="https://z3prover.github.io/api/html/namespacez3.html">bindings for C++</a> &ndash; or some other language with less overhead than Python &ndash; a try.</li>
+<li>Avoid recreating the constraints in <code>encode_variant</code>.
+Instead try to come up with a way to leverage <a href="https://theory.stanford.edu/~nikolaj/programmingz3.html#sec-assumptions">solving under assumptions</a>, i.e. avoid <code>encode_variant</code> and rather pass some assumptions to <code>check</code> which define $\mathit{patternSegment}$.</li>
+<li>Instead of solving each of the 200 problem instances separately try to combine them all into a single set of constraints, s.t. a single invocation of <code>check</code> will suffice to solve the complete puzzle.</li>
+<li>Assuming you do implement the above suggestion, try feeding the constraints to a dedicated SAT solver for another performance bump.
+Have a look at <a href="/blog/generating-crosswords-with-sat-smt/#cnf-export">this section</a> in a previous post, if you need some guidance on how to do this.</li>
+</ul>
+<hr style="margin-top: 2em">
+<div class="links">
+
+    <a href="/blog/aoc-seven-segment-search-with-z3/aoc08.py" class="button">aoc08.py</a>
+
+    <a href="/blog/aoc-seven-segment-search-with-z3/input.txt" class="button">input.txt</a>
+
+</div>
+		</article>
+		</main>
+	</div>
+	
+	<div class="notepad related-posts">
+		<h1>Related Posts</h1>
+		<hr>
+		
+			<article>
+    <header>
+        <h2><a href="https://bohlender.pro/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/">Solving a Logic Synthesis Puzzle via SAT/SMT</a></h2>
+        <div class="metadata">
+    <time datetime="2019-12-12">December 12, 2019</time>
+    <ul>
+        <li><a class="tag-block" href="/tags/sat">SAT</a></li>
+        <li><a class="tag-block" href="/tags/smt">SMT</a></li>
+        <li><a class="tag-block" href="/tags/logic-synthesis">Logic Synthesis</a></li>
+        <li><a class="tag-block" href="/tags/puzzle">Puzzle</a></li>
+    </ul>
+</div>
+    </header><p>A few weeks ago, I was asked the following riddle:
+<q>Design a <a href="https://en.wikipedia.org/wiki/Logic_gate">logic circuit</a> with three inputs and three outputs, such that the outputs are the inverted inputs. You may use arbitrary many AND and OR gates, but at most two NOT gates</q>.
+Although the characterisation of this problem as an <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a> instance is straightforward, I found it necessary to reduce it to <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">SAT</a> and incorporate further assumptions to achieve reasonable performance.</p>
+<p>This post illustrates said process, ranging from the original idea to a standard formulation of SAT-based logic synthesis to a problem-specific and more constrained instance.</p>
+	<a class="read-more" href="https://bohlender.pro/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/">
+        &raquo; Read more
+    </a>
+</article>
+		
+			<article>
+    <header>
+        <h2><a href="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/">Generating Crosswords via SAT/SMT</a></h2>
+        <div class="metadata">
+    <time datetime="2020-10-24">October 24, 2020</time>
+    <ul>
+        <li><a class="tag-block" href="/tags/sat">SAT</a></li>
+        <li><a class="tag-block" href="/tags/puzzle">Puzzle</a></li>
+    </ul>
+</div>
+    </header><p>Recently I got interested in designing personalised crosswords as a way to spice up photo book presents.
+This made me realise how hard generating <q>high-quality</q> crosswords actually is.
+Trying to create a crossword from a set of words &ndash; or a subset thereof &ndash; I checked out several tools but found all of them to be based on heuristics and yield rather sparse crosswords.</p>
+<p>In line with the general theme of my previous posts, this one illustrates how we can leverage <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">SAT solving</a> to solve this problem.
+In contrast to related approaches, which assume a fixed grid structure and search for fitting words, we consider word placement as part of the problem and eventually end up with an integrated solution to generating crosswords of adjustable quality.</p>
+	<a class="read-more" href="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/">
+        &raquo; Read more
+    </a>
+</article>
+		
+			<article>
+    <header>
+        <h2><a href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/">Playing Hard Mastermind Games with a SAT-based AI</a></h2>
+        <div class="metadata">
+    <time datetime="2020-03-12">March 12, 2020</time>
+    <ul>
+        <li><a class="tag-block" href="/tags/sat">SAT</a></li>
+        <li><a class="tag-block" href="/tags/ai">AI</a></li>
+        <li><a class="tag-block" href="/tags/puzzle">Puzzle</a></li>
+    </ul>
+</div>
+    </header><p>Back in the day, <a href="https://en.wikipedia.org/wiki/Mastermind_(board_game)">Mastermind</a> was a popular two player code-breaking game, and many <a href="https://en.wikipedia.org/wiki/Mastermind_(board_game)#Variations">variations thereof</a> still exist as both standalone games and puzzles within other games.
+Although it is difficult for a human player to make <em>optimal guesses</em> of the secret code, or at least guesses that do not conflict with the provided clues, the setting is usually simple enough for an AI to find such candidates via explicit exploration of the <a href="https://en.wikipedia.org/wiki/Game_tree">game tree</a>.</p>
+<p>However, such approaches become unfeasible when the number of possibilities for secret codes grows into the millions.
+This post illustrates the problem with standard approaches, and how finding consistent candidates can be approached with <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">SAT</a> solving &ndash; yielding an AI that can handle orders-of-magnitude harder Mastermind instances.</p>
+	<a class="read-more" href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/">
+        &raquo; Read more
+    </a>
+</article>
+		
+	</div>
+	
+</div>
+
+        </div>
+        </div>
+        <footer>
+	<p>© Dimitri Bohlender</p>
+	<p><a href="/legal">Legal Notice</a></p>
+</footer>
+    </body>
+</html>

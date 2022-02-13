@@ -503,7 +503,8 @@ The <strong>code length</strong> $|s|$ and <strong>set of colours/symbols</stron
 <p>For example, <em>Grand Mastermind</em> keeps the secret length of the original but uses $25$ symbols ($5$ shapes, $5$ colours) which allows for $25^4=390\,625$ different codes.
 Overall, most Mastermind variants feature a number of combinations in this order of magnitude (thousands), rendering them amenable to analysis via methods that explicitly explore the game tree.
 At the time of writing, <a href="https://en.wikipedia.org/wiki/Mastermind_(board_game)#Variations">the Wikipedia page</a> lists only one exception: <em>Mastermind Secret Search</em> uses $26$ letters as symbols to form words up to a length of six characters, which gives rise to $26^6=308\,915\,776$ possible secrets.</p>
-<aside>
+
+<aside >
     
     <p>Keep in mind that Mastermind games are designed to be played by humans, and mostly feature reasonably small numbers of combinations.
 To alleviate the difficulty of playing the variations with large numbers of combinations such games resort to additional constraints or more restrictive feedback.</p>
@@ -517,7 +518,8 @@ Therefore, even when not aiming for optimal play but merely reasonable guesses, 
 However, they work well for most practical Mastermind variants and are a good place to start getting a feel for the problem domain.</p>
 <h2 id="explicit-approaches"><a href="#explicit-approaches" class="hanchor" ariaLabel="Anchor">Explicit Approaches</a> </h2>
 <p>In contrast to <em>symbolic</em> methods for search and reachability checking, which work with implicit representations of state sets, <em>explicit</em> methods actually construct each state (here: secret codes) separately and store each in an accessible form in memory.</p>
-<aside>
+
+<aside >
     <p>
     I&rsquo;ve found this <a href="http://www.philos.rug.nl/~barteld/master.pdf">overview of Mastermind strategies</a> particularly helpful to get an understanding of the (explicit) standard approaches and their tradeoffs.
     </p>
@@ -1155,7 +1157,8 @@ The following table illustrates the possible outcomes depending on the chosen $c
 To make it more clear, consider picking $c=(0,0,0,0)$ for the first guess.
 The worst that could happen next would be receiving the feedback $(0,0)$, since this would still leave us with a set of $625$ candidates that are consistent with the feedback.
 In contrast, the best feedback would clearly be $(4,0)$, as this would imply that our guess was equal to the secret code and we just won.</p>
-<aside>
+
+<aside >
     <p>
     Due to symmetry and the lack of feedback, there is actually no need to enumerate <em>all</em> possible secrets for the first guess.
 It is sufficient to consider $(0,0,0,0)$, $(0,0,0,1)$, $(0,0,1,1)$, $(0,0,1,2)$ and $(0,1,2,3)$ to cover all unique columns.
@@ -1821,7 +1824,8 @@ s_{3,1} &= \mathit{fm}_3
         <a href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
     </figcaption>
 </figure></p>
-<aside>
+
+<aside >
     <p>
     During development I actually used variables of the form $\mathit{fm}_{\mathit{pos},\mathit{round}}$ to simplify debugging.
 Once done, it was just more readable to let Z3 pick fresh names for the variables instead of manually generating distinct names for each feedback&rsquo;s full match variables.
@@ -1837,7 +1841,8 @@ A true literal $\mathit{sm}_{2,3}$ shall denote that the symbol at index $2$ of 
 <p>With this in mind, we can easily construct an according cardinality constraint for some feedback $f=(2,1)$:
 $$\mathit{sm}_{0,1} +\mathit{sm}_{0,2} + \dots + \mathit{sm}_{3,2}  = 1$$
 Note that no constraint should have a variable of the form $\mathit{sm}_{\mathit{pos},\mathit{pos}}$, as such a case would actually describe a full match &ndash; not a symbol match.</p>
-<aside>
+
+<aside >
     
     <p>One might think that it is also necessary to add a constraint which disallows cases like $\mathit{sm}_{2,1}$ and $\mathit{sm}_{3,1}$ being $\mathit{true}$ at the same time.
 After all, this would indicate that both symbols can become full matches if moved to the same position.</p>
@@ -2458,7 +2463,8 @@ The following table provides both a qualitative and quantitative comparison of t
 </tr>
 </tbody>
 </table>
-<aside>
+
+<aside >
     <p>
     Note that, due to the nondeterministic and heuristics-guided nature of SAT solving, the results may vary slightly for your setup.
     </p>
@@ -2536,6 +2542,32 @@ In contrast to related approaches, which assume a fixed grid structure and searc
 Although the characterisation of this problem as an <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a> instance is straightforward, I found it necessary to reduce it to <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">SAT</a> and incorporate further assumptions to achieve reasonable performance.</p>
 <p>This post illustrates said process, ranging from the original idea to a standard formulation of SAT-based logic synthesis to a problem-specific and more constrained instance.</p>
 	<a class="read-more" href="https://bohlender.pro/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/">
+        &raquo; Read more
+    </a>
+</article>
+		
+			<article>
+    <header>
+        <h2><a href="https://bohlender.pro/blog/aoc-seven-segment-search-with-z3/">Solving the &#34;Seven Segment Search&#34; Puzzle with Z3</a></h2>
+        <div class="metadata">
+    <time datetime="2022-01-22">January 22, 2022</time>
+    <ul>
+        <li><a class="tag-block" href="/tags/smt">SMT</a></li>
+        <li><a class="tag-block" href="/tags/puzzle">Puzzle</a></li>
+        <li><a class="tag-block" href="/tags/advent-of-code">Advent of Code</a></li>
+    </ul>
+</div>
+    </header><p>This week I stumbled upon <a href="https://www.reddit.com/r/adventofcode/comments/rbwnh5/2021_day_8_can_it_be_solved_as_a_constraint/">someone wondering</a> whether the <strong>second part</strong> of the recent <a href="https://adventofcode.com/2021/day/8">Advent of Code puzzle &ldquo;Seven Segment Search&rdquo;</a> can be expressed as a constraint satisfaction problem.
+As attested by the replies and solutions: yes, it can.
+However, to my mind, the solutions could be more instructive and raise awareness for some of the tradeoffs or solver misuses they put up with.
+This post tries to do better.</p>
+<p>I assume that the reader is familiar with mathematical notation and</p>
+<ul>
+<li>just struggles to express the posed problem in a formal, declarative way, <em>or</em></li>
+<li>is interested in seeing how the <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a> solver <a href="https://github.com/Z3Prover/z3/">Z3</a> can be used to express and solve the problem in several logics.
+It takes only few steps to get from a quantifier-laden high-level formulation to what is effectively <a href="https://en.wikipedia.org/wiki/Propositional_logic">propositional logic</a>.</li>
+</ul>
+	<a class="read-more" href="https://bohlender.pro/blog/aoc-seven-segment-search-with-z3/">
         &raquo; Read more
     </a>
 </article>

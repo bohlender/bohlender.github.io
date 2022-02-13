@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1180px" height="560px" viewBox="0 0 1180 560" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <g id="Artboard-001" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="wires" transform="translate(299.500000, 60.000000)" stroke="#979797" stroke-linecap="square" stroke-width="5">
+            <line x1="629" y1="440.5" x2="-3.49165141e-14" y2="440.5" id="g"></line>
+            <line x1="801" y1="366.5" x2="-1.19150783e-13" y2="366.5" id="f"></line>
+            <line x1="591" y1="293.5" x2="-1.08929792e-14" y2="293.5" id="e"></line>
+            <line x1="629" y1="220.5" x2="-3.49165141e-14" y2="220.5" id="d"></line>
+            <line x1="801" y1="146.5" x2="-1.19150783e-13" y2="146.5" id="c"></line>
+            <line x1="591" y1="73.5" x2="-1.08929792e-14" y2="73.5" id="b"></line>
+            <line x1="629" y1="0.5" x2="-3.49165141e-14" y2="0.5" id="a"></line>
+        </g>
+        <g id="7-segment-display" transform="translate(862.000000, 22.000000)">
+            <g id="segments" stroke="#808080" stroke-width="0.95">
+                <polygon id="g" fill="#F6F4F0" points="82 440 215 440 253 478 215 516 82 516 44 478">
+                    <animate attributeName="fill"
+                    values="#F6F4F0; #F6F4F0; #A6E22E; #A6E22E; #A6E22E; #A6E22E; #A6E22E; #F6F4F0; #A6E22E; #A6E22E"
+                    calcMode="discrete" dur="10s" repeatCount="indefinite"/>
+                </polygon>
+                <polygon id="f" fill="#A6E22E" transform="translate(258.500000, 368.000000) rotate(-270.000000) translate(-258.500000, -368.000000) " points="192 330 325 330 363 368 325 406 192 406 154 368">
+                    <animate attributeName="fill"
+                    values="#A6E22E; #A6E22E; #A6E22E; #A6E22E; #A6E22E; #A6E22E; #A6E22E; #A6E22E; #A6E22E; #F6F4F0"
+                    calcMode="discrete" dur="10s" repeatCount="indefinite"/>
+                </polygon>
+                <polygon id="e" fill="#F6F4F0" transform="translate(38.500000, 368.000000) rotate(-270.000000) translate(-38.500000, -368.000000) " points="-28 330 105 330 143 368 105 406 -28 406 -66 368">
+                    <animate attributeName="fill"
+                    values="#F6F4F0; #F6F4F0; #F6F4F0; #F6F4F0; #A6E22E; #A6E22E; #F6F4F0; #F6F4F0; #A6E22E; #A6E22E"
+                    calcMode="discrete" dur="10s" repeatCount="indefinite"/>
+                </polygon>
+                <polygon id="d" fill="#A6E22E" points="82 220 215 220 253 258 215 296 82 296 44 258">
+                    <animate attributeName="fill"
+                    values="#A6E22E; #F6F4F0; #A6E22E; #A6E22E; #A6E22E; #F6F4F0; #A6E22E; #F6F4F0; #A6E22E; #A6E22E"
+                    calcMode="discrete" dur="10s" repeatCount="indefinite"/>
+                </polygon>
+                <polygon id="c" fill="#A6E22E" transform="translate(258.500000, 148.000000) rotate(-270.000000) translate(-258.500000, -148.000000) " points="192 110 325 110 363 148 325 186 192 186 154 148">
+                    <animate attributeName="fill"
+                    values="#A6E22E; #A6E22E; #A6E22E; #F6F4F0; #F6F4F0; #A6E22E; #A6E22E; #A6E22E; #A6E22E; #A6E22E" 
+                    calcMode="discrete" dur="10s" repeatCount="indefinite"/>
+                </polygon>
+                <polygon id="b" fill="#A6E22E" transform="translate(38.500000, 148.000000) rotate(-270.000000) translate(-38.500000, -148.000000) " points="-28 110 105 110 143 148 105 186 -28 186 -66 148">
+                    <animate attributeName="fill"
+                    values="#A6E22E; #F6F4F0; #F6F4F0; #A6E22E; #A6E22E; #A6E22E; #A6E22E; #F6F4F0; #A6E22E; #F6F4F0"
+                    calcMode="discrete" dur="10s" repeatCount="indefinite"/>
+                </polygon>
+                <polygon id="a" fill="#F6F4F0" points="82 0 215 0 253 38 215 76 82 76 44 38">
+                    <animate attributeName="fill"
+                    values="#F6F4F0; #A6E22E; #A6E22E; #A6E22E; #A6E22E; #A6E22E; #A6E22E; #F6F4F0; #A6E22E; #A6E22E"
+                    calcMode="discrete" dur="10s" repeatCount="indefinite"/>
+                </polygon>
+            </g>
+            <g id="labels" transform="translate(25.000000, 5.000000)" fill="#000000" font-family="RobotoSlab-Regular, Roboto Slab" font-size="45" font-weight="normal">
+                <text id="g">
+                    <tspan x="113" y="483">g</tspan>
+                </text>
+                <text id="f">
+                    <tspan x="225.501953" y="371">f</tspan>
+                </text>
+                <text id="e">
+                    <tspan x="1.40405273" y="371">e</tspan>
+                </text>
+                <text id="d">
+                    <tspan x="110.497803" y="267">d</tspan>
+                </text>
+                <text id="c">
+                    <tspan x="221.371094" y="151">c</tspan>
+                </text>
+                <text id="b">
+                    <tspan x="0.470214844" y="151">b</tspan>
+                </text>
+                <text id="a">
+                    <tspan x="111.607422" y="47">a</tspan>
+                </text>
+            </g>
+        </g>
+        <g id="µC" transform="translate(20.000000, 20.000000)">
+            <g id="pins_left" transform="translate(0.000000, 40.000000)" stroke="#B08954" stroke-linecap="round" stroke-width="20">
+                <line x1="40" y1="440.5" x2="7.99360578e-14" y2="440.5" id="g"></line>
+                <line x1="40" y1="366.5" x2="7.99360578e-14" y2="366.5" id="f"></line>
+                <line x1="40" y1="293.5" x2="7.99360578e-14" y2="293.5" id="e"></line>
+                <line x1="40" y1="220.5" x2="7.99360578e-14" y2="220.5" id="d"></line>
+                <line x1="40" y1="146.5" x2="7.99360578e-14" y2="146.5" id="c"></line>
+                <line x1="40" y1="73.5" x2="7.99360578e-14" y2="73.5" id="b"></line>
+                <line x1="40" y1="0.5" x2="0" y2="0.5" id="a"></line>
+            </g>
+            <g id="pins_right" transform="translate(240.000000, 40.000000)" stroke="#B08954" stroke-linecap="round" stroke-width="20">
+                <line x1="40" y1="440.5" x2="7.99360578e-14" y2="440.5" id="g"></line>
+                <line x1="40" y1="366.5" x2="7.99360578e-14" y2="366.5" id="f"></line>
+                <line x1="40" y1="293.5" x2="7.99360578e-14" y2="293.5" id="e"></line>
+                <line x1="40" y1="220.5" x2="7.99360578e-14" y2="220.5" id="d"></line>
+                <line x1="40" y1="146.5" x2="7.99360578e-14" y2="146.5" id="c"></line>
+                <line x1="40" y1="73.5" x2="7.99360578e-14" y2="73.5" id="b"></line>
+                <line x1="40" y1="0.5" x2="0" y2="0.5" id="a"></line>
+            </g>
+            <path d="M220,0 C231.045695,-2.02906125e-15 240,8.954305 240,20 L240,500 C240,511.045695 231.045695,520 220,520 L60,520 C48.954305,520 40,511.045695 40,500 L40,20 C40,8.954305 48.954305,2.02906125e-15 60,0 L120,0 L120,0 C120,11.045695 128.954305,20 140,20 C151.045695,20 160,11.045695 160,0 L220,0 Z" id="DIP" stroke="#25292C" stroke-width="3" fill="#25292C" stroke-linejoin="round"></path>
+        </g>
+    </g>
+</svg>

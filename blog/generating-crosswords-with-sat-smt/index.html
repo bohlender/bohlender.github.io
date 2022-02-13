@@ -87,7 +87,8 @@ In contrast to related approaches, which assume a fixed grid structure and searc
 <h2 id="the-problem-statement"><a href="#the-problem-statement" class="hanchor" ariaLabel="Anchor">The Problem Statement</a> </h2>
 <p>When designing a crossword puzzle on a specific theme or topic, one will likely start with <strong>a set of words</strong> (and clever clues) that fit the setting and a rough idea of <strong>the crossword&rsquo;s dimensions</strong>.
 For example, when designing a crossword for a magazine, the page size will probably limit the crossword&rsquo;s width to less than 20 cells to keep the characters legible.
-<aside>
+
+<aside >
     <p>
     What makes a crossword <em>personal</em> is that the words are not taken from some generic dictionary but have some significance to the person that will be solving the crossword.
 For example, this could be places they&rsquo;ve been to or references to in-jokes.
@@ -238,7 +239,8 @@ That is,</p>
 <li>every horizontal and vertical contiguous sequence of characters in the grid must correspond to a word placement,</li>
 <li>the placed words must form a single <a href="https://en.wikipedia.org/wiki/Connected_component_%28graph_theory%29">connected component</a>.</li>
 </ol>
-<aside>
+
+<aside >
     <p>
     We consider horizontal character sequences to be read from left to right, and vertical ones from top to bottom.
     </p>
@@ -484,7 +486,8 @@ $$w_{x,y,o}$$
 for each position $(x,y)$ within the grid and orientation $o\in\{\mathit{horizontal},\mathit{vertical}\}$.
 We will use these placement variables in such a way that
 $w_{x,y,o}$ being assigned $\mathit{true}$ in the SAT solver&rsquo;s solution will indicate that $w$ should be placed at $(x,y)$ in orientation $o$.
-<aside>
+
+<aside >
     <p>
     Of course we could have used two bounded integers $w_x,w_y$ and a Boolean $w_o$ just as well to encode the attributes separately.
 However, this would ultimately have complicated the use of a SAT solver and the interpretation of its solution.
@@ -1404,7 +1407,8 @@ Therefore, we have to come up with a formula that characterises the connectednes
 Even when avoiding symmetrical entries, the number of such variables will grow polynomially in the number of words that can potentially be placed.
 This is problematic since even our example crossword of size 12 already features 51 words to choose from.</p>
 <p>Alternatively, by understanding the grid cells as vertices of a graph where the edges connect neighbouring (non-empty) cells, we can get around this problem:
-<aside>
+
+<aside >
     <p>
     When talking about the neighbours of a cell at position $(x,y)$, we exclude the diagonal neighbours, i.e. we only refer to those at positions $(x, y-1)$, $(x, y+1)$, $(x-1, y)$ and $(x+1, y)$.
     </p>
@@ -1835,7 +1839,8 @@ inCc <span style="color:#f92672">=</span> [[[Bool(<span style="color:#e6db74">f<
 </figure></p>
 <p>It only remains to assert that all the other non-empty cells in the grid can reach the <q>start cell</q>.
 Considering that the grid is square and its <code>size</code> is finite, all other non-empty cells must be reachable within $\mathit{size}^2$ steps.
-<aside>
+
+<aside >
     <p>
     Note that $\mathit{size}^2$ is not the tightest upper bound.
 The example code actually uses a lower <code>maxDistance</code>, which is easy to come up with by assessing the longest possible paths in some example grids.
@@ -2086,7 +2091,8 @@ As implied in the previous section Z3 didn&rsquo;t perform too well on these ins
     </figure>
     
 </figure>
-<aside>
+
+<aside >
     <p>
     Note that the first two configurations (<a href="https://github.com/arminbiere/cadical/tree/c622a490ec3d9a1a1e998b08120c9b8d0b67a123">cadical</a> and <a href="https://github.com/msoos/cryptominisat/releases/tag/5.8.0">cryptominisat</a>) run single-threaded, while both <a href="https://github.com/arminbiere/lingeling/tree/7d5db72420b95ab356c98ca7f7a4681ed2c59c70">plingeling</a> and <a href="https://github.com/msoos/cryptominisat/releases/tag/5.8.0">cryptominisat -t4</a> use four worker threads on a i7-7700K CPU.
 Some of the experiments, such as the single-threaded ones for quality 100, are still pending but I will probably not finish those as proper evaluation would take unreasonably long.
@@ -2286,6 +2292,32 @@ This post illustrates the problem with standard approaches, and how finding cons
 Although the characterisation of this problem as an <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a> instance is straightforward, I found it necessary to reduce it to <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">SAT</a> and incorporate further assumptions to achieve reasonable performance.</p>
 <p>This post illustrates said process, ranging from the original idea to a standard formulation of SAT-based logic synthesis to a problem-specific and more constrained instance.</p>
 	<a class="read-more" href="https://bohlender.pro/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/">
+        &raquo; Read more
+    </a>
+</article>
+		
+			<article>
+    <header>
+        <h2><a href="https://bohlender.pro/blog/aoc-seven-segment-search-with-z3/">Solving the &#34;Seven Segment Search&#34; Puzzle with Z3</a></h2>
+        <div class="metadata">
+    <time datetime="2022-01-22">January 22, 2022</time>
+    <ul>
+        <li><a class="tag-block" href="/tags/smt">SMT</a></li>
+        <li><a class="tag-block" href="/tags/puzzle">Puzzle</a></li>
+        <li><a class="tag-block" href="/tags/advent-of-code">Advent of Code</a></li>
+    </ul>
+</div>
+    </header><p>This week I stumbled upon <a href="https://www.reddit.com/r/adventofcode/comments/rbwnh5/2021_day_8_can_it_be_solved_as_a_constraint/">someone wondering</a> whether the <strong>second part</strong> of the recent <a href="https://adventofcode.com/2021/day/8">Advent of Code puzzle &ldquo;Seven Segment Search&rdquo;</a> can be expressed as a constraint satisfaction problem.
+As attested by the replies and solutions: yes, it can.
+However, to my mind, the solutions could be more instructive and raise awareness for some of the tradeoffs or solver misuses they put up with.
+This post tries to do better.</p>
+<p>I assume that the reader is familiar with mathematical notation and</p>
+<ul>
+<li>just struggles to express the posed problem in a formal, declarative way, <em>or</em></li>
+<li>is interested in seeing how the <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a> solver <a href="https://github.com/Z3Prover/z3/">Z3</a> can be used to express and solve the problem in several logics.
+It takes only few steps to get from a quantifier-laden high-level formulation to what is effectively <a href="https://en.wikipedia.org/wiki/Propositional_logic">propositional logic</a>.</li>
+</ul>
+	<a class="read-more" href="https://bohlender.pro/blog/aoc-seven-segment-search-with-z3/">
         &raquo; Read more
     </a>
 </article>

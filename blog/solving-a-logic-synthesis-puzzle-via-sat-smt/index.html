@@ -104,7 +104,8 @@ g_2(x_0,x_1,x_2)&=\neg x_2
 where $x_0,x_1,x_2$ are the circuit&rsquo;s Boolean inputs.</p>
 <p>Instead of thinking of a solution ourselves, we want to characterise the problem in terms of constraints whose solution can be interpreted as a solution to the riddle.
 To this end, we intend the constraints to describe a generic circuit that is parametrised by the <em>functions</em> that its gates realise, and the <em>connections</em> between these gates.
-<aside>
+
+<aside >
     <p>
     Without loss of generality, we restrict ourselves to gates with two inputs.
 Gates with larger <a href="https://en.wikipedia.org/wiki/Fan-in">fan-in</a> can be constructed from these.
@@ -132,7 +133,8 @@ Conceptually we want to guarantee something along these lines:</p>
 <p>$$\tag{1}\forall x_0,x_1,x_2\ldotp g_0(x_0, x_1, x_2)=\mathit{circuit}(x_0,x_1,x_2)$$</p>
 <p>where $\mathit{circuit}$ is defined by the choice of $f_3$ and the wiring.
 Here, $f_3$ and the wiring are the parameters which we, or a constraint solver, can tweak to establish the validity of $(1)$.
-<aside>
+
+<aside >
     <p>
     As in the post on the <a href="/blog/smt-based-optimisation-of-fast-inverse-square-root">inverse square root hack</a>, logic synthesis can be understood as a <strong>parameter synthesis</strong> problem, too.
 We are searching for a choice of parameters (gates and wiring) that make the system (circuit) compliant with some property for every input.
@@ -190,7 +192,8 @@ In contrast to $(1)$, we now express the circuit&rsquo;s overall semantics $\mat
 Increasing either the number of outputs or gates will merely add further conjuncts in the same vein.</p>
 <p>However, this characterisation does not yet make use of the variables $g_{i,j}$ and $c_{i,j,k}$ to encode the chosen wiring.
 To bind the intended semantics to these variables, we let the variables imply the corresponding options and require at least one of them to be $\mathit{true}$.
-<aside>
+
+<aside >
     
     <p>We do not explicitly require $g_0$ to be connected to exactly one $x_i$.
 Although we can add this constraint it is not necessary.
@@ -227,7 +230,8 @@ However, to solve the introductory riddle we still have to restrict the function
     \vee~ & (f_i(0,0) \wedge \neg f_i(0, 1) = f_i(1,0) \wedge \neg f_i(1, 1))\\
 \end{aligned}
  $$</div>
-<aside>
+
+<aside >
     <p>
     We use $0$ and $1$ instead of $\mathit{false}$ and $\mathit{true}$ to improve readability.
 Of course the constants must be truth values and not integers.
@@ -889,7 +893,8 @@ s<span style="color:#f92672">.</span>add(quantified)
         <a href="https://bohlender.pro/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/gen_smt2.py">gen_smt2.py</a>
     </figcaption>
 </figure></p>
-<aside>
+
+<aside >
     <p>
     Note that we could easily let Z3 solve the instance right away via <code>s.check()</code>.
 I just prefer benchmarking the once generated SMT instances instead of regenerating them in every run.
@@ -994,7 +999,8 @@ While the SMT-based synthesis of a full adder may take a few seconds, the <a hre
 <h2 id="sat-based-logic-synthesis"><a href="#sat-based-logic-synthesis" class="hanchor" ariaLabel="Anchor">SAT-based Logic Synthesis</a> </h2>
 <p>To make our problem approachable via SAT solving, we must reformulate the constraints to be free of quantifiers and uninterpreted functions.
 The cardinality constraints are less of a problem since (i) many SAT solvers support them, and (ii) Z3 can also reduce them to propositional logic for us.
-<aside>
+
+<aside >
     <p>
     Strictly speaking, non-logical symbols like <q>=</q> are not part of propositional logic either but are easily reduced to it.
 As with the cardinality constraints, Z3 does this automatically for us.
@@ -1027,7 +1033,8 @@ Looking at how $\forall x$ is defined for a Boolean $x$:
 $$ \forall x\ldotp \varphi := \varphi[\mathit{true}/x] \wedge \varphi[\mathit{false}/x]$$
 it is easy to see that we can eliminate one variable at a time by cloning the expression $\varphi$ and substituting $x$ by $\mathit{true}$ in the first instance and by $\mathit{false}$ in the second one.
 We effectively enumerate all the values the quantifier ranges over and conjunct the instantiated constraints.
-<aside>
+
+<aside >
     <p>
     Although every variable elimination doubles the number of constraints, and will clearly not scale to arbitrary numbers of inputs, it is fine for our purposes.
 The puzzle features three inputs so this quantifier elimination only increases the characterisation by roughly $2^3$.
@@ -1084,7 +1091,8 @@ However, the illustrated encoding will make the upcoming elimination of uninterp
 <h3 id="eliminating-uninterpreted-functions"><a href="#eliminating-uninterpreted-functions" class="hanchor" ariaLabel="Anchor">Eliminating Uninterpreted Functions</a> </h3>
 <p>The last step of the reduction is the elimination of the uninterpreted functions $f_i$ and the corresponding $x_i$.
 Since we&rsquo;re dealing with functions over Booleans, we can simply introduce a variable for each entry of a function&rsquo;s truth table, and encode the semantics in terms of these entries.
-<aside>
+
+<aside >
     <p>
     Note that the goal functions $g_i$ are not uninterpreted but known and evaluated during construction of the constraints.
     </p>
@@ -1599,6 +1607,32 @@ It might also be possible to solve this with the logic synthesis tools mentioned
 		
 			<article>
     <header>
+        <h2><a href="https://bohlender.pro/blog/aoc-seven-segment-search-with-z3/">Solving the &#34;Seven Segment Search&#34; Puzzle with Z3</a></h2>
+        <div class="metadata">
+    <time datetime="2022-01-22">January 22, 2022</time>
+    <ul>
+        <li><a class="tag-block" href="/tags/smt">SMT</a></li>
+        <li><a class="tag-block" href="/tags/puzzle">Puzzle</a></li>
+        <li><a class="tag-block" href="/tags/advent-of-code">Advent of Code</a></li>
+    </ul>
+</div>
+    </header><p>This week I stumbled upon <a href="https://www.reddit.com/r/adventofcode/comments/rbwnh5/2021_day_8_can_it_be_solved_as_a_constraint/">someone wondering</a> whether the <strong>second part</strong> of the recent <a href="https://adventofcode.com/2021/day/8">Advent of Code puzzle &ldquo;Seven Segment Search&rdquo;</a> can be expressed as a constraint satisfaction problem.
+As attested by the replies and solutions: yes, it can.
+However, to my mind, the solutions could be more instructive and raise awareness for some of the tradeoffs or solver misuses they put up with.
+This post tries to do better.</p>
+<p>I assume that the reader is familiar with mathematical notation and</p>
+<ul>
+<li>just struggles to express the posed problem in a formal, declarative way, <em>or</em></li>
+<li>is interested in seeing how the <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a> solver <a href="https://github.com/Z3Prover/z3/">Z3</a> can be used to express and solve the problem in several logics.
+It takes only few steps to get from a quantifier-laden high-level formulation to what is effectively <a href="https://en.wikipedia.org/wiki/Propositional_logic">propositional logic</a>.</li>
+</ul>
+	<a class="read-more" href="https://bohlender.pro/blog/aoc-seven-segment-search-with-z3/">
+        &raquo; Read more
+    </a>
+</article>
+		
+			<article>
+    <header>
         <h2><a href="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/">Generating Crosswords via SAT/SMT</a></h2>
         <div class="metadata">
     <time datetime="2020-10-24">October 24, 2020</time>
@@ -1633,24 +1667,6 @@ Although it is difficult for a human player to make <em>optimal guesses</em> of 
 <p>However, such approaches become unfeasible when the number of possibilities for secret codes grows into the millions.
 This post illustrates the problem with standard approaches, and how finding consistent candidates can be approached with <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">SAT</a> solving &ndash; yielding an AI that can handle orders-of-magnitude harder Mastermind instances.</p>
 	<a class="read-more" href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/">
-        &raquo; Read more
-    </a>
-</article>
-		
-			<article>
-    <header>
-        <h2><a href="https://bohlender.pro/blog/smt-based-optimisation-of-fast-inverse-square-root/">SMT-based Reasoning About the Fast Inverse Square Root</a></h2>
-        <div class="metadata">
-    <time datetime="2019-09-26">September 26, 2019</time>
-    <ul>
-        <li><a class="tag-block" href="/tags/smt">SMT</a></li>
-        <li><a class="tag-block" href="/tags/smt-lib">SMT-LIB</a></li>
-        <li><a class="tag-block" href="/tags/software-verification">Software Verification</a></li>
-    </ul>
-</div>
-    </header><p>While there is a <a href="https://web.archive.org/web/20160308091758/http://www.daxia.com/bibis/upload/406Fast_Inverse_Square_Root.pdf">mathematical explanation</a> for the choice of <code>0x5F3759DF</code> in the <a href="https://en.wikipedia.org/wiki/Fast_inverse_square_root">famous bit-level hack</a> for approximating the multiplicative inverse of the square root of a 32-bit floating-point number, it is not immediately clear to what extent the reasoning is really applicable in the context of machine data types and their peculiarities.
-This post illustrates how this, and related aspects, can be investigated with <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a>-based reasoning about the actual implementation.</p>
-	<a class="read-more" href="https://bohlender.pro/blog/smt-based-optimisation-of-fast-inverse-square-root/">
         &raquo; Read more
     </a>
 </article>

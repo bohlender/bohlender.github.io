@@ -85,7 +85,8 @@ However, in the &rsquo;90s, its precise computation was computationally expensiv
 With this in mind, it is not surprising that the &ldquo;fast inverse square root&rdquo; is often associated with <a href="https://en.wikipedia.org/wiki/Quake_III_Arena">Quake III Arena</a> &ndash; a multiplayer-player focussed first-person shooter from 1999 that made use of this approximation to avoid the computational cost of the real thing, without losing &ldquo;too much&rdquo; precision.</p>
 <p>While Quake did not invent the approximation, the publishing of its source code brought many developers into contact with this technique.
 And although modern CPUs provide native support for approximating $1/\sqrt{x}$ quickly &ndash; rendering the approximation mostly irrelevant nowadays &ndash; the general approach taken in this post is still applicable to many modern day questions.</p>
-<aside>
+
+<aside >
     
     <p>With the introduction of <a href="https://en.wikipedia.org/wiki/Streaming_SIMD_Extensions">SSE</a>, every x86_64 CPU since the Pentium III features a native instruction for computing $\sqrt{x}$ and its reciprocal via <code>SQRTSS</code> and <code>RSQRTSS</code>, respectively.</p>
 <p>More recent extensions, such as <a href="https://en.wikipedia.org/wiki/AVX-512">AVX-512</a>, provide even better approximations w.r.t. the relative error, and also support 64-bit floats.</p>
@@ -135,7 +136,8 @@ which takes the magnitude into consideration.
 In the context of Quake, the quality of the approximation should not fluctuate but keep the relative error reasonably small for all inputs.
 Therefore it is <a href="https://web.archive.org/web/20160308091758/http://www.daxia.com/bibis/upload/406Fast_Inverse_Square_Root.pdf">common</a> to analyse the fast inverse square root  w.r.t. the <strong>maximum relative error</strong> it may cause.
 The smaller this value is, the better the approximation is considered to be.</p>
-<aside>
+
+<aside >
     
     <p>Depending on the context, it might be more reasonable to use the <a href="https://en.wikipedia.org/wiki/Least_squares">least squares</a> criterion &ndash; a standard tool in regression analysis.</p>
 <p><a href="http://rrrola.wz.cz/inv_sqrt.html">J. Kadlec</a> has experimented with both measures in the context of <code>Q_rsqrt</code>, and provides accordingly optimised alternatives to <code>0x5f3759df</code>.</p>
@@ -447,7 +449,8 @@ There is no branching of control flow, making the characterisation pretty straig
 </figure>
 <p>While this post is not a tutorial on the <a href="http://smtlib.cs.uiowa.edu/papers/smt-lib-reference-v2.6-r2017-07-18.pdf">SMT-LIB language</a>, it should still be pretty easy to get the general idea and intuition.
 For the most part, the characterisation boils down to expressing the LLVM IR in terms of <a href="https://en.wikipedia.org/wiki/S-expression">symbolic expressions</a> written in <a href="https://en.wikipedia.org/wiki/Polish_notation">prefix notation</a>.</p>
-<aside>
+
+<aside >
     
     <p>For an interactive introduction to the SMT-LIB language I recommend the <a href="https://rise4fun.com/Z3/tutorial/guide">Z3 tutorial</a>.
 <a href="https://github.com/Z3Prover/z3/">Z3</a> is a feature-packed, MIT licensed and SMT-LIB compliant SMT solver.
@@ -953,7 +956,8 @@ As before, we introduce auxiliary functions <code>f0.5</code> and <code>f1.5</co
     </figcaption>
 </figure>
 <p>Two points may need further clarification though:</p>
-<aside>
+
+<aside >
     <p>
     Just like LLVM IR, SMT-LIB does not distinguish between signed and unsigned bit vectors.
 Instead, operations whose semantics depends on the signedness come in two flavours, e.g. both <code>bvugt</code> and <code>bvsgt</code> express &ldquo;greater than&rdquo;.
@@ -1779,7 +1783,8 @@ To determine whether <code>NaN</code> can ever be returned by <code>relErr</code
 The constraints are trivially satisfiable by any normal, negative floating-point number.
 After all, we are not approximating an arbitrary function $f(x)$ but $1/\sqrt x$, and the square root for negative numbers is not defined &ndash; at least not for floats.
 This should really have been part of our correctness criterion from the start.</p>
-<aside>
+
+<aside >
     <p>
     Knowing that $\sqrt x$ is not defined for negative $x$, we restrict the analysis to non-negative floats, such that <code>relErr</code> never returns <code>NaN</code>.
 However, even if $f(x)$ were an arbitrary function, we could have achieved the same by simply asserting <code>relErr</code> to not be <code>NaN</code>.
@@ -1807,7 +1812,8 @@ The maximum relative error might be significantly lower than 1%.</p>
 <p>With the current set of constraints, SMT solving can take the role of an <a href="https://en.wikipedia.org/wiki/Oracle_machine">oracle</a> for checking whether the maximum relative error is below some bound, and be used to <strong>refine this bound iteratively</strong>, e.g. via binary search.
 While the solver returns <code>sat</code>, the maximum relative error is greater than the currently assumed bound, and a greater bound must be picked.
 However, if the solver returns <code>unsat</code>, the bound can be decreased.</p>
-<aside>
+
+<aside >
     <p>
     Z3 is not just an SMT solver but can also solve <a href="https://rise4fun.com/Z3/tutorial/optimization">optimisation problems over SMT formulas</a>.
 Unfortunately this machinery does not support floating-point constraints, which is why we do the minimisation manually.
@@ -2144,7 +2150,8 @@ One such task is finding a better <code>magic</code> constant, which reduces the
 <p>When approaching this without any insight into the problem, finding the best constant boils down to computing the maximum relative error achieved by each of the $2^{32}$ possible constants.
 The evaluation of each constant, in turn, requires checking the relative error resulting from each of the $2^{32}$ possible input floats.
 Overall, exhaustive testing would involve $2^{32}\cdot 2^{32}$ computations of the relative error and is clearly not feasible.</p>
-<aside>
+
+<aside >
     <p>
     An exhaustive exploration of the maximum relative error resulting from each of the $2^{32}$ constants in question <strong>can be made feasible</strong> by exploiting peculiarities of $\eta(x)$.
 In particular, the computation of the maximum relative error for a given <code>magic</code> can be sped up, as it is sufficient to compute the error for $x\in[1,4)$ only &ndash; the <a href="http://rrrola.wz.cz/inv_sqrt.html">error wraps around</a>.
@@ -2605,6 +2612,32 @@ Does the solver come up with the same instructions that were used in the origina
 Although the characterisation of this problem as an <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a> instance is straightforward, I found it necessary to reduce it to <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">SAT</a> and incorporate further assumptions to achieve reasonable performance.</p>
 <p>This post illustrates said process, ranging from the original idea to a standard formulation of SAT-based logic synthesis to a problem-specific and more constrained instance.</p>
 	<a class="read-more" href="https://bohlender.pro/blog/solving-a-logic-synthesis-puzzle-via-sat-smt/">
+        &raquo; Read more
+    </a>
+</article>
+		
+			<article>
+    <header>
+        <h2><a href="https://bohlender.pro/blog/aoc-seven-segment-search-with-z3/">Solving the &#34;Seven Segment Search&#34; Puzzle with Z3</a></h2>
+        <div class="metadata">
+    <time datetime="2022-01-22">January 22, 2022</time>
+    <ul>
+        <li><a class="tag-block" href="/tags/smt">SMT</a></li>
+        <li><a class="tag-block" href="/tags/puzzle">Puzzle</a></li>
+        <li><a class="tag-block" href="/tags/advent-of-code">Advent of Code</a></li>
+    </ul>
+</div>
+    </header><p>This week I stumbled upon <a href="https://www.reddit.com/r/adventofcode/comments/rbwnh5/2021_day_8_can_it_be_solved_as_a_constraint/">someone wondering</a> whether the <strong>second part</strong> of the recent <a href="https://adventofcode.com/2021/day/8">Advent of Code puzzle &ldquo;Seven Segment Search&rdquo;</a> can be expressed as a constraint satisfaction problem.
+As attested by the replies and solutions: yes, it can.
+However, to my mind, the solutions could be more instructive and raise awareness for some of the tradeoffs or solver misuses they put up with.
+This post tries to do better.</p>
+<p>I assume that the reader is familiar with mathematical notation and</p>
+<ul>
+<li>just struggles to express the posed problem in a formal, declarative way, <em>or</em></li>
+<li>is interested in seeing how the <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a> solver <a href="https://github.com/Z3Prover/z3/">Z3</a> can be used to express and solve the problem in several logics.
+It takes only few steps to get from a quantifier-laden high-level formulation to what is effectively <a href="https://en.wikipedia.org/wiki/Propositional_logic">propositional logic</a>.</li>
+</ul>
+	<a class="read-more" href="https://bohlender.pro/blog/aoc-seven-segment-search-with-z3/">
         &raquo; Read more
     </a>
 </article>
