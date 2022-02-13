@@ -362,8 +362,8 @@ Even the permutation $\mathit{Perm}$, which differs from instance to instance, c
 Just as $\mathit{digitSegment}$ characterises the segments behind each possible digit, the idea here is to introduce a predicate
 $$\mathit{patternSegment}: \underset{\overbrace{\{0,1,2,3,4,5,6,7,8,9\}}}{\mathit{Index}} \times \mathit{Segment}$$
 to characterise the segments behind each of the ten observable patterns.
-That is, assert for all indices $i$ and segments $s$:
-$$\tag{4}\mathit{patternSegment}(i,s) \iff s \text{ is a segment of the $i$-th pattern}$$</p>
+That is, assert for all indices $i$ and segments $s$ that
+$$\tag{4}\mathit{patternSegment}(i,s) \iff s \text{ is a segment of the $i$-th pattern}.$$</p>
 
 <aside >
     
@@ -381,7 +381,7 @@ Had our mental model of a problem instance been different, e.g. if the sequence 
 </aside>
 <p>The only thing that remains to be formalised is the <strong>relation between the observed patterns and the other &ldquo;objects&rdquo;</strong>.
 That&rsquo;s the actual puzzle.
-What we know from the puzzle description that each of the observable patterns matches the permuted segments of some digit.
+What we know from the puzzle description is that each of the observable patterns matches the permuted segments of some digit.
 Therefore, there must be a &ldquo;decoding function&rdquo;
 $$\mathit{Idx2dig}: \mathit{Index} \to \mathit{Digit}$$
 which maps each observed pattern &ndash; more precisely its index $i$ &ndash; in such a way to a digit $d$ that the permuted segments of $d$ correspond to the observed pattern.
@@ -401,7 +401,7 @@ s = s' &\iff \mathit{Perm}(s) = \mathit{Perm}(s')\\
 \end{aligned}
  $$</div>
 for all $d\in\mathit{Digit}$, $s,s'\in\mathit{Segment}$, and indices $i\in\mathit{Index}$.</p>
-<p>If we now manage to find an interpretation of the uninterpreted symbols that satisfies all these constraints, the puzzle instance will be solved.
+<p>If we now manage to find an interpretation of the uninterpreted symbols that satisfies all these constraints, the particular puzzle instance will be solved.
 We can then simply use $\mathit{Idx2dig}$ to map the patterns on the malfunctioning four-digit seven-segment display back to digits, or use $\mathit{Perm}$ to undo the permutation of segments.</p>
 <h2 id="solving-the-puzzle-via-z3"><a href="#solving-the-puzzle-via-z3" class="hanchor" ariaLabel="Anchor">Solving the Puzzle via Z3</a> </h2>
 <p>While there are many solvers, formalisms, and technologies that we can leverage to obtain a satisfying interpretation of the above constraints, this post illustrates how to do it with the <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a> solver <a href="https://github.com/Z3Prover/z3/">Z3</a>.
@@ -578,7 +578,7 @@ This lets you see for yourself how a logic impacts modelling convenience, size o
 </aside>
 <h3 id="solving-the-puzzle-incrementally"><a href="#solving-the-puzzle-incrementally" class="hanchor" ariaLabel="Anchor">Solving the Puzzle Incrementally</a> </h3>
 <p>To solve the overall puzzle, we have to solve the 200 independent problem instances described in the <a href="input.txt">input file</a> and combine their solutions.
-Although it is possible to construct and solve the instances' constraints independently, as all of the <a href="https://www.reddit.com/r/adventofcode/comments/rbwnh5/2021_day_8_can_it_be_solved_as_a_constraint/">suggested solutions</a> do, it is more efficient to avoid starting from scratch 200 times.
+Although it is possible to construct and solve the instances' constraints independently, as most of the <a href="https://www.reddit.com/r/adventofcode/comments/rbwnh5/2021_day_8_can_it_be_solved_as_a_constraint/">suggested solutions</a> do, it is more efficient to avoid starting from scratch 200 times.
 Closer inspection of constraints $(1)&ndash;(5)$ shows that the instances' formalisations only differ in $(4)$, i.e. the definition of $\mathit{patternSegment}$.
 Therefore, a simple way to avoid starting from scratch is by first adding the core constraints $(1)&ndash;(3),(5)$ to the solver&rsquo;s stack of constraints and then iteratively checking satisfiability with each of the 200 variants of $(4)$ swapped in at the top of the stack.</p>
 
@@ -590,7 +590,7 @@ The latter is <a href="https://github.com/Z3Prover/z3/issues/1152#issuecomment-3
 </aside>
 <p>The following encoding-agnostic procedure implements the suggested approach.
 It uses the scope management operations <a href="https://theory.stanford.edu/~nikolaj/programmingz3.html#sec-scopes"><code>push</code> and <code>pop</code></a> to replace the definition of $\mathit{patternSegment}$ between satisfiability checks.
-When a satisfying interpretation &ndash; a so called model &ndash; is found we can inspect it to learn how the observed patterns map to digits:
+When a satisfying interpretation &ndash; a so called model &ndash; is found, we can inspect it to learn how the observed patterns map to digits:
 
 
 
@@ -1819,7 +1819,7 @@ Therefore, in the next step, we will bring our constraints into a quantifier-fre
     </figcaption>
 </figure></p>
 <p>The approach to get rid of a forall quantifier is simple: just <strong>explicitly enumerate the values and assert the nested constraint for each</strong>.
-This leaves us with a increased number of constraints but spares Z3 the necessity of dealing with quantifiers:
+This leaves us with an increased number of constraints but spares Z3 the necessity of dealing with quantifiers:
 
 
 
@@ -2084,7 +2084,7 @@ This leaves us with a increased number of constraints but spares Z3 the necessit
     </figcaption>
 </figure></p>
 <p>Aside from the substitution of quantification by iteration, the code is effectively the same as in our <a href="#high-level-encoding">first encoder</a>.
-I find this version even more readable that the previous one, mostly because it is so easy to express <q>$s \text{ is a segment of }d$</q> for a concrete pair $(d,s)$.</p>
+I find this version to be even more readable that the previous one, mostly because it is so easy to express <q>$s \text{ is a segment of }d$</q> for a concrete pair $(d,s)$.</p>
 <p>The rest of the encoder does not provide any new insights and is only shown for the sake of completeness:
 
 
@@ -2400,7 +2400,7 @@ I just like naming the variables like the function applications they replace.
 This does complicate constraints where we previously had nested function applications, such as $(3)$ and $(5)$.
 Here, the idea is similar to the <a href="#stepwise-composition">alternative formulation</a> of $(3)$: we constrain the result of the outer function application depending on the result of the nested function application.
 However, without uninterpreted functions, some constraint simplification opportunities may become more obvious, too.
-Since the domain and value range of $\mathit{perm}$ are equal, the bijectivity constraint can be simplified to &ldquo;different applications of $\mathit{perm}$ return distinct segments&rdquo;:
+Since the domain and value range of $\mathit{perm}$ are equal the bijectivity constraint can be simplified to &ldquo;distinct applications of $\mathit{perm}$ return distinct segments&rdquo;:
 
 
 
@@ -2840,7 +2840,7 @@ Well, running a profiler shows that most time is wasted in the bindings &ndash; 
 <li>Avoid recreating the constraints for each variant.
 They have the same form anyway.
 Instead, try to come up with a way to leverage <a href="https://theory.stanford.edu/~nikolaj/programmingz3.html#sec-assumptions">solving under assumptions</a>, i.e. delete <code>encode_variant</code> and rather communicate the observed patterns by passing appropriate assumptions to the <code>check</code> function.</li>
-<li>Instead of solving each of the 200 problem instances separately, try to combine them all into a single set of constraints.
+<li>Alternatively, instead of solving each of the 200 problem instances separately, try to combine them all into a single set of constraints.
 A single invocation of <code>check</code> shall suffice to solve the complete puzzle.</li>
 <li>Assuming you do implement the above suggestion, try feeding the constraints to a dedicated SAT solver for another performance gain.
 Have a look at <a href="/blog/generating-crosswords-with-sat-smt/#cnf-export">this section</a> from a previous post, if you need some guidance on how to do this.</li>
