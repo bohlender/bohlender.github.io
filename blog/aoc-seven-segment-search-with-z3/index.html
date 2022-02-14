@@ -247,7 +247,7 @@ It takes only few steps to get from a quantifier-laden high-level formulation to
     </figcaption>
 </figure></p>
 <p>The crux of the <a href="https://adventofcode.com/2021/day/8">Seven Segment Search</a> puzzle is that we are faced with a seven-segment display whose wiring got mixed up.
-As a result, instead of turning on segments <code>c</code> and <code>f</code> to display a <code>1</code>, our display may turn on segments <code>a</code> and <code>b</code> instead.
+As a result, instead of turning on segments <code>c</code> and <code>f</code> to display a 1, our display may turn on segments <code>a</code> and <code>b</code> instead.
 We don&rsquo;t get to see how the wrong wiring looks like though.
 All we can observe is a sequence of patterns and our task is to make sense of it.
 That is, to find out which digit each pattern represents:
@@ -556,13 +556,13 @@ segment2char <span style="color:#f92672">=</span> {s: str(s) <span style="color:
 
 <aside >
     <p>
-    If you find the introduction of an <code>IndexSort</code> unnecessary, feel free to make the index-specific defines alias those of the <code>DigitSort</code>, i.e. let <code>IndexSort = DigitSort</code> etc.
+    If you find introducing an <code>IndexSort</code> and related definitions unnecessary, feel free to alias <code>DigitSort</code> and its definitions instead, i.e. let <code>IndexSort = DigitSort</code> etc.
     </p>
 </aside>
 <p>Of course it is possible to use <code>IntSort</code> and <code>StringSort</code> to model digits, indices and segments instead of introducing dedicated finite domains, and some of the <a href="https://www.reddit.com/r/adventofcode/comments/rbwnh5/2021_day_8_can_it_be_solved_as_a_constraint/">suggested approaches</a> do resort to this.
 However, when doing so one must be aware of the implications.</p>
 <p>For example, to exploit problem-specifics, one of the posted solutions features integer addition in its constraints.
-The result of this is that the characterisation ends up in a more complex fragment of first-order logic than necessary &ndash; in <a href="http://smtlib.cs.uiowa.edu/logics.shtml">quantifier-free linear integer arithmetic (<code>QF_LIA</code>)</a>.
+The result of this is that the characterisation ends up in a more complex fragment of first-order logic than necessary &ndash; in <a href="http://smtlib.cs.uiowa.edu/logics.shtml">quantifier-free linear integer arithmetic (QF_LIA)</a>.
 This, in turn, forces SMT solvers to employ more complex techniques than necessary to solve the puzzle.
 However, if higher-level modelling better captures the semantics of the problem, it may pay off to use a more expressive (sub-)logic &ndash; even if reduction to a less expressive one is possible.
 One should just <strong>be careful to not add such complexity inadvertently</strong>.
