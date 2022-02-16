@@ -37,9 +37,11 @@ This post illustrates the problem with standard approaches, and how finding cons
     <body class="blog">
         <header>
 	<nav>
-		<input type="checkbox" id="show-menu" role="button">
+		<label for="show-menu" class="show-menu">
+			<img class="icon" src="/gfx/fa-icons.svg#bars"/>
+		</label>
+		<input type="checkbox" id="show-menu" role="button" aria-pressed="true">
 		<ul class="dropdown">
-			<label for="show-menu" class="show-menu"><img class="icon" src="/gfx/fa-icons.svg#bars" /></label>
 			<li><a href="/">Home</a></li>
 			<li><a href="/cv/">CV</a></li>
 			<li><a href="/projects/">Projects</a></li>

@@ -48,9 +48,11 @@ It takes only few steps to get from a quantifier-laden high-level formulation to
     <body class="blog">
         <header>
 	<nav>
-		<input type="checkbox" id="show-menu" role="button">
+		<label for="show-menu" class="show-menu">
+			<img class="icon" src="/gfx/fa-icons.svg#bars"/>
+		</label>
+		<input type="checkbox" id="show-menu" role="button" aria-pressed="true">
 		<ul class="dropdown">
-			<label for="show-menu" class="show-menu"><img class="icon" src="/gfx/fa-icons.svg#bars" /></label>
 			<li><a href="/">Home</a></li>
 			<li><a href="/cv/">CV</a></li>
 			<li><a href="/projects/">Projects</a></li>
