@@ -99,9 +99,10 @@ $
 \textcolor{#ae81ff}●
 $,
 the following sequence would be a possible secret code:</p>
-<p>$$\tag{1}
-s=\textcolor{#a6e22e}●\textcolor{#272822}{●●}\textcolor{#f92672}{●}
-$$</p>
+$$
+\tag{1}
+s=\textcolor{#a6e22e}&#9679;\textcolor{#272822}{&#9679;&#9679;}\textcolor{#f92672}{&#9679;}
+$$
 <p>This secret is designed by and only known to the <em>codemaker</em>.
 In every round, the <em>codebreaker</em> makes a guess, and receives a pair of numbers as feedback/clue from the codemaker:</p>
 <ol>
@@ -115,7 +116,7 @@ The codemaker&rsquo;s feedback to that guess would be $(1, 1)$, since</p>
 <li>even though there are two pink pegs, only one of them can become a full match if put in the last position &ndash; we can&rsquo;t put both there</li>
 </ul>
 <p>The following code computes such feedback in two phases.
-First, we get rid of all full matches from both the <code>guess</code> and <code>secret</code>, and then try to match the remaining symbols:
+First, we get rid of all full matches from both the <code>guess</code> and <code>secret</code>, and then try to match the remaining symbols:</p>
 
 
 
@@ -268,7 +269,7 @@ First, we get rid of all full matches from both the <code>guess</code> and <code
     <figcaption>
         <a href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
     </figcaption>
-</figure></p>
+</figure>
 <h3 id="example-playthrough"><a href="#example-playthrough" class="hanchor" ariaLabel="Anchor">Example Playthrough</a> </h3>
 <p>A full playthrough of classic Mastermind, i.e. with codes of length four, and six colours/symbols
 $\Sigma=\{
@@ -316,7 +317,7 @@ Without questioning the reasoning of the codebreaker, the following table outlin
 </table>
 <p>This is in fact the log of an actual game played by the SAT-based AI that we will end up with in the end of the post.</p>
 <p>The corresponding game loop amounts to few lines of code.
-It requires a potential player or AI to be able to give a first guess at the beginning of the game (<code>initial_guess()</code>), and incorporate feedback for subsequent guesses (<code>make_guess(feedback)</code>):
+It requires a potential player or AI to be able to give a first guess at the beginning of the game (<code>initial_guess()</code>), and incorporate feedback for subsequent guesses (<code>make_guess(feedback)</code>):</p>
 
 
 
@@ -493,7 +494,7 @@ It requires a potential player or AI to be able to give a first guess at the beg
     <figcaption>
         <a href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
     </figcaption>
-</figure></p>
+</figure>
 <h3 id="wheres-the-difficulty"><a href="#wheres-the-difficulty" class="hanchor" ariaLabel="Anchor">Where&rsquo;s the Difficulty?</a> </h3>
 <p>With four positions and six colours there are only $6^4=1\,296$ possible combinations to choose from, so keeping the set of all combinations in memory and working with it is perfectly feasible when solving classic Mastermind instances.
 However, there is nothing hindering us from using even longer sequences or introducing further colours.
@@ -533,7 +534,7 @@ $\Sigma=\{
 \textcolor{#ae81ff}●
 \}$
 is treated as $\Sigma=\{0,1,2,3,4,5\}$, and the secret $s=\textcolor{#a6e22e}●\textcolor{#272822}{●●}\textcolor{#f92672}{●}$ is just the tuple $s=(2,0,0,1)$ to us.
-Given $|s|$ and $|\Sigma|$, we can now easily enumerate all possible secrets with Python&rsquo;s <a href="https://docs.python.org/3.8/library/itertools.html#itertools.product"><code>product</code></a> function:
+Given $|s|$ and $|\Sigma|$, we can now easily enumerate all possible secrets with Python&rsquo;s <a href="https://docs.python.org/3.8/library/itertools.html#itertools.product"><code>product</code></a> function:</p>
 
 
 
@@ -582,13 +583,13 @@ Given $|s|$ and $|\Sigma|$, we can now easily enumerate all possible secrets wit
     <figcaption>
         <a href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
     </figcaption>
-</figure></p>
+</figure>
 <h3 id="refinement-of-consistent-candidates"><a href="#refinement-of-consistent-candidates" class="hanchor" ariaLabel="Anchor">Refinement of Consistent Candidates</a> </h3>
 <p>The simplest approach to playing Mastermind is probably to iterate over <code>all_secrets()</code> and commit each element, since we must eventually encounter the code chosen by the codemaker.
 However, this approach completely ignores the feedback received from the codemaker, and will obviously lead to many wasted rounds for the codebreaker.</p>
 <p>The next best thing we can try is to avoid making guesses that are <em>inconsistent</em> with the accumulated feedback.
 For this, we must merely check that whatever we assume <code>secret</code> to be, it generates the same feedback for the previous guesses as the actual secret.
-For every guess-feedback pair from previous rounds the following function must return $\mathit{true}$:
+For every guess-feedback pair from previous rounds the following function must return $\mathit{true}$:</p>
 
 
 
@@ -637,7 +638,7 @@ For every guess-feedback pair from previous rounds the following function must r
     <figcaption>
         <a href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
     </figcaption>
-</figure></p>
+</figure>
 <p>This is exactly the approach suggested by <a href="https://doi.org/10.1145/1056635.1056637">Shapiro</a> in 1983, and a naïve implementation is provided with <code>ExplicitConsistentAi</code>:</p>
 
 
@@ -789,13 +790,13 @@ Prior to the first guess there is no feedback, so initially all possible secrets
 Although the implementation always returns the first element, there is nothing wrong with picking a different one.</p>
 <p>Unless a guess happens to match the secret exactly, we will receive feedback $f$ that renders some elements of <code>self.candidates</code> inconsistent with $f$.
 Therefore, after every round, such candidates and the last (wrong) guess are removed from <code>self.candidates</code>.</p>
-<p>Although the approach does not result in optimal play, and many instances can be won in less turns, it is computationally cheap and solves a classic Mastermind instance in $5.765$ turns on average.
+<p>Even though the approach does not result in optimal play, and many instances can be won in less turns, it is computationally cheap and solves a classic Mastermind instance in $5.765$ turns on average.
 This is surprisingly <a href="http://www.philos.rug.nl/~barteld/master.pdf">close to the theoretical minimum</a> of $4.34$ turns.</p>
 <h3 id="lazy-enumeration-of-consistent-candidates"><a href="#lazy-enumeration-of-consistent-candidates" class="hanchor" ariaLabel="Anchor">Lazy Enumeration of Consistent Candidates</a> </h3>
 <p>A downside of the above method is that it keeps a list of <em>all</em> consistent candidates in memory.
 Since the number of possible secrets grows exponentially in the admissible length of secrets, this may already hinder us from solving slightly harder Mastermind variations, e.g. with $6^8$ possible secrets.</p>
 <p><code>LazyExplicitConsistentAi</code> is a more practical implementation of the previous approach.
-It enumerates the consistent combinations but only needs one candidate to be explicitly present in memory at a time, which results in a small memory footprint:
+It enumerates the consistent combinations but only needs one candidate to be explicitly present in memory at a time, which results in a small memory footprint:</p>
 
 
 
@@ -940,8 +941,8 @@ It enumerates the consistent combinations but only needs one candidate to be exp
     <figcaption>
         <a href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
     </figcaption>
-</figure></p>
-<p>Unlike the previous approach, which incrementally refines the set of candidates w.r.t. the latest feedback, a lazily generated candidate is checked w.r.t. all of the received feedback:
+</figure>
+<p>Unlike the previous approach, which incrementally refines the set of candidates w.r.t. the latest feedback, a lazily generated candidate is checked w.r.t. all of the received feedback:</p>
 
 
 
@@ -1014,7 +1015,7 @@ It enumerates the consistent combinations but only needs one candidate to be exp
     <figcaption>
         <a href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
     </figcaption>
-</figure></p>
+</figure>
 <h3 id="minimax-based-guessing"><a href="#minimax-based-guessing" class="hanchor" ariaLabel="Anchor">Minimax-based Guessing</a> </h3>
 <p>Since my original motivation for looking into the topic was to learn how to play the Mastermind games in <a href="https://en.wikipedia.org/wiki/Mansions_of_Madness">Mansions of Madness</a> optimally, I feel like I should outline how to do this, too.
 Even though the central topic of this post is the (symbolic) computation of consistent guesses for hard Mastermind instances.</p>
@@ -1164,7 +1165,7 @@ It is sufficient to consider $(0,0,0,0)$, $(0,0,0,1)$, $(0,0,1,1)$, $(0,0,1,2)$ 
 </aside>
 <p>To develop the idea further, finding the <q>best</q> guess amounts to constructing such a table, identifying the worst case of each column, and picking the column/candidate with the smallest worst case.
 According to the provided table, <em>a</em> best initial guess would be $(0,0,1,1)$, which guarantees to bring the set of candidates down to a size of at most $256$.
-<code>ExplicitMinimaxAi</code> implements this method to determine the best guess:
+<code>ExplicitMinimaxAi</code> implements this method to determine the best guess:</p>
 
 
 
@@ -1485,7 +1486,7 @@ According to the provided table, <em>a</em> best initial guess would be $(0,0,1,
     <figcaption>
         <a href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
     </figcaption>
-</figure></p>
+</figure>
 <p>Note that the best move may even be to gather further information and purposefully make a guess that is inconsistent with the received feedback.
 However, if there is both a consistent and an inconsistent candidate that are <q>best</q>, one should of course prefer the consistent one &ndash; it might match the secret after all.
 That&rsquo;s why we also keep the inconsistent candidates (<code>self.not_candidate</code>) around.</p>
@@ -1501,23 +1502,25 @@ Luckily, we can reduce the problem to another well-studied NP-complete problem &
 Let&rsquo;s see what kind of variables and constraints we need for this.</p>
 <h3 id="encoding-the-symbol-mapping"><a href="#encoding-the-symbol-mapping" class="hanchor" ariaLabel="Anchor">Encoding the Symbol Mapping</a> </h3>
 <p>Since we want to guess some secret $s$, we first of all need variables that indicate which symbol occurs at which position.
-To this end, we introduce the Boolean variables:
-$$s_{\mathit{pos},\mathit{sym}}$$
+To this end, we introduce the Boolean variables
+$$
+s_{\mathit{pos},\mathit{sym}}
+$$
 where $\mathit{pos}\in \{0,\dots,|s|-1\}, \mathit{sym}\in\Sigma$.</p>
 <p>The intended semantics is that an assignment $s_{1,2}\mapsto\mathit{true}$ denotes symbol $2$ to be at index $1$ of $s$.
 However, since there are no constraints yet, a solver might just as well choose $s_{1,2}$ and $s_{1,3}$ to be $\mathit{true}$, which suggests both $2$ and $3$ to be at index $1$ of the secret.</p>
 <p>To characterise that each position of the tuple $s$ has <strong>exactly one</strong> symbol, we need add an according <em>cardinality constraint</em> for each position.
 Assuming the classic Mastermind setting, i.e. $|s|=4$ and $|\Sigma|=6$, we add the constraints:</p>
-<div>$$ 
+$$
 \begin{aligned}
 s_{0,0} + s_{0,1} + s_{0,2} + s_{0,3} + s_{0,4} + s_{0,5} &= 1,\\
 s_{1,0} + s_{1,1} + s_{1,2} + s_{1,3} + s_{1,4} + s_{1,5} &= 1,\\
 s_{2,0} + s_{2,1} + s_{2,2} + s_{2,3} + s_{2,4} + s_{2,5} &= 1,\\
 s_{3,0} + s_{3,1} + s_{3,2} + s_{3,3} + s_{3,4} + s_{3,5} &= 1\\
 \end{aligned}
- $$</div>
+$$
 <p>If we were to query the satisfiability of our SAT instance now, we would get a satisfying assignment with four of the $s_{\mathit{pos},\mathit{sym}}$ variables set to $\mathit{true}$ &ndash; one for each $\mathit{pos}$.</p>
-<p>Using the Python bindings for <a href="https://github.com/Z3Prover/z3/">Z3</a> &ndash; a popular solver for SAT and <a href="https://en.wikipedia.org/wiki/SMT_solver">SMT</a> instances &ndash; the initialisation of <code>SymbolicConsistentAi</code> creates the discussed variables and constraints:
+<p>Using the Python bindings for <a href="https://github.com/Z3Prover/z3/">Z3</a> &ndash; a popular solver for SAT and <a href="https://en.wikipedia.org/wiki/SMT_solver">SMT</a> instances &ndash; the initialisation of <code>SymbolicConsistentAi</code> creates the discussed variables and constraints:</p>
 
 
 
@@ -1654,7 +1657,7 @@ s_{3,0} + s_{3,1} + s_{3,2} + s_{3,3} + s_{3,4} + s_{3,5} &= 1\\
     <figcaption>
         <a href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
     </figcaption>
-</figure></p>
+</figure>
 <h3 id="encoding-full-matches"><a href="#encoding-full-matches" class="hanchor" ariaLabel="Anchor">Encoding Full Matches</a> </h3>
 <p>Initially, there is no feedback to constrain the set of consistent candidates, and picking a random candidate is unproblematic.
 Any subsequent guess, however, should at least be consistent with the feedback accumulated up to that point.
@@ -1662,23 +1665,27 @@ To characterise such candidates, we next consider which constraints some feedbac
 <p>Consider the first part of the feedback: the number of full matches.
 This is clearly another cardinality constraint, but this one does not constrain the $s_{\mathit{pos},\mathit{sym}}$ variables directly.
 Instead we need some auxiliary variables
-$$\mathit{fm}_\mathit{pos}$$
+$$
+\mathit{fm}_\mathit{pos}
+$$
 where $\mathit{pos}\in \{0,\dots,|s|-1\}$, to identify in which position we have a full match and count the number of matches.
 These are the variables for which we create the constraint.
-Assuming the classic Mastermind setting and some feedback $f=(2,1)$, we simply add:
-$$\mathit{fm_0} + \mathit{fm_1} + \mathit{fm_2} + \mathit{fm_3} = 2$$</p>
+Assuming the classic Mastermind setting and some feedback $f=(2,1)$, we simply add
+$$
+\mathit{fm_0} + \mathit{fm_1} + \mathit{fm_2} + \mathit{fm_3} = 2
+$$</p>
 <p>Although the $\mathit{fm}_\mathit{pos}$ variables are now constrained, they are not related to any $s_{\mathit{pos},\mathit{sym}}$ yet.
 Intuitively, a variable $\mathit{fm}_\mathit{pos}$ should be $\mathit{true}$, if and only if the symbol at index $\mathit{pos}$ of a committed candidate has the same symbol as the secret at index $\mathit{pos}$ &ndash; that&rsquo;s what a full match is.
 With this in mind, and assuming the candidate to have been $c=(3,2,0,1)$, the following constraints establish the missing link:</p>
-<div>$$ 
+$$
 \begin{aligned}
 s_{0,3} &= \mathit{fm}_0,\\
 s_{1,2} &= \mathit{fm}_1,\\
 s_{2,0} &= \mathit{fm}_2,\\
 s_{3,1} &= \mathit{fm}_3
 \end{aligned}
- $$</div>
-<p>The first part of <code>make_guess</code> mirrors the discussed idea, but introduces fresh variables $\mathit{fm}_\mathit{pos}$ in every iteration since the feedback of different rounds is unrelated:
+$$
+<p>The first part of <code>make_guess</code> mirrors the discussed idea, but introduces fresh variables $\mathit{fm}_\mathit{pos}$ in every iteration since the feedback of different rounds is unrelated:</p>
 
 
 
@@ -1821,7 +1828,7 @@ s_{3,1} &= \mathit{fm}_3
     <figcaption>
         <a href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
     </figcaption>
-</figure></p>
+</figure>
 
 <aside >
     <p>
@@ -1832,13 +1839,17 @@ Once done, it was just more readable to let Z3 pick fresh names for the variable
 <h3 id="encoding-symbol-matches"><a href="#encoding-symbol-matches" class="hanchor" ariaLabel="Anchor">Encoding Symbol Matches</a> </h3>
 <p>What remains is the creation of constraints which enforce consistency w.r.t. the second part of the feedback: the number of symbol matches.
 Unlike the full match <q>flag</q> that we introduced for every position, a symbol match relates two positions &ndash; one from the guess with one from the secret.
-To this end, we introduce the Boolean variables:
-$$\mathit{sm}_{\mathit{src},\mathit{dst}}$$
+To this end, we introduce the Boolean variables
+$$
+\mathit{sm}_{\mathit{src},\mathit{dst}}
+$$
 where $\mathit{src},\mathit{dst}\in \{0,\dots,|s|-1\}$.
 A true literal $\mathit{sm}_{2,3}$ shall denote that the symbol at index $2$ of the guess can be moved to index $3$ to achieve a full match.</p>
-<p>With this in mind, we can easily construct an according cardinality constraint for some feedback $f=(2,1)$:
-$$\mathit{sm}_{0,1} +\mathit{sm}_{0,2} + \dots + \mathit{sm}_{3,2}  = 1$$
-Note that no constraint should have a variable of the form $\mathit{sm}_{\mathit{pos},\mathit{pos}}$, as such a case would actually describe a full match &ndash; not a symbol match.</p>
+<p>With this in mind, we can easily construct an according cardinality constraint for some feedback $f=(2,1)$:</p>
+$$
+\mathit{sm}_{0,1} +\mathit{sm}_{0,2} + \dots + \mathit{sm}_{3,2}  = 1
+$$
+<p>Note that no constraint should have a variable of the form $\mathit{sm}_{\mathit{pos},\mathit{pos}}$, as such a case would actually describe a full match &ndash; not a symbol match.</p>
 
 <aside >
     
@@ -1852,17 +1863,27 @@ After all, this would indicate that both symbols can become full matches if move
 A variable $\mathit{sm}_{\mathit{src},\mathit{dst}}$ should be $\mathit{true}$, if and only if <strong>all</strong> of the following conditions are met:</p>
 <ul>
 <li>There is no full match at position $\mathit{src}$:
-$$\neg \mathit{fm}_\mathit{src}$$</li>
+$$
+  \neg \mathit{fm}_\mathit{src}
+  $$</li>
 <li>The symbol $\mathit{sym}$ at index $\mathit{src}$ of the guess is the same as the symbol at index $\mathit{dst}$ of the secret:
-$$s_{\mathit{dst},\mathit{sym}}$$</li>
+$$
+  s_{\mathit{dst},\mathit{sym}}
+  $$</li>
 <li>There is no full match at position $\mathit{dst}$:
-$$\neg \mathit{fm}_\mathit{dst}$$</li>
+$$
+  \neg \mathit{fm}_\mathit{dst}
+  $$</li>
 <li>No smaller (higher priority) position has matched the symbol at $\mathit{dst}$:
-$$\bigwedge_{\substack{0\leq\mathit{prev}&lt;\mathit{src}\\ \mathit{prev} \neq \mathit{dst}}} \neg \mathit{sm}_{\mathit{prev},\mathit{dst}}$$</li>
+$$
+  \bigwedge_{\substack{0\leq\mathit{prev}<\mathit{src}\\ \mathit{prev} \neq \mathit{dst}}} \neg \mathit{sm}_{\mathit{prev},\mathit{dst}}
+  $$</li>
 <li>The symbol at index $\mathit{src}$ has not matched any symbol on a smaller (higher priority) position:
-$$\bigwedge_{\substack{0\leq\mathit{prev}&lt;\mathit{dst}\\ \mathit{prev} \neq \mathit{src}}} \neg \mathit{sm}_{\mathit{src},\mathit{prev}}$$</li>
+$$
+  \bigwedge_{\substack{0\leq\mathit{prev}<\mathit{dst}\\ \mathit{prev} \neq \mathit{src}}} \neg \mathit{sm}_{\mathit{src},\mathit{prev}}
+  $$</li>
 </ul>
-<p>The rest of the <code>make_guess</code> method &ndash; started in the previous section &ndash; implements the proposed encoding:
+<p>The rest of the <code>make_guess</code> method &ndash; started in the previous section &ndash; implements the proposed encoding:</p>
 
 
 
@@ -2195,13 +2216,13 @@ self<span style="color:#f92672">.</span>solver<span style="color:#f92672">.</spa
     <figcaption>
         <a href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
     </figcaption>
-</figure></p>
+</figure>
 <p>Note that we treat the $\mathit{sm}_{\mathit{src},\mathit{dst}}$ variables similar to the feedback-specific $\mathit{fm}_\mathit{pos}$ variables: we introduce fresh ones for every feedback.</p>
 <h3 id="computing-a-guess"><a href="#computing-a-guess" class="hanchor" ariaLabel="Anchor">Computing a Guess</a> </h3>
 <p>We now have all the constraints together for the $s_{\mathit{pos},\mathit{sym}}$ variables to characterise the code sequences that are consistent with the received feedback.
 To actually compute a guess, we just need to find an assignment that satisfies these constraints.
 Luckily, we can delegate this task to a SAT solver.</p>
-<p>To construct the guess, we identify the $s_{\mathit{pos},\mathit{sym}}$ variables that are set to $\mathit{true}$:
+<p>To construct the guess, we identify the $s_{\mathit{pos},\mathit{sym}}$ variables that are set to $\mathit{true}$:</p>
 
 
 
@@ -2384,7 +2405,7 @@ Luckily, we can delegate this task to a SAT solver.</p>
     <figcaption>
         <a href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
     </figcaption>
-</figure></p>
+</figure>
 <p>That&rsquo;s all there is to it.
 Feel free to experiment with <a href="mastermind.py">the provided implementation</a> of the discussed methods.
 Using the <code>SymbolicConsistentAi</code> you can now easily play Mastermind games with huge numbers of secret code combinations.
@@ -2558,7 +2579,7 @@ Although the characterisation of this problem as an <a href="https://en.wikipedi
     </header><p>This week I stumbled upon <a href="https://www.reddit.com/r/adventofcode/comments/rbwnh5/2021_day_8_can_it_be_solved_as_a_constraint/">someone wondering</a> whether the <strong>second part</strong> of the recent <a href="https://adventofcode.com/2021/day/8">Advent of Code puzzle &ldquo;Seven Segment Search&rdquo;</a> can be expressed as a constraint satisfaction problem.
 As attested by the replies: yes, it can.
 However, I think the question deserves a more extensive discussion than just a few comments in a thread.
-This post tries to provide a more instructive answer and raise awareness for some of the tradeoffs or solver misuses some solutions put up with.</p>
+This post tries to provide a more instructive answer and raise awareness for the tradeoffs or solver misuses some solutions put up with.</p>
 <p>I assume that the reader is familiar with mathematical notation and</p>
 <ul>
 <li>just struggles to express the posed problem in a formal, declarative way, <em>or</em></li>

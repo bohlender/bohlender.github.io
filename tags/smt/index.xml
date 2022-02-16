@@ -19,7 +19,7 @@
       <description>&lt;p&gt;This week I stumbled upon &lt;a href=&#34;https://www.reddit.com/r/adventofcode/comments/rbwnh5/2021_day_8_can_it_be_solved_as_a_constraint/&#34;&gt;someone wondering&lt;/a&gt; whether the &lt;strong&gt;second part&lt;/strong&gt; of the recent &lt;a href=&#34;https://adventofcode.com/2021/day/8&#34;&gt;Advent of Code puzzle &amp;ldquo;Seven Segment Search&amp;rdquo;&lt;/a&gt; can be expressed as a constraint satisfaction problem.
 As attested by the replies: yes, it can.
 However, I think the question deserves a more extensive discussion than just a few comments in a thread.
-This post tries to provide a more instructive answer and raise awareness for some of the tradeoffs or solver misuses some solutions put up with.&lt;/p&gt;
+This post tries to provide a more instructive answer and raise awareness for the tradeoffs or solver misuses some solutions put up with.&lt;/p&gt;
 &lt;p&gt;I assume that the reader is familiar with mathematical notation and&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;just struggles to express the posed problem in a formal, declarative way, &lt;em&gt;or&lt;/em&gt;&lt;/li&gt;

@@ -84,14 +84,14 @@ Trying to create a crossword from a set of words &ndash; or a subset thereof &nd
 In contrast to related approaches, which assume a fixed grid structure and search for fitting words, we consider word placement as part of the problem and eventually end up with an integrated solution to generating crosswords of adjustable quality.</p>
 <h2 id="the-problem-statement"><a href="#the-problem-statement" class="hanchor" ariaLabel="Anchor">The Problem Statement</a> </h2>
 <p>When designing a crossword puzzle on a specific theme or topic, one will likely start with <strong>a set of words</strong> (and clever clues) that fit the setting and a rough idea of <strong>the crossword&rsquo;s dimensions</strong>.
-For example, when designing a crossword for a magazine, the page size will probably limit the crossword&rsquo;s width to less than 20 cells to keep the characters legible.
+For example, when designing a crossword for a magazine, the page size will probably limit the crossword&rsquo;s width to less than 20 cells to keep the characters legible.</p>
 
 <aside >
     <p>
     What makes a crossword <em>personal</em> is that the words are not taken from some generic dictionary but have some significance to the person that will be solving the crossword.
 For example, this could be places they&rsquo;ve been to or references to in-jokes.
     </p>
-</aside></p>
+</aside>
 <p>For the sake of exposition, assume that we want to design a square crossword of size 12 on (mostly retro) games that my friends and family have fond memories of.
 I came up with the following list of games, most of which are classics to us:</p>
 
@@ -480,21 +480,25 @@ Furthermore, it is often advantageous to use dedicated SAT solvers for such inst
 <p>When talking about word placement, what we typically have in mind are a word&rsquo;s start coordinates and its orientation.
 For example, in the generated <a href="#an-optimal-word-placement">crossword shown above</a>, the phrase <q>MYST</q> starts at $(x,y)=(0,0)$ and is oriented vertically.
 Since there is only a finite number of possible placements, a simple way of encoding the placement of a word $w$ in terms of Boolean variables is by means of a variable
-$$w_{x,y,o}$$
+$$
+w_{x,y,o}
+$$
 for each position $(x,y)$ within the grid and orientation $o\in\{\mathit{horizontal},\mathit{vertical}\}$.
 We will use these placement variables in such a way that
-$w_{x,y,o}$ being assigned $\mathit{true}$ in the SAT solver&rsquo;s solution will indicate that $w$ should be placed at $(x,y)$ in orientation $o$.
+$w_{x,y,o}$ being assigned $\mathit{true}$ in the SAT solver&rsquo;s solution will indicate that $w$ should be placed at $(x,y)$ in orientation $o$.</p>
 
 <aside >
     <p>
     Of course we could have used two bounded integers $w_x,w_y$ and a Boolean $w_o$ just as well to encode the attributes separately.
 However, this would ultimately have complicated the use of a SAT solver and the interpretation of its solution.
     </p>
-</aside></p>
+</aside>
 <p>In addition to the placement, we also need a way to characterise the subset of words that is actually used in the solution.
 Only the placement of those selected words will be constrained and make sense.
 Since the choice whether a word shall be part of the crossword is Boolean, it suffices to introduce a variable
-$$w_\mathit{selected}$$
+$$
+w_\mathit{selected}
+$$
 for each word $w$.</p>
 <p>The first lines of <code>encodeProblem</code> do just that:</p>
 
@@ -786,15 +790,15 @@ grid <span style="color:#f92672">=</span> [[Const(<span style="color:#e6db74">f<
 <p>Depending on how and whether a word is placed, other characters must appear in the corresponding grid cells.
 So to encode <a href="#the-problem-statement">rule (1)</a>, we can iterate over each word and placement within the grid bounds, and assert that the characters match.
 For example, to cover the placement of <q>MYST</q> in the <a href="#an-optimal-word-placement">introductory crossword</a>, we need the following constraint:</p>
-<div>$$ 
+$$
 \begin{aligned}
 \mathit{MYST}_{0,0,\mathit{vertical}} \rightarrow &~ grid_{0,0}=M\\
 \wedge &~ grid_{0,1}=Y\\
 \wedge &~ grid_{0,2}=S\\
 \wedge &~ grid_{0,3}=T
 \end{aligned}
- $$</div>
-<p>Lines 91 to 94 take care of creating such constraints for horizontal placement, but the vertical placement can be handled analogously:
+$$
+<p>Lines 91 to 94 take care of creating such constraints for horizontal placement, but the vertical placement can be handled analogously:</p>
 
 
 
@@ -1047,19 +1051,19 @@ res <span style="color:#f92672">=</span> []
     <figcaption>
         <a href="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/crossword.py">crossword.py</a>
     </figcaption>
-</figure></p>
+</figure>
 <p>Note that the utility of <code>possible_placements</code> and <code>word_placement_vars</code> may not be obvious yet, but tracking all words' possible placements in a cell and all possible placement of a word will come in handy later.</p>
 <p>Besides relating the placement and grid variables, we also have to ensure that words are not placed within each other (cf. <a href="#the-problem-statement">rule (2)</a>).
 This can be achieved by requiring the characters before and after each placed word to be empty (or out of grid bounds).
-In the case of our running example, this amounts to</p>
-<div>$$ 
+In the case of our running example, this amounts to
+$$
 \begin{aligned}
 \mathit{MYST}_{0,0,\mathit{vertical}} \rightarrow &~ \cancel{grid_{0,-1}=\mathit{empty}}\\
 \wedge &~ grid_{0,4}=\mathit{empty}
 \end{aligned}
- $$</div>
-<p>where the coordinates $(0,-1)$ lie outside the grid.</p>
-<p>The corresponding constraints can be created right after the previous ones:
+$$
+where the coordinates $(0,-1)$ lie outside the grid.</p>
+<p>The corresponding constraints can be created right after the previous ones:</p>
 
 
 
@@ -1172,12 +1176,12 @@ res<span style="color:#f92672">.</span>append(Implies(placement_vars[word][y][x]
     <figcaption>
         <a href="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/crossword.py">crossword.py</a>
     </figcaption>
-</figure></p>
+</figure>
 <p>Now, each word&rsquo;s possible placement has been characterised and related to the grid&rsquo;s characters.
 However, there is nothing stopping the SAT solver from picking two placements for the same word and violating <a href="#the-problem-statement">rule (3)</a>.
 To account for this, we require at most one variable $w_{x,y,o}$ to be $\mathit{true}$ for each word $w$, while at least one of them should be if the word is selected for inclusion in the crossword, i.e. if $w_\mathit{selected}$ is $\mathit{true}$.</p>
-<p>Considering our example word <q>MYST</q>, we have to add</p>
-<p><div>$$ 
+<p>Considering our example word <q>MYST</q>, we have to add
+$$
 \begin{aligned}
 &~ \mathit{MYST}_{0,0,\mathit{horizontal}}\\
 + &~ \dots\\
@@ -1187,16 +1191,16 @@ To account for this, we require at most one variable $w_{x,y,o}$ to be $\mathit{
 + &~ \mathit{MYST}_{11,8,\mathit{vertical}}\\
 \leq &~ 1
 \end{aligned}
- $$</div>
+$$
 and
-<div>$$ 
+$$
 \begin{aligned}
 \mathit{MYST}_\mathit{selected} \rightarrow &~ \mathit{MYST}_{0,0,\mathit{horizontal}}\\
 \vee &~ \dots\\
 \vee &~ \mathit{MYST}_{11,8,\mathit{vertical}}
 \end{aligned}
- $$</div></p>
-<p>The following lines take care of creating such constraints for each word:
+$$</p>
+<p>The following lines take care of creating such constraints for each word:</p>
 
 
 
@@ -1259,12 +1263,12 @@ res<span style="color:#f92672">.</span>append(Implies(word_selection[word], Or(w
     <figcaption>
         <a href="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/crossword.py">crossword.py</a>
     </figcaption>
-</figure></p>
+</figure>
 <h3 id="only-sequences-of-words"><a href="#only-sequences-of-words" class="hanchor" ariaLabel="Anchor">Only Sequences of Words</a> </h3>
 <p>If we were to use a SAT solver on the constraints accumulated so far, we may find that some grid cell variables are assigned seemingly random characters which do not even form a word.
 This is to be expected, as there is no constraint to enforce that all character sequences must correspond to a word placement yet (cf.  <a href="#the-problem-statement">rule (4)</a>).</p>
 <p>A simple way to achieve this, is to require the start coordinates of each sequence to correspond to the coordinates of a word placement.
-The following lines handle horizontal character sequences but vertical ones can be treated analogously:
+The following lines handle horizontal character sequences but vertical ones can be treated analogously:</p>
 
 
 
@@ -1377,11 +1381,11 @@ The following lines handle horizontal character sequences but vertical ones can 
     <figcaption>
         <a href="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/crossword.py">crossword.py</a>
     </figcaption>
-</figure></p>
+</figure>
 <h3 id="connectedness"><a href="#connectedness" class="hanchor" ariaLabel="Anchor">Connectedness</a> </h3>
 <p>The last and most complex requirement is <a href="#the-problem-statement">rule (5)</a>, which demands the placed words to form a single crossword rather than several disjoint ones.
 That is, understanding the placed words as vertices of an <a href="https://en.wikipedia.org/wiki/Undirected_graph">undirected graph</a>, which are connected if the words intersect, should result in a graph with only one <a href="https://en.wikipedia.org/wiki/Connected_component_%28graph_theory%29">connected component</a>.</p>
-<p>The following figure illustrates the graph corresponding to our <a href="#an-optimal-word-placement">introductory example</a>:
+<p>The following figure illustrates the graph corresponding to our <a href="#an-optimal-word-placement">introductory example</a>:</p>
 
 
 
@@ -1397,20 +1401,14 @@ That is, understanding the placed words as vertices of an <a href="https://en.wi
             </figcaption>
     </figure>
     
-</figure></p>
+</figure>
 <p>For a fixed graph, computing the components can be <a href="https://en.wikipedia.org/wiki/Connected_component_(graph_theory)#Algorithms">done in linear time</a>, and the connectedness is also easy to see in the above figure.
 However, in our application, the graph is not fixed but parametrised by the solutions to the other constraints.
 Therefore, we have to come up with a formula that characterises the connectedness of any word placement, i.e. it should be satisfiable if the encoded word placement forms a single component.</p>
 <p>Since neither the subset of words that will be placed nor the intersections of these words are known beforehand, a Boolean encoding of the word intersection relation will have to introduce variables $\mathit{connected}_{w_1,w_2}$ for each pair of words $w_1, w_2$.
 Even when avoiding symmetrical entries, the number of such variables will grow polynomially in the number of words that can potentially be placed.
 This is problematic since even our example crossword of size 12 already features 51 words to choose from.</p>
-<p>Alternatively, by understanding the grid cells as vertices of a graph where the edges connect neighbouring (non-empty) cells, we can get around this problem:
-
-<aside >
-    <p>
-    When talking about the neighbours of a cell at position $(x,y)$, we exclude the diagonal neighbours, i.e. we only refer to those at positions $(x, y-1)$, $(x, y+1)$, $(x-1, y)$ and $(x+1, y)$.
-    </p>
-</aside>
+<p>Alternatively, by understanding the grid cells as vertices of a graph where the edges connect neighbouring (non-empty) cells, we can get around this problem:</p>
 
 
 
@@ -1426,32 +1424,40 @@ This is problematic since even our example crossword of size 12 already features
             </figcaption>
     </figure>
     
-</figure></p>
+</figure>
 <p>Here, the edge relation grows linearly in the number of cells as every cell can at most be connected to four others.
 The size of our word set has no impact.</p>
+
+<aside >
+    <p>
+    When talking about the neighbours of a cell at position $(x,y)$, we exclude the diagonal neighbours, i.e. we only refer to those at positions $(x, y-1)$, $(x, y+1)$, $(x-1, y)$ and $(x+1, y)$.
+    </p>
+</aside>
 <p>From this perspective, the connectedness check amounts to proving that we can reach every placed character from every other placed character by some path over neighbouring (non-empty) cells.
 In fact, it already suffices to show that <strong>there is one cell that can be reached from all others</strong>.</p>
 <p>To approach the connectedness check in the suggested way, we first have to characterise a non-empty cell for which we will try to prove reachability from all others.
 Since it is unknown where words will be placed, let&rsquo;s just pick the uppermost-leftmost non-empty cell as the <q>start cell</q> of the connected component.
-We introduce the variables</p>
-<p>$$\mathit{ccStart}_y,\mathit{ccStart}_{x,y}$$</p>
-<p>for all coordinates $(x,y)$ within the grid bounds, to identify the row and exact coordinates of the <q>start cell</q>.
-Clearly, $\mathit{ccStart}_y$ must be $\mathit{true}$ for the first row that is not empty, i.e.</p>
-<div>$$ 
+We introduce the variables
+$$
+\mathit{ccStart}_y,\mathit{ccStart}_{x,y}
+$$
+for all coordinates $(x,y)$ within the grid bounds, to identify the row and exact coordinates of the <q>start cell</q>.</p>
+<p>Clearly, $\mathit{ccStart}_y$ must be $\mathit{true}$ for the first row that is not empty, i.e.
+$$
 \begin{aligned}
 \mathit{ccStart}_y =&~ \bigvee_{0\leq x < \mathit{size}} \mathit{grid}_{x,y} \neq \mathit{empty}\\
 \wedge&~ \bigwedge_{0\leq i < y} \neg \mathit{ccStart}_i
 \end{aligned}
- $$</div>
-<p>and $\mathit{ccStart}_{x,y}$ must be $\mathit{true}$ for the first non-empty cell in that row, i.e.</p>
-<div>$$ 
+$$
+and $\mathit{ccStart}_{x,y}$ must be $\mathit{true}$ for the first non-empty cell in that row, i.e.
+$$
 \begin{aligned}
 \mathit{ccStart}_{x,y} =&~ \mathit{ccStart}_y\\
 \wedge&~ \mathit{grid}_{x,y} \neq \mathit{empty}\\
 \wedge&~ \bigwedge_{0\leq i < x} \neg \mathit{ccStart}_{i,y}
 \end{aligned}
- $$</div>
-<p>Lines 151 to 161 take care of creating such constraints:
+$$</p>
+<p>Lines 151 to 161 take care of creating such constraints:</p>
 
 
 
@@ -1834,30 +1840,34 @@ inCc <span style="color:#f92672">=</span> [[[Bool(<span style="color:#e6db74">f<
     <figcaption>
         <a href="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/crossword.py">crossword.py</a>
     </figcaption>
-</figure></p>
+</figure>
 <p>It only remains to assert that all the other non-empty cells in the grid can reach the <q>start cell</q>.
-Considering that the grid is square and its <code>size</code> is finite, all other non-empty cells must be reachable within $\mathit{size}^2$ steps.
+Considering that the grid is square and its <code>size</code> is finite, all other non-empty cells must be reachable within $\mathit{size}^2$ steps.</p>
 
 <aside >
     <p>
     Note that $\mathit{size}^2$ is not the tightest upper bound.
 The example code actually uses a lower <code>maxDistance</code>, which is easy to come up with by assessing the longest possible paths in some example grids.
     </p>
-</aside></p>
+</aside>
 <p>To identify states that can reach the <q>start</q> of the connected component within $n$ steps (or less), we introduce the variables
-$$\mathit{reach}_{i,x,y}$$
-for each position $(x,y)$ and maximal distance $i\in[0,\mathit{maxDistance(size)}]$ to the start.</p>
-<p>Of course only the <q>start cell</q> can reach itself in zero steps, so we assert
-$$\mathit{reach}_{0,x,y} = \mathit{ccStart}_{x,y}$$
-for all coordinates $(x,y)$ in the grid (cf. line 164).
-Furthermore, we know that a cell can reach the <q>start</q> in $i$ steps only if an adjacent cell can do so in $i-1$ steps, i.e.</p>
-<div>$$ 
+$$
+\mathit{reach}_{i,x,y}
+$$
+for each position $(x,y)$ and maximal distance $i\in[0,\mathit{maxDistance(size)}]$ to the start.
+Of course only the <q>start cell</q> can reach itself in zero steps, so we assert
+$$
+\mathit{reach}_{0,x,y} = \mathit{ccStart}_{x,y}
+$$
+for all coordinates $(x,y)$ in the grid (cf. line 164).</p>
+<p>Furthermore, we know that a cell can reach the <q>start</q> in $i$ steps only if an adjacent cell can do so in $i-1$ steps, i.e.
+$$
 \begin{aligned}
 \mathit{reach}_{i,x,y} \rightarrow &~ \mathit{grid}_{x,y}\neq \mathit{empty}\\
 \wedge &~ (\mathit{reach}_{i-1,x,y}\vee\bigvee_{(nx,ny)} \mathit{reach}_{i-1,nx,ny})
 \end{aligned}
- $$</div>
-<p>where $(nx,ny)$ are neighbours of $(x,y)$.
+$$
+where $(nx,ny)$ are neighbours of $(x,y)$.
 This is what the rest of the above listing takes care of, ultimately requiring in line 179 that all non-empty cells must reach the <q>start cell</q> within the <code>maxDistance</code> &ndash; otherwise we&rsquo;d have more than one connected component.</p>
 <h3 id="quality"><a href="#quality" class="hanchor" ariaLabel="Anchor">Quality</a> </h3>
 <p>At this point we&rsquo;ve constructed all constraints that are needed to generate valid crosswords.
@@ -1865,11 +1875,13 @@ However, solving the constraints at this point will yield rather sobering result
 It&rsquo;s time to introduce a quality criterion.</p>
 <p>Quality is subjective, but I guess everyone agrees that a sparse crossword is worse than a tightly packed one.
 Therefore, it may be reasonable to measure quality in terms of the number of words or characters put in the grid.
-The problem I see with both approaches is that they do not reward crossing words, so I&rsquo;ve settled for <strong>the sum of the placed words' lengths</strong>:
-$$\sum_{w\in\mathit{words}} w_\mathit{selected}*\mathit{length}(w)$$
-This effectively values every character in the grid as 1 but also counts each crossing as another 1.
+The problem I see with both approaches is that they do not reward crossing words, so I&rsquo;ve settled for <strong>the sum of the placed words' lengths</strong>:</p>
+$$
+\sum_{w\in\mathit{words}} w_\mathit{selected}*\mathit{length}(w)
+$$
+<p>This effectively values every character in the grid as 1 but also counts each crossing as another 1.
 With this metric, the <a href="#an-optimal-word-placement">introductory crossword</a> achieves a quality of 104.</p>
-<p>By requiring this sum to be greater or equal to a provided <code>minQuality</code>, we can force the SAT solver to only produce crosswords that meet our expectations:
+<p>By requiring this sum to be greater or equal to a provided <code>minQuality</code>, we can force the SAT solver to only produce crosswords that meet our expectations:</p>
 
 
 
@@ -1932,13 +1944,13 @@ res<span style="color:#f92672">.</span>append(PbGe([(var, len(w)) <span style="c
     <figcaption>
         <a href="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/crossword.py">crossword.py</a>
     </figcaption>
-</figure></p>
+</figure>
 <p>That&rsquo;s all there is to it conceptually.
 The <a href="crossword.py">rest of the code</a> is just generic plumbing to feed the constraints <code>res</code> into <a href="https://github.com/Z3Prover/z3">Z3</a> and interpret the returned assignment of Boolean values to our variables.</p>
 <h2 id="cnf-export"><a href="#cnf-export" class="hanchor" ariaLabel="Anchor">CNF Export</a> </h2>
 <p>Although Z3 is feature-rich and state of the art, it nevertheless pays off to use a competitive SAT solver instead for our particular use-case.
 I recommend sticking to SMT solving during development and switching to SAT solving for the more complex instances.
-Z3 provides <a href="https://theory.stanford.edu/~nikolaj/programmingz3.html#sec-tactics">tactics</a> to reduce the finite-domain SMT constraints to a SAT instance in <a href="https://en.wikipedia.org/wiki/Conjunctive_normal_form">CNF</a>, which can then be exported in the <a href="http://www.satcompetition.org/2011/format-benchmarks2011.html">standard format for SAT solvers</a>:
+Z3 provides <a href="https://theory.stanford.edu/~nikolaj/programmingz3.html#sec-tactics">tactics</a> to reduce the finite-domain SMT constraints to a SAT instance in <a href="https://en.wikipedia.org/wiki/Conjunctive_normal_form">CNF</a>, which can then be exported in the <a href="http://www.satcompetition.org/2011/format-benchmarks2011.html">standard format for SAT solvers</a>:</p>
 
 
 
@@ -2067,7 +2079,7 @@ Z3 provides <a href="https://theory.stanford.edu/~nikolaj/programmingz3.html#sec
     <figcaption>
         <a href="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/crossword.py">crossword.py</a>
     </figcaption>
-</figure></p>
+</figure>
 <h2 id="experiments"><a href="#experiments" class="hanchor" ariaLabel="Anchor">Experiments</a> </h2>
 <p>Now that we got the crossword generation pipeline up an running it is interesting to see how long it takes to assemble <a href="#the-problem-statement">the words from our example</a> into crosswords of size 12 with varying quality requirements.
 Following the proposed approach, I generated crosswords of increasing quality and measured the time needed to solve the SAT instances with various solvers.
@@ -2118,7 +2130,7 @@ However, even the instances of quality 95 do already look pretty good and are so
 <p>Feel free to process <a href="eval_51words.csv">the measurements</a> on your own if you&rsquo;re interested in specific figures.</p>
 <p>If this seems slow to you, keep in mind that <strong>you can speed up the generation process</strong> by providing more words to choose from.
 For example, by adding the following words to our word set, the average time to generate a crossword of quality 95 via <a href="https://github.com/arminbiere/lingeling/tree/7d5db72420b95ab356c98ca7f7a4681ed2c59c70">plingeling</a> reduces from 336s to just 45s.</p>
-<p>
+
 
 
 
@@ -2206,7 +2218,7 @@ For example, by adding the following words to our word set, the average time to 
             </figcaption>
     </figure>
     
-</figure></p>
+</figure>
 <p>For higher quality requirements, additional words may improve the runtime by more than an order-of-magnitude (cf. times for quality 100).
 However, when designing a custom crossword, it may be tricky to come up with a large set of words (and witty clues).</p>
 <h2 id="do-try-this-at-home"><a href="#do-try-this-at-home" class="hanchor" ariaLabel="Anchor">Do Try This at Home!</a> </h2>
@@ -2308,7 +2320,7 @@ Although the characterisation of this problem as an <a href="https://en.wikipedi
     </header><p>This week I stumbled upon <a href="https://www.reddit.com/r/adventofcode/comments/rbwnh5/2021_day_8_can_it_be_solved_as_a_constraint/">someone wondering</a> whether the <strong>second part</strong> of the recent <a href="https://adventofcode.com/2021/day/8">Advent of Code puzzle &ldquo;Seven Segment Search&rdquo;</a> can be expressed as a constraint satisfaction problem.
 As attested by the replies: yes, it can.
 However, I think the question deserves a more extensive discussion than just a few comments in a thread.
-This post tries to provide a more instructive answer and raise awareness for some of the tradeoffs or solver misuses some solutions put up with.</p>
+This post tries to provide a more instructive answer and raise awareness for the tradeoffs or solver misuses some solutions put up with.</p>
 <p>I assume that the reader is familiar with mathematical notation and</p>
 <ul>
 <li>just struggles to express the posed problem in a formal, declarative way, <em>or</em></li>

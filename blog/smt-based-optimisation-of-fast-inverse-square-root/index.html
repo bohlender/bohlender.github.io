@@ -129,7 +129,9 @@ However, a clear disadvantage of sticking with the absolute error is that it ign
 <p>For example consider finding that some approximation yields $\epsilon(42) = 1000$.
 Without knowing the magnitude this may sound like a big error, but might actually be off by just 1% if $f(42) = 100000$.
 For this reason, it is often advantageous to use the <a href="https://en.wikipedia.org/wiki/Approximation_error">relative error</a>
-$$\eta(x) = \frac{\epsilon(x)}{|f(x)|} = \left|1-\frac{\hat{f}(x)}{f(x)}\right|,$$
+$$
+\eta(x) = \frac{\epsilon(x)}{|f(x)|} = \left|1-\frac{\hat{f}(x)}{f(x)}\right|,
+$$
 which takes the magnitude into consideration.
 In the context of Quake, the quality of the approximation should not fluctuate but keep the relative error reasonably small for all inputs.
 Therefore it is <a href="https://web.archive.org/web/20160308091758/http://www.daxia.com/bibis/upload/406Fast_Inverse_Square_Root.pdf">common</a> to analyse the fast inverse square root  w.r.t. the <strong>maximum relative error</strong> it may cause.
@@ -145,13 +147,13 @@ The smaller this value is, the better the approximation is considered to be.</p>
 <p>Accordingly, correctness of an approximation can be specified as the requirement that $\eta(x)$ stays below a &ldquo;sufficiently&rdquo; small value for all inputs $x$.
 Of course, the definition of when an error is negligible is governed by the context the approximation is used in.
 For this post, let <code>Q_rsqrt</code> be correct if it achieves a maximum relative error of less than 1%:</p>
-<div>$$ 
+$$
 \tag{1}\begin{aligned}
 \eta(x) &= \left|1-\frac{\mathit{Q\_rsqrt}(x)}{\frac{1}{\sqrt{x}}}\right|\\
 &= |1-\mathit{Q\_rsqrt}(x)\cdot\sqrt{x}| \\
-&< 0.01
+& &lt; 0.01
 \end{aligned}
- $$</div>
+$$
 <h2 id="logical-characterisation-of-program-semantics"><a href="#logical-characterisation-of-program-semantics" class="hanchor" ariaLabel="Anchor">Logical Characterisation of Program Semantics</a> </h2>
 <p>Instead of investigating the property of interest through testing, or exhaustive exploration of possible in- and outputs, symbolic verification is based on characterising semantics in terms of constraints in <a href="https://en.wikipedia.org/wiki/First-order_logic">first-order logic</a>, and reasoning about their satisfiability.</p>
 <p>Just as $x^2+y^2 = 1$ characterises all points on the <a href="https://en.wikipedia.org/wiki/Unit_circle">unit circle</a>, we will establish constraints to characterise all realisable executions of <code>Q_rsqrt</code> &ndash; the essential difference to our use-case being that program variables are ultimately just fixed-size bit vectors, while $x,y\in \mathbb{R}$.
@@ -164,7 +166,7 @@ In particular, it specifies the types and operations relevant for software verif
 The characterisation is standard so feel free to skip it if you&rsquo;re just interested in finding out whether SMT solvers can handle the arising floating-point and bit vector constraints.</p>
 <h3 id="characterising-the-relative-error"><a href="#characterising-the-relative-error" class="hanchor" ariaLabel="Anchor">Characterising the Relative Error</a> </h3>
 <p>To start with a simple function, consider the following implementation of $\eta$ taken from our reference implementation.
-Just as in $(1)$, it computes $\eta(x)$ from $\sqrt x$ and $\mathit{Q\_rsqrt}(x)$.
+Just as in $(1)$, it computes $\eta(x)$ from $\sqrt x$ and $\mathit{Q\_rsqrt}(x)$.</p>
 
 
 
@@ -221,10 +223,10 @@ Just as in $(1)$, it computes $\eta(x)$ from $\sqrt x$ and $\mathit{Q\_rsqrt}(x)
     <figcaption>
         <a href="https://bohlender.pro/blog/smt-based-optimisation-of-fast-inverse-square-root/maxRelErr.c">maxRelErr.c</a>
     </figcaption>
-</figure></p>
-<p>This already looks pretty much like a constraint that relates inputs and outputs, but what is wrong with something along the lines of</p>
-<p>$$\tag{2} \mathit{relErr} = |1 - \mathit{fFast}\cdot\mathit{fSqrt}|,$$</p>
-<p>where $\mathit{relErr},\mathit{fFast},\mathit{fSqrt}\in\mathbb{F}_{32}$ (32-bit floats)?</p>
+</figure>
+<p>This already looks pretty much like a constraint that relates inputs and outputs, but what is wrong with something along the lines of
+$$\tag{2} \mathit{relErr} = |1 - \mathit{fFast}\cdot\mathit{fSqrt}|,$$
+where $\mathit{relErr},\mathit{fFast},\mathit{fSqrt}\in\mathbb{F}_{32}$ (32-bit floats)?</p>
 <p>While the general idea is sensible, going directly from source to characterisation bypasses the compiler.
 As a result, subtleties like type promotion and architecture-specifics may be missing in the characterisation, e.g. the target architecture might not be using 32-bit floats.</p>
 <p>To capture program semantics faithfully, but avoid dealing with assembly and tons of opcodes, many verifiers are based on <a href="https://en.wikipedia.org/wiki/Intermediate_representation">intermediate representations</a> (IRs).
@@ -2157,9 +2159,11 @@ In particular, the computation of the maximum relative error for a given <code>m
 </aside>
 <p>To approach this with SMT, we first of all need a way of checking whether a <code>magic</code> constant exists that yields a maximum relative error below a given bound.
 The actual minimisation of the bound can then be achieved as above, by using the check as an oracle and refining the bound iteratively.
-More formally, we are primarily interested in solving</p>
-<p>$$ \underset{\mathit{magic}}{\exists} ~ \underset{x\geq 0}{\forall} ~ \mathit{normal}(x) \rightarrow \eta(x) &lt; 0.001752,$$</p>
-<p>that is finding a <code>magic</code> constant which returns a smaller maximum relative error than the original constant <code>0x5F3759DF</code> does for normal, non-negative inputs.
+More formally, we are primarily interested in solving
+$$
+\underset{\mathit{magic}}{\exists} ~ \underset{x\geq 0}{\forall} ~ \mathit{normal}(x) \rightarrow \eta(x) < 0.001752,
+$$
+that is finding a <code>magic</code> constant which returns a smaller maximum relative error than the original constant <code>0x5F3759DF</code> does for normal, non-negative inputs.
 Such a search for parameters that make a system adhere to certain constraints is known as <strong>parameter synthesis</strong>.
 Although dedicated techniques for solving such problems exist, they are out of the scope of this post.
 We, instead, follow the conceptually simpler approach of letting the SMT solver deal with the alternating quantifiers on its own.</p>
@@ -2628,7 +2632,7 @@ Although the characterisation of this problem as an <a href="https://en.wikipedi
     </header><p>This week I stumbled upon <a href="https://www.reddit.com/r/adventofcode/comments/rbwnh5/2021_day_8_can_it_be_solved_as_a_constraint/">someone wondering</a> whether the <strong>second part</strong> of the recent <a href="https://adventofcode.com/2021/day/8">Advent of Code puzzle &ldquo;Seven Segment Search&rdquo;</a> can be expressed as a constraint satisfaction problem.
 As attested by the replies: yes, it can.
 However, I think the question deserves a more extensive discussion than just a few comments in a thread.
-This post tries to provide a more instructive answer and raise awareness for some of the tradeoffs or solver misuses some solutions put up with.</p>
+This post tries to provide a more instructive answer and raise awareness for the tradeoffs or solver misuses some solutions put up with.</p>
 <p>I assume that the reader is familiar with mathematical notation and</p>
 <ul>
 <li>just struggles to express the posed problem in a formal, declarative way, <em>or</em></li>
