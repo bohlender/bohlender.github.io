@@ -64,11 +64,9 @@ This post illustrates the problem with standard approaches, and how finding cons
 </div>
 <div class="notepad-wrapper">
 	
-	<div class="notepad">
-		<main>
+	<main class="notepad">
 		<article>
 			<header>
-				
 				<h1>Playing Hard Mastermind Games with a SAT-based AI</h1>
 				<div class="metadata">
     <time datetime="2020-03-12">March 12, 2020</time>
@@ -1866,11 +1864,11 @@ $$
   $$</li>
 <li>No smaller (higher priority) position has matched the symbol at $\mathit{dst}$:
 $$
-  \bigwedge_{\substack{0\leq\mathit{prev}<\mathit{src}\\ \mathit{prev} \neq \mathit{dst}}} \neg \mathit{sm}_{\mathit{prev},\mathit{dst}}
+  \bigwedge_{\substack{0\leq\mathit{prev}&lt;\mathit{src}\\ \mathit{prev} \neq \mathit{dst}}} \neg \mathit{sm}_{\mathit{prev},\mathit{dst}}
   $$</li>
 <li>The symbol at index $\mathit{src}$ has not matched any symbol on a smaller (higher priority) position:
 $$
-  \bigwedge_{\substack{0\leq\mathit{prev}<\mathit{dst}\\ \mathit{prev} \neq \mathit{src}}} \neg \mathit{sm}_{\mathit{src},\mathit{prev}}
+  \bigwedge_{\substack{0\leq\mathit{prev}&lt;\mathit{dst}\\ \mathit{prev} \neq \mathit{src}}} \neg \mathit{sm}_{\mathit{src},\mathit{prev}}
   $$</li>
 </ul>
 <p>The rest of the <code>make_guess</code> method &ndash; started in the previous section &ndash; implements the proposed encoding:</p>
@@ -2504,10 +2502,9 @@ Depending on the chosen approach, it might help to look into <a href="https://en
 
 </div>
 		</article>
-		</main>
-	</div>
+	</main>
 	
-	<div class="notepad related-posts">
+	<section class="notepad related-posts">
 		<h1>Related Posts</h1>
 		<hr>
 		
@@ -2578,7 +2575,7 @@ It takes only few steps to get from a quantifier-laden high-level formulation to
     </a>
 </article>
 		
-	</div>
+	</section>
 	
 </div>
 
