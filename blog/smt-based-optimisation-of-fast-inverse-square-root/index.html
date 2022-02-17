@@ -79,8 +79,7 @@ This post illustrates how this, and related aspects, can be investigated with SM
 			</header>
 			<p>While there is a <a href="https://web.archive.org/web/20160308091758/http://www.daxia.com/bibis/upload/406Fast_Inverse_Square_Root.pdf">mathematical explanation</a> for the choice of <code>0x5F3759DF</code> in the <a href="https://en.wikipedia.org/wiki/Fast_inverse_square_root">famous bit-level hack</a> for approximating the multiplicative inverse of the square root of a 32-bit floating-point number, it is not immediately clear to what extent the reasoning is really applicable in the context of machine data types and their peculiarities.
 This post illustrates how this, and related aspects, can be investigated with <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a>-based reasoning about the actual implementation.</p>
-<h2 id="introduction"><a href="#introduction" class="hanchor" ariaLabel="Anchor">Introduction</a> </h2>
-<p>Computing the reciprocal or &ldquo;multiplicative inverse&rdquo; square root $1/\sqrt{x}$ is a common operation in 3D computer graphics since it occurs naturally during <a href="https://en.wikipedia.org/wiki/Unit_vector">vector normalisation</a>.
+<h2 id="introduction"><a href="#introduction">Introduction</a></h2><p>Computing the reciprocal or &ldquo;multiplicative inverse&rdquo; square root $1/\sqrt{x}$ is a common operation in 3D computer graphics since it occurs naturally during <a href="https://en.wikipedia.org/wiki/Unit_vector">vector normalisation</a>.
 However, in the &rsquo;90s, its precise computation was computationally expensive, and high numbers of such computations in every frame of a real-time graphics application could lead to stuttering and dropping of the framerate.
 With this in mind, it is not surprising that the &ldquo;fast inverse square root&rdquo; is often associated with <a href="https://en.wikipedia.org/wiki/Quake_III_Arena">Quake III Arena</a> &ndash; a multiplayer-player focussed first-person shooter from 1999 that made use of this approximation to avoid the computational cost of the real thing, without losing &ldquo;too much&rdquo; precision.</p>
 <p>While Quake did not invent the approximation, the publishing of its source code brought many developers into contact with this technique.
@@ -93,8 +92,7 @@ And although modern CPUs provide native support for approximating $1/\sqrt{x}$ q
 
     
 </aside>
-<h3 id="the-fast-inverse-square-root"><a href="#the-fast-inverse-square-root" class="hanchor" ariaLabel="Anchor">The Fast Inverse Square Root</a> </h3>
-<p>The following C code is a condensed version of the <a href="https://github.com/id-Software/Quake-III-Arena/blob/master/code/game/q_math.c#L552">approximation used in Quake</a>.
+<h3 id="the-fast-inverse-square-root"><a href="#the-fast-inverse-square-root">The Fast Inverse Square Root</a></h3><p>The following C code is a condensed version of the <a href="https://github.com/id-Software/Quake-III-Arena/blob/master/code/game/q_math.c#L552">approximation used in Quake</a>.
 It boils down to treating the float as a 32-bit integer, and performing the trickery shown in line 3.
 The result could be returned after line 4, but adding a subsequent iteration of <a href="https://en.wikipedia.org/wiki/Newton%27s_method">Newton&rsquo;s method</a> improves the precision significantly, while being computationally cheap.</p>
 <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
@@ -124,8 +122,7 @@ The result could be returned after line 4, but adding a subsequent iteration of 
 <p>When presented with such a bit-level hack, one cannot help but wonder whether it really does what it is supposed to do in all cases.
 As you will see, we do not have to understand the approximation&rsquo;s inner workings to assess its correctness, but merely be able to formalise it.
 To this end, let us first look at how to express the expected behaviour of <code>Q_rsqrt</code>.</p>
-<h3 id="correctness-of-an-approximation"><a href="#correctness-of-an-approximation" class="hanchor" ariaLabel="Anchor">Correctness of an Approximation</a> </h3>
-<p>To asses the quality of an approximation, the employed measure should incorporate the discrepancy between the exact value $f(x)$ and its approximation $\hat{f}(x)$, that is, be based on the <a href="https://en.wikipedia.org/wiki/Approximation_error">absolute error</a> $\epsilon(x) = |f(x) - \hat{f}(x)|$.
+<h3 id="correctness-of-an-approximation"><a href="#correctness-of-an-approximation">Correctness of an Approximation</a></h3><p>To asses the quality of an approximation, the employed measure should incorporate the discrepancy between the exact value $f(x)$ and its approximation $\hat{f}(x)$, that is, be based on the <a href="https://en.wikipedia.org/wiki/Approximation_error">absolute error</a> $\epsilon(x) = |f(x) - \hat{f}(x)|$.
 Depending on the context, various measures come into question, and it is often not obvious what the most sensible choice is.
 However, a clear disadvantage of sticking with the absolute error is that it ignores the magnitude of the exact value.</p>
 <p>For example consider finding that some approximation yields $\epsilon(42) = 1000$.
@@ -156,8 +153,7 @@ $$
 & &lt; 0.01
 \end{aligned}
 $$
-<h2 id="logical-characterisation-of-program-semantics"><a href="#logical-characterisation-of-program-semantics" class="hanchor" ariaLabel="Anchor">Logical Characterisation of Program Semantics</a> </h2>
-<p>Instead of investigating the property of interest through testing, or exhaustive exploration of possible in- and outputs, symbolic verification is based on characterising semantics in terms of constraints in <a href="https://en.wikipedia.org/wiki/First-order_logic">first-order logic</a>, and reasoning about their satisfiability.</p>
+<h2 id="logical-characterisation-of-program-semantics"><a href="#logical-characterisation-of-program-semantics">Logical Characterisation of Program Semantics</a></h2><p>Instead of investigating the property of interest through testing, or exhaustive exploration of possible in- and outputs, symbolic verification is based on characterising semantics in terms of constraints in <a href="https://en.wikipedia.org/wiki/First-order_logic">first-order logic</a>, and reasoning about their satisfiability.</p>
 <p>Just as $x^2+y^2 = 1$ characterises all points on the <a href="https://en.wikipedia.org/wiki/Unit_circle">unit circle</a>, we will establish constraints to characterise all realisable executions of <code>Q_rsqrt</code> &ndash; the essential difference to our use-case being that program variables are ultimately just fixed-size bit vectors, while $x,y\in \mathbb{R}$.
 A percise characterisation of program semantics has to take all the peculiarities of machine represented numbers into account, such as overflows, rounding errors and exceptions.</p>
 <p>The actual heavy lifting, that is checking the constraints' satisfiability, is typically accomplished with an <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a> solver.
@@ -166,8 +162,7 @@ Luckily the <a href="http://smtlib.cs.uiowa.edu/">SMT-LIB</a> standard provides 
 In particular, it specifies the types and operations relevant for software verification.</p>
 <p>In the following we characterise both $\eta(x)$ and <code>Q_rsqrt</code> in SMT-LIB, using <a href="maxRelErr.c">this brute force search for the maximum relative error</a> as a reference for the functions' expected outputs.
 The characterisation is standard so feel free to skip it if you&rsquo;re just interested in finding out whether SMT solvers can handle the arising floating-point and bit vector constraints.</p>
-<h3 id="characterising-the-relative-error"><a href="#characterising-the-relative-error" class="hanchor" ariaLabel="Anchor">Characterising the Relative Error</a> </h3>
-<p>To start with a simple function, consider the following implementation of $\eta$ taken from our reference implementation.
+<h3 id="characterising-the-relative-error"><a href="#characterising-the-relative-error">Characterising the Relative Error</a></h3><p>To start with a simple function, consider the following implementation of $\eta$ taken from our reference implementation.
 Just as in $(1)$, it computes $\eta(x)$ from $\sqrt x$ and $\mathit{Q\_rsqrt}(x)$.</p>
 
 
@@ -468,8 +463,7 @@ In contrast to the handwaving in $(2)$, SMT-LIB is explicit about the operations
 The language is also aware of the fact that floats cannot represent every real number precisely, which is why <code>fp.mul</code>, and many other operations, require the underlying rounding mode to be specified.
 Our example&rsquo;s IR does not make use of specific rounding modes, which is why we use the default <a href="https://en.wikipedia.org/wiki/Floating-point_arithmetic#Rounding_modes">rounding to nearest</a> (RNE), where ties round to the nearest even digit.
 This is also the reason why the verbosity in the auxiliary (0-ary) function <code>f1.0</code> is needed, just to specify a IEEE 754 compliant <code>1.0f</code>.</p>
-<h3 id="characterising-the-fast-inverse-square-root"><a href="#characterising-the-fast-inverse-square-root" class="hanchor" ariaLabel="Anchor">Characterising the Fast Inverse Square Root</a> </h3>
-<p>Similar to the relative error function, <code>Q_rsqrt</code> features no branching of control flow but is merely a sequence of instructions.
+<h3 id="characterising-the-fast-inverse-square-root"><a href="#characterising-the-fast-inverse-square-root">Characterising the Fast Inverse Square Root</a></h3><p>Similar to the relative error function, <code>Q_rsqrt</code> features no branching of control flow but is merely a sequence of instructions.
 To be able to experiment with different constants in the hack later, we introduce an identifier <code>magic</code> that exists outside of the function.</p>
 
 
@@ -972,8 +966,7 @@ Unlike in the source code, its value is currently unconstrained but will be rest
 The reason is that <a href="http://smtlib.cs.uiowa.edu/theories-FloatingPoint.shtml">there is no <em>function</em></a> for converting floats to their IEEE 754 binary format, e.g. <code>NaN</code> has multiple representations.
 Therefore we feed both the float <code>%0%</code> and its bit vector representation <code>%2</code> into <code>Q_rsqrt</code>, and will assert this relation for every call site.</li>
 </ol>
-<h2 id="checking-properties-of-interest"><a href="#checking-properties-of-interest" class="hanchor" ariaLabel="Anchor">Checking Properties of Interest</a> </h2>
-<p>Having defined both functions, we can start checking the satisfiability of constraints that involve them.
+<h2 id="checking-properties-of-interest"><a href="#checking-properties-of-interest">Checking Properties of Interest</a></h2><p>Having defined both functions, we can start checking the satisfiability of constraints that involve them.
 Although we are pretty sure that our logical characterisation is correct, we may have mixed things up or introduced typos.
 It is a good idea to first test whether it performs the same computations as the <a href="maxRelErr.c">reference implementation</a>:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-zsh" data-lang="zsh">arch: 64-bit
@@ -1296,8 +1289,7 @@ true</code></pre></td></tr></table>
         <a href="https://bohlender.pro/blog/smt-based-optimisation-of-fast-inverse-square-root/invsqrt.log">invsqrt.log</a>
     </figcaption>
 </figure>
-<h3 id="checking-correctness"><a href="#checking-correctness" class="hanchor" ariaLabel="Anchor">Checking Correctness</a> </h3>
-<p>Having confirmed that there is nothing obviously wrong with our characterisation, we can now investigate the properties we are actually interested in.</p>
+<h3 id="checking-correctness"><a href="#checking-correctness">Checking Correctness</a></h3><p>Having confirmed that there is nothing obviously wrong with our characterisation, we can now investigate the properties we are actually interested in.</p>
 <p>We already established in the introduction that correctness of an approximation can be specified by constraining the maximum relative error.
 To prove that the relative error never exceeds 1% for any float, we leave the input to <code>Q_rsqrt</code> <strong>unconstrained</strong>, and check whether it is possible for <code>relErr</code> to return anything greater than 0.01.</p>
 
@@ -1621,8 +1613,7 @@ When also requiring the input to <strong>not be subnormal</strong>, the SMT solv
     </figcaption>
 </figure>
 <p>Since normal floats are not zero, infinite, or subnormal, the unsatisfiability of the accumulated set of constraints <strong>proves that for all normal floats</strong>, the predicate <code>relErr(..) &gt; 0.01</code> is not satisfiable.</p>
-<h3 id="can-the-result-be-nan"><a href="#can-the-result-be-nan" class="hanchor" ariaLabel="Anchor">Can the Result be NaN?</a> </h3>
-<p>Why do I state the result in such an indirect way, instead of just saying that we have proof of correctness for all normal floats?
+<h3 id="can-the-result-be-nan"><a href="#can-the-result-be-nan">Can the Result be NaN?</a></h3><p>Why do I state the result in such an indirect way, instead of just saying that we have proof of correctness for all normal floats?
 Because there is still a minor issue with the previous result.
 While we have indeed proven that the result of <code>relErr</code> can not exceed 0.01, the result may potentially not even be a number (<code>NaN</code>).
 Since <code>NaN</code> is neither greater nor less than 1%, even an implementation of <code>Q_rsqrt</code> that always returns <code>NaN</code> will satisfy our current specification of correctness.</p>
@@ -1808,8 +1799,7 @@ The following constraints are not satisfiable, proving <strong>within seconds</s
     ((<span style="color:#a6e22e">_</span> to_fp <span style="color:#ae81ff">8</span> <span style="color:#ae81ff">24</span>) RNE <span style="color:#ae81ff">0.01</span>)
 ))
 (<span style="color:#a6e22e">check-sat</span>)
-</code></pre></div><h3 id="bounding-the-maximum-relative-error"><a href="#bounding-the-maximum-relative-error" class="hanchor" ariaLabel="Anchor">Bounding the Maximum Relative Error</a> </h3>
-<p>Having established that the fast inverse square root really works for normal, non-negative floats, it would be nice to have a tighter bound on the relative error.
+</code></pre></div><h3 id="bounding-the-maximum-relative-error"><a href="#bounding-the-maximum-relative-error">Bounding the Maximum Relative Error</a></h3><p>Having established that the fast inverse square root really works for normal, non-negative floats, it would be nice to have a tighter bound on the relative error.
 The maximum relative error might be significantly lower than 1%.</p>
 <p>With the current set of constraints, SMT solving can take the role of an <a href="https://en.wikipedia.org/wiki/Oracle_machine">oracle</a> for checking whether the maximum relative error is below some bound, and be used to <strong>refine this bound iteratively</strong>, e.g. via binary search.
 While the solver returns <code>sat</code>, the maximum relative error is greater than the currently assumed bound, and a greater bound must be picked.
@@ -2145,8 +2135,7 @@ The maximal relative error is exactly 0.0017523765563964844 <span style="color:#
 </figure>
 <p>Unlike the previous constraints, these checks take a while (<strong>hours</strong>), but eventually <strong>prove the maximum relative error to be <code>0x3AE5B000</code></strong> (~0.00175237).
 This matches the results of our <a href="maxRelErr.c">brute force search</a>.</p>
-<h3 id="in-search-of-better-magic"><a href="#in-search-of-better-magic" class="hanchor" ariaLabel="Anchor">In Search of Better Magic</a> </h3>
-<p>While we could analyse some interesting properties of the implementation with SMT solving, it didn&rsquo;t really pay off in this particular case, as the <a href="maxRelErr.c">naïve enumeration</a> of all possible inputs and outputs takes just a few seconds.
+<h3 id="in-search-of-better-magic"><a href="#in-search-of-better-magic">In Search of Better Magic</a></h3><p>While we could analyse some interesting properties of the implementation with SMT solving, it didn&rsquo;t really pay off in this particular case, as the <a href="maxRelErr.c">naïve enumeration</a> of all possible inputs and outputs takes just a few seconds.
 It is when the problem space grows, and exhaustive testing becomes unfeasible, that formal verification starts to pay off.
 One such task is finding a better <code>magic</code> constant, which reduces the maximum relative error even further.</p>
 <p>When approaching this without any insight into the problem, finding the best constant boils down to computing the maximum relative error achieved by each of the $2^{32}$ possible constants.
@@ -2563,8 +2552,7 @@ For no magic number is the maximal relative error below 0.0017513036.. <span sty
 </figure>
 <p>Solving these instances takes about <strong>two days</strong> on an i5-4210M, but Z3 (v4.8.5) eventually determines that the <code>magic</code> constant <code>0x5f375a81</code> achieves a maximum relative error of <code>0x3ae58c00</code> (~0.0017513).
 Furthermore, we find that <strong>no constant can achieve an even lower maximum relative error</strong>.</p>
-<h2 id="do-try-this-at-home"><a href="#do-try-this-at-home" class="hanchor" ariaLabel="Anchor">Do Try This at Home!</a> </h2>
-<p>Having read this far, and understood how to get from source code to a logical characterisation of the semantics and various properties, you should be able to investigate related issues on you own.
+<h2 id="do-try-this-at-home"><a href="#do-try-this-at-home">Do Try This at Home!</a></h2><p>Having read this far, and understood how to get from source code to a logical characterisation of the semantics and various properties, you should be able to investigate related issues on you own.
 The following ideas come to mind (easiest first):</p>
 <ul>
 <li>Find out whether the optimised <code>magic</code> constant is unique, or there are others that achieve the same maximum relative error.</li>

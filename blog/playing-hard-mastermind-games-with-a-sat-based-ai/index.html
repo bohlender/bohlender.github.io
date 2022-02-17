@@ -83,14 +83,12 @@ This post illustrates the problem with standard approaches, and how finding cons
 Although it is difficult for a human player to make <em>optimal guesses</em> of the secret code, or at least guesses that do not conflict with the provided clues, the setting is usually simple enough for an AI to find such candidates via explicit exploration of the <a href="https://en.wikipedia.org/wiki/Game_tree">game tree</a>.</p>
 <p>However, such approaches become unfeasible when the number of possibilities for secret codes grows into the millions.
 This post illustrates the problem with standard approaches, and how finding consistent candidates can be approached with <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">SAT</a> solving &ndash; yielding an AI that can handle orders-of-magnitude harder Mastermind instances.</p>
-<h2 id="introduction"><a href="#introduction" class="hanchor" ariaLabel="Anchor">Introduction</a> </h2>
-<p>Every now and then, my friends and I gather to play <a href="https://en.wikipedia.org/wiki/Mansions_of_Madness">Mansions of Madness</a> &ndash; a cooperative boardgame.
+<h2 id="introduction"><a href="#introduction">Introduction</a></h2><p>Every now and then, my friends and I gather to play <a href="https://en.wikipedia.org/wiki/Mansions_of_Madness">Mansions of Madness</a> &ndash; a cooperative boardgame.
 In line with its Lovecraftian setting, the game is often unforgiving so we try to optimise our every move.
 Besides the core gameplay, solving various puzzles is often needed to advance.
 One of these puzzles is in fact <a href="https://boardgamegeek.com/image/3742103/mansions-madness-second-edition">a Mastermind variant</a>, and, as <a href="https://www.boardgamegeek.com/thread/1653724/code-puzzle-absurdity-almost-game-breaking">some players argue</a>, the instances may be rather difficult to reason about &ndash; resulting in wasted turns and decreased chance of winning the scenario.
 This is how the problem of making educated guesses in Mastermind piqued my interest.</p>
-<h3 id="rules-of-mastermind"><a href="#rules-of-mastermind" class="hanchor" ariaLabel="Anchor">Rules of Mastermind</a> </h3>
-<p>In the classic Mastermind game, a <em>secret code</em> $s$ is a row of four pegs, where each peg is of one of six colours.
+<h3 id="rules-of-mastermind"><a href="#rules-of-mastermind">Rules of Mastermind</a></h3><p>In the classic Mastermind game, a <em>secret code</em> $s$ is a row of four pegs, where each peg is of one of six colours.
 For example given the colours
 $
 \textcolor{#272822}●
@@ -272,8 +270,7 @@ First, we get rid of all full matches from both the <code>guess</code> and <code
         <a href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
     </figcaption>
 </figure>
-<h3 id="example-playthrough"><a href="#example-playthrough" class="hanchor" ariaLabel="Anchor">Example Playthrough</a> </h3>
-<p>A full playthrough of classic Mastermind, i.e. with codes of length four, and six colours/symbols
+<h3 id="example-playthrough"><a href="#example-playthrough">Example Playthrough</a></h3><p>A full playthrough of classic Mastermind, i.e. with codes of length four, and six colours/symbols
 $\Sigma=\{
 \textcolor{#272822}●,
 \textcolor{#f92672}●,
@@ -497,8 +494,7 @@ It requires a potential player or AI to be able to give a first guess at the beg
         <a href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
     </figcaption>
 </figure>
-<h3 id="wheres-the-difficulty"><a href="#wheres-the-difficulty" class="hanchor" ariaLabel="Anchor">Where&rsquo;s the Difficulty?</a> </h3>
-<p>With four positions and six colours there are only $6^4=1\,296$ possible combinations to choose from, so keeping the set of all combinations in memory and working with it is perfectly feasible when solving classic Mastermind instances.
+<h3 id="wheres-the-difficulty"><a href="#wheres-the-difficulty">Where&rsquo;s the Difficulty?</a></h3><p>With four positions and six colours there are only $6^4=1\,296$ possible combinations to choose from, so keeping the set of all combinations in memory and working with it is perfectly feasible when solving classic Mastermind instances.
 However, there is nothing hindering us from using even longer sequences or introducing further colours.
 The <strong>code length</strong> $|s|$ and <strong>set of colours/symbols</strong> $\Sigma$ are exactly the parameters that are typically varied to arrive at the different <a href="https://en.wikipedia.org/wiki/Mastermind_(board_game)#Variations">variations of Mastermind</a>.</p>
 <p>For example, <em>Grand Mastermind</em> keeps the secret length of the original but uses $25$ symbols ($5$ shapes, $5$ colours) which allows for $25^4=390\,625$ different codes.
@@ -517,8 +513,7 @@ To alleviate the difficulty of playing the variations with large numbers of comb
 Just to give you an idea: even iterating through all these combinations will take <q>forever</q> and is out of question for a game AI.
 Therefore, even when not aiming for optimal play but merely reasonable guesses, explicit and enumerative methods without backtracking or learning from conflicts won&rsquo;t get us far.
 However, they work well for most practical Mastermind variants and are a good place to start getting a feel for the problem domain.</p>
-<h2 id="explicit-approaches"><a href="#explicit-approaches" class="hanchor" ariaLabel="Anchor">Explicit Approaches</a> </h2>
-<p>In contrast to <em>symbolic</em> methods for search and reachability checking, which work with implicit representations of state sets, <em>explicit</em> methods actually construct each state (here: secret codes) separately and store each in an accessible form in memory.</p>
+<h2 id="explicit-approaches"><a href="#explicit-approaches">Explicit Approaches</a></h2><p>In contrast to <em>symbolic</em> methods for search and reachability checking, which work with implicit representations of state sets, <em>explicit</em> methods actually construct each state (here: secret codes) separately and store each in an accessible form in memory.</p>
 
 <aside >
     <p>
@@ -586,8 +581,7 @@ Given $|s|$ and $|\Sigma|$, we can now easily enumerate all possible secrets wit
         <a href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
     </figcaption>
 </figure>
-<h3 id="refinement-of-consistent-candidates"><a href="#refinement-of-consistent-candidates" class="hanchor" ariaLabel="Anchor">Refinement of Consistent Candidates</a> </h3>
-<p>The simplest approach to playing Mastermind is probably to iterate over <code>all_secrets()</code> and commit each element, since we must eventually encounter the code chosen by the codemaker.
+<h3 id="refinement-of-consistent-candidates"><a href="#refinement-of-consistent-candidates">Refinement of Consistent Candidates</a></h3><p>The simplest approach to playing Mastermind is probably to iterate over <code>all_secrets()</code> and commit each element, since we must eventually encounter the code chosen by the codemaker.
 However, this approach completely ignores the feedback received from the codemaker, and will obviously lead to many wasted rounds for the codebreaker.</p>
 <p>The next best thing we can try is to avoid making guesses that are <em>inconsistent</em> with the accumulated feedback.
 For this, we must merely check that whatever we assume <code>secret</code> to be, it generates the same feedback for the previous guesses as the actual secret.
@@ -794,8 +788,7 @@ Although the implementation always returns the first element, there is nothing w
 Therefore, after every round, such candidates and the last (wrong) guess are removed from <code>self.candidates</code>.</p>
 <p>Even though the approach does not result in optimal play, and many instances can be won in less turns, it is computationally cheap and solves a classic Mastermind instance in $5.765$ turns on average.
 This is surprisingly <a href="http://www.philos.rug.nl/~barteld/master.pdf">close to the theoretical minimum</a> of $4.34$ turns.</p>
-<h3 id="lazy-enumeration-of-consistent-candidates"><a href="#lazy-enumeration-of-consistent-candidates" class="hanchor" ariaLabel="Anchor">Lazy Enumeration of Consistent Candidates</a> </h3>
-<p>A downside of the above method is that it keeps a list of <em>all</em> consistent candidates in memory.
+<h3 id="lazy-enumeration-of-consistent-candidates"><a href="#lazy-enumeration-of-consistent-candidates">Lazy Enumeration of Consistent Candidates</a></h3><p>A downside of the above method is that it keeps a list of <em>all</em> consistent candidates in memory.
 Since the number of possible secrets grows exponentially in the admissible length of secrets, this may already hinder us from solving slightly harder Mastermind variations, e.g. with $6^8$ possible secrets.</p>
 <p><code>LazyExplicitConsistentAi</code> is a more practical implementation of the previous approach.
 It enumerates the consistent combinations but only needs one candidate to be explicitly present in memory at a time, which results in a small memory footprint:</p>
@@ -1018,8 +1011,7 @@ It enumerates the consistent combinations but only needs one candidate to be exp
         <a href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
     </figcaption>
 </figure>
-<h3 id="minimax-based-guessing"><a href="#minimax-based-guessing" class="hanchor" ariaLabel="Anchor">Minimax-based Guessing</a> </h3>
-<p>Since my original motivation for looking into the topic was to learn how to play the Mastermind games in <a href="https://en.wikipedia.org/wiki/Mansions_of_Madness">Mansions of Madness</a> optimally, I feel like I should outline how to do this, too.
+<h3 id="minimax-based-guessing"><a href="#minimax-based-guessing">Minimax-based Guessing</a></h3><p>Since my original motivation for looking into the topic was to learn how to play the Mastermind games in <a href="https://en.wikipedia.org/wiki/Mansions_of_Madness">Mansions of Madness</a> optimally, I feel like I should outline how to do this, too.
 Even though the central topic of this post is the (symbolic) computation of consistent guesses for hard Mastermind instances.</p>
 <p>Instead of just picking some consistent candidate, one can also analyse how promising the various candidates are and pick the <q>best</q> one &ndash; depending on some heuristic or notion of quality.</p>
 <p>The first and probably most popular way for picking a &ldquo;good&rdquo; candidate was suggested by <a href="https://www.cs.uni.edu/~wallingf/teaching/cs3530/resources/knuth-mastermind.pdf">Knuth</a> in 1977.
@@ -1495,15 +1487,13 @@ That&rsquo;s why we also keep the inconsistent candidates (<code>self.not_candid
 <p>The Minimax-based approach solves any classic Mastermind instance <strong>within five guesses</strong>, and needs $4.476$ rounds on average.
 Unfortunately, the runtime complexity of this and similar methods that optimise rigorously is quadratic in the number of candidates.
 Considering that even iterating over all possible secrets of a hard Mastermind instance takes too long for a game AI, aiming for optimal guesses is quite a stretch.</p>
-<h2 id="sat-based-approach"><a href="#sat-based-approach" class="hanchor" ariaLabel="Anchor">SAT-based Approach</a> </h2>
-<p>So far we&rsquo;ve seen that the Minimax-based approach is well-suited for Mastermind instances with small numbers of possible secrets, and that the lazy enumeration of consistent candidates is not optimal, but cheaper to compute, and on average not much worse.
+<h2 id="sat-based-approach"><a href="#sat-based-approach">SAT-based Approach</a></h2><p>So far we&rsquo;ve seen that the Minimax-based approach is well-suited for Mastermind instances with small numbers of possible secrets, and that the lazy enumeration of consistent candidates is not optimal, but cheaper to compute, and on average not much worse.
 However, despite the small memory footprint, the core problem is that enumerative methods don&rsquo;t scale to larger Mastermind instances.</p>
 <p>It would be nice if we could at manage to compute consistent candidates for the hard instances, but even this problem <a href="https://arxiv.org/abs/cs/0512049">is known</a> to be <a href="https://en.wikipedia.org/wiki/NP-complete">NP-complete</a>.
 Luckily, we can reduce the problem to another well-studied NP-complete problem &ndash; the <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">Boolean satisfiability problem (SAT)</a> &ndash; and leverage the highly-tuned solvers existing for it.</p>
 <p>All we have to do is devise a logical characterisation of the candidates that are consistent with the feedback received so far and use a SAT solver to acquire such a candidate.
 Let&rsquo;s see what kind of variables and constraints we need for this.</p>
-<h3 id="encoding-the-symbol-mapping"><a href="#encoding-the-symbol-mapping" class="hanchor" ariaLabel="Anchor">Encoding the Symbol Mapping</a> </h3>
-<p>Since we want to guess some secret $s$, we first of all need variables that indicate which symbol occurs at which position.
+<h3 id="encoding-the-symbol-mapping"><a href="#encoding-the-symbol-mapping">Encoding the Symbol Mapping</a></h3><p>Since we want to guess some secret $s$, we first of all need variables that indicate which symbol occurs at which position.
 To this end, we introduce the Boolean variables
 $$
 s_{\mathit{pos},\mathit{sym}}
@@ -1660,8 +1650,7 @@ $$
         <a href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
     </figcaption>
 </figure>
-<h3 id="encoding-full-matches"><a href="#encoding-full-matches" class="hanchor" ariaLabel="Anchor">Encoding Full Matches</a> </h3>
-<p>Initially, there is no feedback to constrain the set of consistent candidates, and picking a random candidate is unproblematic.
+<h3 id="encoding-full-matches"><a href="#encoding-full-matches">Encoding Full Matches</a></h3><p>Initially, there is no feedback to constrain the set of consistent candidates, and picking a random candidate is unproblematic.
 Any subsequent guess, however, should at least be consistent with the feedback accumulated up to that point.
 To characterise such candidates, we next consider which constraints some feedback $f$ for a committed candidate $c$ imposes.</p>
 <p>Consider the first part of the feedback: the number of full matches.
@@ -1838,8 +1827,7 @@ $$
 Once done, it was just more readable to let Z3 pick fresh names for the variables instead of manually generating distinct names for each feedback&rsquo;s full match variables.
     </p>
 </aside>
-<h3 id="encoding-symbol-matches"><a href="#encoding-symbol-matches" class="hanchor" ariaLabel="Anchor">Encoding Symbol Matches</a> </h3>
-<p>What remains is the creation of constraints which enforce consistency w.r.t. the second part of the feedback: the number of symbol matches.
+<h3 id="encoding-symbol-matches"><a href="#encoding-symbol-matches">Encoding Symbol Matches</a></h3><p>What remains is the creation of constraints which enforce consistency w.r.t. the second part of the feedback: the number of symbol matches.
 Unlike the full match <q>flag</q> that we introduced for every position, a symbol match relates two positions &ndash; one from the guess with one from the secret.
 To this end, we introduce the Boolean variables
 $$
@@ -2220,8 +2208,7 @@ self<span style="color:#f92672">.</span>solver<span style="color:#f92672">.</spa
     </figcaption>
 </figure>
 <p>Note that we treat the $\mathit{sm}_{\mathit{src},\mathit{dst}}$ variables similar to the feedback-specific $\mathit{fm}_\mathit{pos}$ variables: we introduce fresh ones for every feedback.</p>
-<h3 id="computing-a-guess"><a href="#computing-a-guess" class="hanchor" ariaLabel="Anchor">Computing a Guess</a> </h3>
-<p>We now have all the constraints together for the $s_{\mathit{pos},\mathit{sym}}$ variables to characterise the code sequences that are consistent with the received feedback.
+<h3 id="computing-a-guess"><a href="#computing-a-guess">Computing a Guess</a></h3><p>We now have all the constraints together for the $s_{\mathit{pos},\mathit{sym}}$ variables to characterise the code sequences that are consistent with the received feedback.
 To actually compute a guess, we just need to find an assignment that satisfies these constraints.
 Luckily, we can delegate this task to a SAT solver.</p>
 <p>To construct the guess, we identify the $s_{\mathit{pos},\mathit{sym}}$ variables that are set to $\mathit{true}$:</p>
@@ -2412,8 +2399,7 @@ Luckily, we can delegate this task to a SAT solver.</p>
 Feel free to experiment with <a href="mastermind.py">the provided implementation</a> of the discussed methods.
 Using the <code>SymbolicConsistentAi</code> you can now easily play Mastermind games with huge numbers of secret code combinations.
 On average, it takes only $10.51$ guesses to find the secret within $2\,821\,109\,907\,456$ possible combinations of the classic Mastermind variant with codes of length $16$ (see experiments below).</p>
-<h2 id="experiments"><a href="#experiments" class="hanchor" ariaLabel="Anchor">Experiments</a> </h2>
-<p>For reference, I&rsquo;ve run some experiments to measure the performance on an i7-7700K CPU, using Python 3.8 and Z3 v4.8.7.
+<h2 id="experiments"><a href="#experiments">Experiments</a></h2><p>For reference, I&rsquo;ve run some experiments to measure the performance on an i7-7700K CPU, using Python 3.8 and Z3 v4.8.7.
 The following table provides both a qualitative and quantitative comparison of the lazy enumeration AI and the SAT-based AI, with measurement cells formatted as <q>(Explicit / Symbolic)</q>:</p>
 <table>
 <thead>
@@ -2497,8 +2483,7 @@ Accordingly, for those non-exhaustive runs, the measured maximal number of turns
 <p>Although both approaches implement the same idea, i.e. make guesses that are consistent with the feedback, the qualitative results differ.
 This is because our implementation of Shapiro&rsquo;s idea picks the <em>smallest</em> consistent candidate but the SAT-based approach picks <em>some</em> consistent candidate.
 The latter seems to be advantageous.</p>
-<h2 id="do-try-this-at-home"><a href="#do-try-this-at-home" class="hanchor" ariaLabel="Anchor">Do Try This at Home!</a> </h2>
-<p>As usual, there is a lot of room for further improvement and experimentation.
+<h2 id="do-try-this-at-home"><a href="#do-try-this-at-home">Do Try This at Home!</a></h2><p>As usual, there is a lot of room for further improvement and experimentation.
 Here are some points you might want to explore on your own (easiest first):</p>
 <ul>
 <li>There are many low hanging fruits regarding performance improvements.

@@ -84,8 +84,7 @@ This made me realise how hard generating <q>high-quality</q> crosswords actually
 Trying to create a crossword from a set of words &ndash; or a subset thereof &ndash; I checked out several tools but found all of them to be based on heuristics and yield rather sparse crosswords.</p>
 <p>In line with the general theme of my previous posts, this one illustrates how we can leverage <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">SAT solving</a> to solve this problem.
 In contrast to related approaches, which assume a fixed grid structure and search for fitting words, we consider word placement as part of the problem and eventually end up with an integrated solution to generating crosswords of adjustable quality.</p>
-<h2 id="the-problem-statement"><a href="#the-problem-statement" class="hanchor" ariaLabel="Anchor">The Problem Statement</a> </h2>
-<p>When designing a crossword puzzle on a specific theme or topic, one will likely start with <strong>a set of words</strong> (and clever clues) that fit the setting and a rough idea of <strong>the crossword&rsquo;s dimensions</strong>.
+<h2 id="the-problem-statement"><a href="#the-problem-statement">The Problem Statement</a></h2><p>When designing a crossword puzzle on a specific theme or topic, one will likely start with <strong>a set of words</strong> (and clever clues) that fit the setting and a rough idea of <strong>the crossword&rsquo;s dimensions</strong>.
 For example, when designing a crossword for a magazine, the page size will probably limit the crossword&rsquo;s width to less than 20 cells to keep the characters legible.</p>
 
 <aside >
@@ -265,8 +264,7 @@ While <q>quality</q> may be subjective, the following is an <q>optimal</q> place
 </figure>
 <p>To really appreciate the result, try to come up with a subset and placement of words that looks better to you or at least contains a similar number of words.
 For reference, you can also give <a href="https://duckduckgo.com/?q=best+crossword+puzzle+generator">existing tools</a> a try.</p>
-<h2 id="overview-of-sat-based-problem-solving"><a href="#overview-of-sat-based-problem-solving" class="hanchor" ariaLabel="Anchor">Overview of SAT-based Problem Solving</a> </h2>
-<p>Given a Boolean formula, a <a href="https://en.wikipedia.org/wiki/SAT_solver">SAT solver</a> determines whether a variable assignment exists which makes the formula evaluate to $\mathit{true}$.
+<h2 id="overview-of-sat-based-problem-solving"><a href="#overview-of-sat-based-problem-solving">Overview of SAT-based Problem Solving</a></h2><p>Given a Boolean formula, a <a href="https://en.wikipedia.org/wiki/SAT_solver">SAT solver</a> determines whether a variable assignment exists which makes the formula evaluate to $\mathit{true}$.
 To leverage this functionality for problem solving the problem must be characterised in terms of a Boolean formula, such that a solution to the formula can be interpreted as a solution for the original problem.
 This process is also reflected in the structure of our main function:</p>
 
@@ -477,8 +475,7 @@ It will be used to interpret the satisfying assignment, or <em>model</em>, if on
 <p>Don&rsquo;t be surprised that we use the Python bindings of the <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a> solver <a href="https://github.com/Z3Prover/z3">Z3</a>, although the claim was that we will use SAT solving machinery.
 Since the resulting constraints are expressed over finite domains &ndash; as both the crossword grid and the words are finite &ndash; they can easily be <a href="https://theory.stanford.edu/~nikolaj/programmingz3.html#sec-sat-core">translated to SAT instances</a>.
 Furthermore, it is often advantageous to use dedicated SAT solvers for such instances, so &ndash; besides solving the SMT instance with Z3 in line 41 &ndash; we also export the problem in the standard <a href="http://www.satcompetition.org/2011/format-benchmarks2011.html">format for SAT solvers</a> in line 38.</p>
-<h2 id="encoding-the-problem"><a href="#encoding-the-problem" class="hanchor" ariaLabel="Anchor">Encoding the Problem</a> </h2>
-<p>Before looking into how the constraints mentioned in <a href="#the-problem-statement">the problem statement</a> can be expressed as propositional SAT, let&rsquo;s start by compiling the set of variables and constants that we will clearly need for the characterisation of our problem.</p>
+<h2 id="encoding-the-problem"><a href="#encoding-the-problem">Encoding the Problem</a></h2><p>Before looking into how the constraints mentioned in <a href="#the-problem-statement">the problem statement</a> can be expressed as propositional SAT, let&rsquo;s start by compiling the set of variables and constants that we will clearly need for the characterisation of our problem.</p>
 <p>When talking about word placement, what we typically have in mind are a word&rsquo;s start coordinates and its orientation.
 For example, in the generated <a href="#an-optimal-word-placement">crossword shown above</a>, the phrase <q>MYST</q> starts at $(x,y)=(0,0)$ and is oriented vertically.
 Since there is only a finite number of possible placements, a simple way of encoding the placement of a word $w$ in terms of Boolean variables is by means of a variable
@@ -787,8 +784,7 @@ grid <span style="color:#f92672">=</span> [[Const(<span style="color:#e6db74">f<
         <a href="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/crossword.py">crossword.py</a>
     </figcaption>
 </figure>
-<h3 id="word-placement"><a href="#word-placement" class="hanchor" ariaLabel="Anchor">Word Placement</a> </h3>
-<p>With the variable creation out of the way, let&rsquo;s see how we can express the first few rules from <a href="#the-problem-statement">the problem statement</a> as constraints over these variables.</p>
+<h3 id="word-placement"><a href="#word-placement">Word Placement</a></h3><p>With the variable creation out of the way, let&rsquo;s see how we can express the first few rules from <a href="#the-problem-statement">the problem statement</a> as constraints over these variables.</p>
 <p>Depending on how and whether a word is placed, other characters must appear in the corresponding grid cells.
 So to encode <a href="#the-problem-statement">rule (1)</a>, we can iterate over each word and placement within the grid bounds, and assert that the characters match.
 For example, to cover the placement of <q>MYST</q> in the <a href="#an-optimal-word-placement">introductory crossword</a>, we need the following constraint:</p>
@@ -1266,8 +1262,7 @@ res<span style="color:#f92672">.</span>append(Implies(word_selection[word], Or(w
         <a href="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/crossword.py">crossword.py</a>
     </figcaption>
 </figure>
-<h3 id="only-sequences-of-words"><a href="#only-sequences-of-words" class="hanchor" ariaLabel="Anchor">Only Sequences of Words</a> </h3>
-<p>If we were to use a SAT solver on the constraints accumulated so far, we may find that some grid cell variables are assigned seemingly random characters which do not even form a word.
+<h3 id="only-sequences-of-words"><a href="#only-sequences-of-words">Only Sequences of Words</a></h3><p>If we were to use a SAT solver on the constraints accumulated so far, we may find that some grid cell variables are assigned seemingly random characters which do not even form a word.
 This is to be expected, as there is no constraint to enforce that all character sequences must correspond to a word placement yet (cf.  <a href="#the-problem-statement">rule (4)</a>).</p>
 <p>A simple way to achieve this, is to require the start coordinates of each sequence to correspond to the coordinates of a word placement.
 The following lines handle horizontal character sequences but vertical ones can be treated analogously:</p>
@@ -1384,8 +1379,7 @@ The following lines handle horizontal character sequences but vertical ones can 
         <a href="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/crossword.py">crossword.py</a>
     </figcaption>
 </figure>
-<h3 id="connectedness"><a href="#connectedness" class="hanchor" ariaLabel="Anchor">Connectedness</a> </h3>
-<p>The last and most complex requirement is <a href="#the-problem-statement">rule (5)</a>, which demands the placed words to form a single crossword rather than several disjoint ones.
+<h3 id="connectedness"><a href="#connectedness">Connectedness</a></h3><p>The last and most complex requirement is <a href="#the-problem-statement">rule (5)</a>, which demands the placed words to form a single crossword rather than several disjoint ones.
 That is, understanding the placed words as vertices of an <a href="https://en.wikipedia.org/wiki/Undirected_graph">undirected graph</a>, which are connected if the words intersect, should result in a graph with only one <a href="https://en.wikipedia.org/wiki/Connected_component_%28graph_theory%29">connected component</a>.</p>
 <p>The following figure illustrates the graph corresponding to our <a href="#an-optimal-word-placement">introductory example</a>:</p>
 
@@ -1871,8 +1865,7 @@ $$
 $$
 where $(nx,ny)$ are neighbours of $(x,y)$.
 This is what the rest of the above listing takes care of, ultimately requiring in line 179 that all non-empty cells must reach the <q>start cell</q> within the <code>maxDistance</code> &ndash; otherwise we&rsquo;d have more than one connected component.</p>
-<h3 id="quality"><a href="#quality" class="hanchor" ariaLabel="Anchor">Quality</a> </h3>
-<p>At this point we&rsquo;ve constructed all constraints that are needed to generate valid crosswords.
+<h3 id="quality"><a href="#quality">Quality</a></h3><p>At this point we&rsquo;ve constructed all constraints that are needed to generate valid crosswords.
 However, solving the constraints at this point will yield rather sobering results as even an empty crossword is a valid crossword &ndash; we do not require anything but compliance with the rules yet.
 It&rsquo;s time to introduce a quality criterion.</p>
 <p>Quality is subjective, but I guess everyone agrees that a sparse crossword is worse than a tightly packed one.
@@ -1949,8 +1942,7 @@ res<span style="color:#f92672">.</span>append(PbGe([(var, len(w)) <span style="c
 </figure>
 <p>That&rsquo;s all there is to it conceptually.
 The <a href="crossword.py">rest of the code</a> is just generic plumbing to feed the constraints <code>res</code> into <a href="https://github.com/Z3Prover/z3">Z3</a> and interpret the returned assignment of Boolean values to our variables.</p>
-<h2 id="cnf-export"><a href="#cnf-export" class="hanchor" ariaLabel="Anchor">CNF Export</a> </h2>
-<p>Although Z3 is feature-rich and state of the art, it nevertheless pays off to use a competitive SAT solver instead for our particular use-case.
+<h2 id="cnf-export"><a href="#cnf-export">CNF Export</a></h2><p>Although Z3 is feature-rich and state of the art, it nevertheless pays off to use a competitive SAT solver instead for our particular use-case.
 I recommend sticking to SMT solving during development and switching to SAT solving for the more complex instances.
 Z3 provides <a href="https://theory.stanford.edu/~nikolaj/programmingz3.html#sec-tactics">tactics</a> to reduce the finite-domain SMT constraints to a SAT instance in <a href="https://en.wikipedia.org/wiki/Conjunctive_normal_form">CNF</a>, which can then be exported in the <a href="http://www.satcompetition.org/2011/format-benchmarks2011.html">standard format for SAT solvers</a>:</p>
 
@@ -2082,8 +2074,7 @@ Z3 provides <a href="https://theory.stanford.edu/~nikolaj/programmingz3.html#sec
         <a href="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/crossword.py">crossword.py</a>
     </figcaption>
 </figure>
-<h2 id="experiments"><a href="#experiments" class="hanchor" ariaLabel="Anchor">Experiments</a> </h2>
-<p>Now that we got the crossword generation pipeline up an running it is interesting to see how long it takes to assemble <a href="#the-problem-statement">the words from our example</a> into crosswords of size 12 with varying quality requirements.
+<h2 id="experiments"><a href="#experiments">Experiments</a></h2><p>Now that we got the crossword generation pipeline up an running it is interesting to see how long it takes to assemble <a href="#the-problem-statement">the words from our example</a> into crosswords of size 12 with varying quality requirements.
 Following the proposed approach, I generated crosswords of increasing quality and measured the time needed to solve the SAT instances with various solvers.
 Since not all steps of the SAT encoding and solving are fully deterministic, some repetitions are necessary to get a better overview of the solvers' average performance.
 As implied in the previous section Z3 didn&rsquo;t perform too well on these instances and was therefore excluded from the evaluation.</p>
@@ -2223,8 +2214,7 @@ For example, by adding the following words to our word set, the average time to 
 </figure>
 <p>For higher quality requirements, additional words may improve the runtime by more than an order-of-magnitude (cf. times for quality 100).
 However, when designing a custom crossword, it may be tricky to come up with a large set of words (and witty clues).</p>
-<h2 id="do-try-this-at-home"><a href="#do-try-this-at-home" class="hanchor" ariaLabel="Anchor">Do Try This at Home!</a> </h2>
-<p>The presented solution works well for my use case but obviously leaves room for further improvements.
+<h2 id="do-try-this-at-home"><a href="#do-try-this-at-home">Do Try This at Home!</a></h2><p>The presented solution works well for my use case but obviously leaves room for further improvements.
 Instead of building infrastructure around the crossword generation, e.g. turning it into rich client application or a service, I&rsquo;d rather point out some conceptual alleys worth exploring:</p>
 <ul>
 <li>What about non-square or hexagonal grids?

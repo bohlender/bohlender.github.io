@@ -100,8 +100,7 @@ This post tries to provide a more instructive answer and raise awareness for the
 <li>is interested in seeing how the <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a> solver <a href="https://github.com/Z3Prover/z3/">Z3</a> can be used to express and solve the problem in several logics.
 It takes only few steps to get from a quantifier-laden high-level formulation to what is effectively <a href="https://en.wikipedia.org/wiki/Propositional_logic">propositional logic</a>.</li>
 </ul>
-<h2 id="the-problem-statement"><a href="#the-problem-statement" class="hanchor" ariaLabel="Anchor">The Problem Statement</a> </h2>
-<p>A functioning <a href="https://en.wikipedia.org/wiki/Seven-segment_display">seven-segment display</a> is supposed to represent digits as follows:</p>
+<h2 id="the-problem-statement"><a href="#the-problem-statement">The Problem Statement</a></h2><p>A functioning <a href="https://en.wikipedia.org/wiki/Seven-segment_display">seven-segment display</a> is supposed to represent digits as follows:</p>
 
 
 
@@ -288,15 +287,13 @@ That is, to find out which digit each pattern represents:</p>
 </figure>
 <p>The decoded number 5353 is the solution to this problem instance.
 However, <a href="https://adventofcode.com">Advent of Code</a> is about programming, so &ndash; to make people solve the puzzle programmatically &ndash; there are actually 200 independent instances that need to be solved and their 4-digit numbers summed up.</p>
-<h3 id="puzzle-input-file"><a href="#puzzle-input-file" class="hanchor" ariaLabel="Anchor">Puzzle Input File</a> </h3>
-<p>The <a href="input.txt">puzzle input file</a> consists of 200 lines &ndash; each of which encodes an independent problem instance.
+<h3 id="puzzle-input-file"><a href="#puzzle-input-file">Puzzle Input File</a></h3><p>The <a href="input.txt">puzzle input file</a> consists of 200 lines &ndash; each of which encodes an independent problem instance.
 The <strong>first part</strong> of a line describes the ten (unordered) patterns that can be observed on the malfunctioning seven-segment display.
 The <strong>second part</strong> represents the four-digit seven-segment display that needs be decoded.
 The above problem instance is in fact <a href="https://adventofcode.com/2021/day/8">the original introductory example</a>.
 It may appear as follows in the input file:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab | cdfeb fcadb cdfeb cdbaf
-</code></pre></div><h2 id="formalising-a-problem-instance"><a href="#formalising-a-problem-instance" class="hanchor" ariaLabel="Anchor">Formalising a Problem Instance</a> </h2>
-<p>If you give it some thought, it is easy to come up with efficient <a href="https://www.reddit.com/r/adventofcode/comments/rbj87a/2021_day_8_solutions/">procedures to solve</a> any problem instance of this puzzle by exploiting domain-specifics like the patterns' numbers of segments.
+</code></pre></div><h2 id="formalising-a-problem-instance"><a href="#formalising-a-problem-instance">Formalising a Problem Instance</a></h2><p>If you give it some thought, it is easy to come up with efficient <a href="https://www.reddit.com/r/adventofcode/comments/rbj87a/2021_day_8_solutions/">procedures to solve</a> any problem instance of this puzzle by exploiting domain-specifics like the patterns' numbers of segments.
 For example, since <code>1</code> is the only digit that is displayed by exactly two segments, any observed pattern with just two lit segments must be representing it as well.
 However, in general, such procedures may require significant alterations and re-analysis of puzzle aspects to exploit even if seemingly small variations are introduced.</p>
 <p>Declarative approaches, which merely rely on a description of <em>what</em> a solution to a problem is, rather than <em>how</em> to find it, tend to be less prone to this.
@@ -313,8 +310,7 @@ This system can then be solved by some generic procedure that doesn&rsquo;t even
 </aside>
 <p>In the following, we will use <a href="https://en.wikipedia.org/wiki/First_order_logic">first-order logic</a> to express the puzzle in a formal, declarative way.
 This is a reasonably high-level logic which allows us to conveniently express the relations between the problem&rsquo;s entities, and is amenable to automated theorem proving.</p>
-<h3 id="characterisation-in-first-order-logic"><a href="#characterisation-in-first-order-logic" class="hanchor" ariaLabel="Anchor">Characterisation in First-Order Logic</a> </h3>
-<p>Let us start by formalising the thing we know: <strong>how each digit maps to a set of segments on a (functioning) seven-segment display</strong>.
+<h3 id="characterisation-in-first-order-logic"><a href="#characterisation-in-first-order-logic">Characterisation in First-Order Logic</a></h3><p>Let us start by formalising the thing we know: <strong>how each digit maps to a set of segments on a (functioning) seven-segment display</strong>.
 In first-order logic sets are characterised by predicates.
 For example, if the domain of discourse is $\mathbb{Z}$, predicate $\mathit{neg}(x) := x&lt;0$ chracterises the set of negative integers.
 Accordingly, to characterise the segments of each digit $d$, we could define 10 predicates $\mathit{segment}_d(s)$.
@@ -408,8 +404,7 @@ $$
 \tag{5}\mathit{PermDigitSegment}(\mathit{Idx2dig}(i),s) \iff \mathit{patternSegment}(i,s)
 $$
 for all indices $i$ and segments $s$.</p>
-<h3 id="the-characterisation-at-a-glance"><a href="#the-characterisation-at-a-glance" class="hanchor" ariaLabel="Anchor">The Characterisation at a Glance</a> </h3>
-<p>Overall, we end up with the following constraints
+<h3 id="the-characterisation-at-a-glance"><a href="#the-characterisation-at-a-glance">The Characterisation at a Glance</a></h3><p>Overall, we end up with the following constraints
 $$
 \begin{aligned}
 \mathit{digitSegment}(d,s) &\iff s \text{ is a segment of } d\\
@@ -422,11 +417,9 @@ $$
 for all $d\in\mathit{Digit}$, $s,s'\in\mathit{Segment}$, and indices $i\in\mathit{Index}$.</p>
 <p>If we now manage to find an interpretation of the uninterpreted symbols that satisfies all these constraints, the particular puzzle instance will be solved.
 We can then simply use $\mathit{Idx2dig}$ to map the patterns on the malfunctioning four-digit seven-segment display back to digits, or use $\mathit{Perm}$ to undo the permutation of segments.</p>
-<h2 id="solving-the-puzzle-via-z3"><a href="#solving-the-puzzle-via-z3" class="hanchor" ariaLabel="Anchor">Solving the Puzzle via Z3</a> </h2>
-<p>While there are many solvers, formalisms, and technologies that we can leverage to obtain a satisfying interpretation of the above constraints, this post illustrates how to do it with the <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a> solver <a href="https://github.com/Z3Prover/z3/">Z3</a>.
+<h2 id="solving-the-puzzle-via-z3"><a href="#solving-the-puzzle-via-z3">Solving the Puzzle via Z3</a></h2><p>While there are many solvers, formalisms, and technologies that we can leverage to obtain a satisfying interpretation of the above constraints, this post illustrates how to do it with the <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">SMT</a> solver <a href="https://github.com/Z3Prover/z3/">Z3</a>.
 More precisely, with its <a href="https://z3prover.github.io/api/html/namespacez3py.html">Python bindings</a>.</p>
-<h3 id="domains"><a href="#domains" class="hanchor" ariaLabel="Anchor">Domains</a> </h3>
-<p>To express the above predicates we first have to introduce the domains, or <code>Sort</code>s, our values will be from.
+<h3 id="domains"><a href="#domains">Domains</a></h3><p>To express the above predicates we first have to introduce the domains, or <code>Sort</code>s, our values will be from.
 Finite domains of unrelated values can be created via <code>EnumSort</code>, and that&rsquo;s exactly the kind of values we&rsquo;re dealing with in the puzzle.
 Since we will also need to convert between these values and their Python counterparts &ndash; <code>int</code> for digits and indices, and <code>str</code> for segments &ndash; we accompany each domain with corresponding mappings:</p>
 
@@ -595,8 +588,7 @@ Otherwise, one can quickly end up expressing a decidable problem in terms of an 
 This lets you see for yourself how a logic impacts modelling convenience, size of the characterisation, and solver performance.
     </p>
 </aside>
-<h3 id="solving-the-puzzle-incrementally"><a href="#solving-the-puzzle-incrementally" class="hanchor" ariaLabel="Anchor">Solving the Puzzle Incrementally</a> </h3>
-<p>To solve the overall puzzle, we have to solve the 200 independent problem instances described in the <a href="input.txt">input file</a> and combine their solutions.
+<h3 id="solving-the-puzzle-incrementally"><a href="#solving-the-puzzle-incrementally">Solving the Puzzle Incrementally</a></h3><p>To solve the overall puzzle, we have to solve the 200 independent problem instances described in the <a href="input.txt">input file</a> and combine their solutions.
 Although it is possible to construct and solve the instances' constraints independently, as most of the <a href="https://www.reddit.com/r/adventofcode/comments/rbwnh5/2021_day_8_can_it_be_solved_as_a_constraint/">suggested solutions</a> do, it is more efficient to avoid starting from scratch 200 times.
 Closer inspection of constraints $(1)&ndash;(5)$ shows that the instances' formalisations only differ in $(4)$, i.e. the definition of $\mathit{patternSegment}$.
 Therefore, a simple way to avoid starting from scratch is by first adding the core constraints $(1)&ndash;(3),(5)$ to the solver&rsquo;s stack of constraints and then iteratively checking satisfiability with each of the 200 variants of $(4)$ swapped in at the top of the stack.</p>
@@ -992,8 +984,7 @@ The more specific it is, the more likely
 <p>As you can hopefully see, using an SMT solver incrementally is pretty straight forward in the context of this puzzle.
 Although we&rsquo;ve just started, our SMT-based puzzle solver is almost finished already.
 It merely remains to provide a concrete implementation of <code>PuzzleEncoder</code>.</p>
-<h3 id="high-level-encoding"><a href="#high-level-encoding" class="hanchor" ariaLabel="Anchor">High-level Encoding</a> </h3>
-<p>The most obvious solution is to just use the means Z3 provides to express the characterisation we came up with <a href="#the-characterisation-at-a-glance">above</a>.</p>
+<h3 id="high-level-encoding"><a href="#high-level-encoding">High-level Encoding</a></h3><p>The most obvious solution is to just use the means Z3 provides to express the characterisation we came up with <a href="#the-characterisation-at-a-glance">above</a>.</p>
 <p>It is handy to keep the symbols that we use in our encoding around, e.g. to reference them in the encoding functions, or to look up their interpretation later.
 Therefore, we declare these symbols as members of the encoder.
 What may catch you by surprise is that, following the <a href="http://smtlib.cs.uiowa.edu/language.shtml">SMT-LIB standard</a>, there is no special way to create a predicate in Z3.
@@ -1704,8 +1695,7 @@ The integer at index $i$ denotes the digit encoded by the $i$-th observed patter
 Just make sure to pass an instance of <code>HighLevelEncoder</code> to <code>solve_puzzle</code>.
 This naïve solution isn&rsquo;t exactly fast, taking roughly 30s, but comping up with it didn&rsquo;t require much thought beyond <a href="#formalising-a-problem-instance">the original formalisation</a>.
 Let&rsquo;s see whether this can be improved by switching to a less expressive (sub-)logic.</p>
-<h3 id="mid-level-encoding"><a href="#mid-level-encoding" class="hanchor" ariaLabel="Anchor">Mid-level Encoding</a> </h3>
-<p>Although quantifiers facilitate concise characterisation they are also a source of complexity &ndash; especially in the context of small finite domains.
+<h3 id="mid-level-encoding"><a href="#mid-level-encoding">Mid-level Encoding</a></h3><p>Although quantifiers facilitate concise characterisation they are also a source of complexity &ndash; especially in the context of small finite domains.
 Therefore, in the next step, we will bring our constraints into a quantifier-free fragment of first-order logic.</p>
 <p>Dropping the quantifiers does not entail any changes to the declared symbols, but the new encoder should communicate that the constraints it produces are free of quantifiers:</p>
 
@@ -2261,8 +2251,7 @@ I find this version to be even more readable that the previous one, mostly becau
 <p>Now, try running <code>solve_puzzle</code> with this new encoder.
 It turns out that moving to a quantifier-free fragment of first-order logic reduces the runtime significantly (to ~6s).
 One might wonder whether going even lower will yield similar performance gains.</p>
-<h3 id="low-level-encoding"><a href="#low-level-encoding" class="hanchor" ariaLabel="Anchor">Low-level Encoding</a> </h3>
-<p>Similar to quantifiers, uninterpreted functions introduce some complexity but do not add any expressivity that is essential to our characterisation.
+<h3 id="low-level-encoding"><a href="#low-level-encoding">Low-level Encoding</a></h3><p>Similar to quantifiers, uninterpreted functions introduce some complexity but do not add any expressivity that is essential to our characterisation.
 If our constraints were free of both quantifiers and uninterpreted functions they&rsquo;d be effectively propositional.
 In fact, Z3 wouldn&rsquo;t even reach for SMT procedures but directly employ its <a href="https://theory.stanford.edu/~nikolaj/programmingz3.html#sec-sat-core">SAT solver</a>.</p>
 
@@ -2851,8 +2840,7 @@ Since the domain and value range of $\mathit{perm}$ are equal the bijectivity co
 </figure>
 <p>This is where we stop tweaking the encoding.
 You will find that running <code>solve_puzzle</code> with an instance of <code>LowLevelEncoder</code> again reduces the runtime significantly (to ~1s).</p>
-<h2 id="do-try-this-at-home"><a href="#do-try-this-at-home" class="hanchor" ariaLabel="Anchor">Do Try This at Home</a> </h2>
-<p>Interestingly, if the <code>LowLevelEncoder</code> is used, each <code>check</code> in <code>solve_puzzle</code> takes only about 500µs.
+<h2 id="do-try-this-at-home"><a href="#do-try-this-at-home">Do Try This at Home</a></h2><p>Interestingly, if the <code>LowLevelEncoder</code> is used, each <code>check</code> in <code>solve_puzzle</code> takes only about 500µs.
 So why does <code>solve_puzzle</code> take 1s? That&rsquo;s an order of magnitude longer than 200 times 500µs!
 Well, running a profiler shows that most time is wasted in the bindings &ndash; specifically in <code>ExprRef.__eq__</code>.</p>
 <p>There are several things you can do to squeeze out better execution times:</p>
