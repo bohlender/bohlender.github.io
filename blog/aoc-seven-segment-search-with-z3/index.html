@@ -106,12 +106,18 @@ It takes only few steps to get from a quantifier-laden high-level formulation to
 
 
 
-<figure class="figure-outer" id="random-digits-on-a-functioning-display">
+
+
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="random-digits-on-a-functioning-display">
     <figure class="figure-inner">
         <img src="gfx/display_good.svg" width="450"/> 
-            <figcaption>
-                Random digits on a functioning display
-            </figcaption>
+                <figcaption>
+                    Random digits on a functioning display
+                </figcaption>
+        
     </figure>
     
 </figure>
@@ -257,12 +263,18 @@ That is, to find out which digit each pattern represents:</p>
 
 
 
-<figure class="figure-outer" id="random-digits-on-a-malfunctioning-display">
+
+
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="random-digits-on-a-malfunctioning-display">
     <figure class="figure-inner">
         <img src="gfx/display_broken.svg" width="450"/> 
-            <figcaption>
-                Random digits on a malfunctioning display
-            </figcaption>
+                <figcaption>
+                    Random digits on a malfunctioning display
+                </figcaption>
+        
     </figure>
     
 </figure>
@@ -274,12 +286,18 @@ That is, to find out which digit each pattern represents:</p>
 
 
 
-<figure class="figure-outer" id="how-5353-shows-up-on-the-malfunctioning-display">
+
+
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="how-5353-shows-up-on-the-malfunctioning-display">
     <figure class="figure-inner">
         <img src="gfx/display_4digit.svg" width="450"/> 
-            <figcaption>
-                How 5353 shows up on the malfunctioning display
-            </figcaption>
+                <figcaption>
+                    How 5353 shows up on the malfunctioning display
+                </figcaption>
+        
     </figure>
     
 </figure>
@@ -2918,5 +2936,13 @@ In contrast to related approaches, which assume a fixed grid structure and searc
 	<p>© Dimitri Bohlender</p>
 	<p><a href="/legal">Legal Notice</a></p>
 </footer>
+
+<script src="/perfundo/perfundo.min.js"></script>
+<script>
+	perfundo('.perfundo', {
+		disableHistory: true,
+		swipe: true
+	});
+</script>
     </body>
 </html>

@@ -2,6 +2,18 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://bohlender.pro/tags/</loc>
+    <lastmod>2023-01-21T13:38:05+01:00</lastmod>
+  </url>
+  <url>
+    <loc>https://bohlender.pro/tags/tinkering/</loc>
+    <lastmod>2023-01-21T13:38:05+01:00</lastmod>
+  </url>
+  <url>
+    <loc>https://bohlender.pro/blog/turning-studio-headphones-into-a-headset/</loc>
+    <lastmod>2023-01-21T13:38:05+01:00</lastmod>
+  </url>
+  <url>
     <loc>https://bohlender.pro/tags/advent-of-code/</loc>
     <lastmod>2022-01-22T15:06:54+01:00</lastmod>
   </url>
@@ -15,10 +27,6 @@
   </url>
   <url>
     <loc>https://bohlender.pro/blog/aoc-seven-segment-search-with-z3/</loc>
-    <lastmod>2022-01-22T15:06:54+01:00</lastmod>
-  </url>
-  <url>
-    <loc>https://bohlender.pro/tags/</loc>
     <lastmod>2022-01-22T15:06:54+01:00</lastmod>
   </url>
   <url>

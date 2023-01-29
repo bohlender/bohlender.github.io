@@ -251,12 +251,18 @@ While <q>quality</q> may be subjective, the following is an <q>optimal</q> place
 
 
 
-<figure class="figure-outer" id="an-optimal-word-placement">
+
+
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="an-optimal-word-placement">
     <figure class="figure-inner">
         <img src="gfx/12x12_q104.svg" width="380"/> 
-            <figcaption>
-                An optimal word placement
-            </figcaption>
+                <figcaption>
+                    An optimal word placement
+                </figcaption>
+        
     </figure>
     
 </figure>
@@ -1387,12 +1393,18 @@ That is, understanding the placed words as vertices of an <a href="https://en.wi
 
 
 
-<figure class="figure-outer" id="understanding-words-as-vertices">
+
+
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="understanding-words-as-vertices">
     <figure class="figure-inner">
         <img src="gfx/12x12_q104_edgeRelationOfWords.svg" width="380"/> 
-            <figcaption>
-                Understanding words as vertices
-            </figcaption>
+                <figcaption>
+                    Understanding words as vertices
+                </figcaption>
+        
     </figure>
     
 </figure>
@@ -1410,12 +1422,18 @@ This is problematic since even our example crossword of size 12 already features
 
 
 
-<figure class="figure-outer" id="understanding-cells-as-vertices">
+
+
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="understanding-cells-as-vertices">
     <figure class="figure-inner">
         <img src="gfx/12x12_q104_edgeRelationOfCells.svg" width="380"/> 
-            <figcaption>
-                Understanding cells as vertices
-            </figcaption>
+                <figcaption>
+                    Understanding cells as vertices
+                </figcaption>
+        
     </figure>
     
 </figure>
@@ -2083,12 +2101,18 @@ As implied in the previous section Z3 didn&rsquo;t perform too well on these ins
 
 
 
-<figure class="figure-outer" id="solving-time-for-varying-sat-solvers-and-qualities-given-51-words">
+
+
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="solving-time-for-varying-sat-solvers-and-qualities-given-51-words">
     <figure class="figure-inner">
         <img src="gfx/eval_51words.svg"/> 
-            <figcaption>
-                Solving time for varying SAT solvers and qualities [given 51 words]
-            </figcaption>
+                <figcaption>
+                    Solving time for varying SAT solvers and qualities [given 51 words]
+                </figcaption>
+        
     </figure>
     
 </figure>
@@ -2109,12 +2133,18 @@ However, even the instances of quality 95 do already look pretty good and are so
 
 
 
-<figure class="figure-outer" id="a-crossword-of-quality-95">
+
+
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="a-crossword-of-quality-95">
     <figure class="figure-inner">
         <img src="gfx/12x12_q95.svg" width="380"/> 
-            <figcaption>
-                A crossword of quality 95
-            </figcaption>
+                <figcaption>
+                    A crossword of quality 95
+                </figcaption>
+        
     </figure>
     
 </figure>
@@ -2201,12 +2231,18 @@ For example, by adding the following words to our word set, the average time to 
 
 
 
-<figure class="figure-outer" id="solving-time-for-varying-sat-solvers-and-qualities-given-73-words">
+
+
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="solving-time-for-varying-sat-solvers-and-qualities-given-73-words">
     <figure class="figure-inner">
         <img src="gfx/eval_73words.svg"/> 
-            <figcaption>
-                Solving time for varying SAT solvers and qualities [given 73 words]
-            </figcaption>
+                <figcaption>
+                    Solving time for varying SAT solvers and qualities [given 73 words]
+                </figcaption>
+        
     </figure>
     
 </figure>
@@ -2305,5 +2341,13 @@ Although the characterisation of this problem as an <a href="https://en.wikipedi
 	<p>© Dimitri Bohlender</p>
 	<p><a href="/legal">Legal Notice</a></p>
 </footer>
+
+<script src="/perfundo/perfundo.min.js"></script>
+<script>
+	perfundo('.perfundo', {
+		disableHistory: true,
+		swipe: true
+	});
+</script>
     </body>
 </html>

@@ -1,0 +1,1782 @@
+<!DOCTYPE html>
+<html lang="en-gb">
+    <head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	
+	<link rel="stylesheet" href="/css/style.css">
+	<link rel="stylesheet" href="/css/perfundo.with-icons.min.css">
+	
+	<link rel="alternate" type="application/rss+xml" href="https://bohlender.pro/blog/index.xml" title="bohlender.pro" />
+	
+	
+
+
+<meta property="og:title" content="Turning Studio Headphones Into a Headset" />
+<meta property="og:description" content="In a recent virtual meeting a new colleague was surprised to see me using a Beyerdynamic DT 770 PRO headset &ndash; a product Beyerdynamic does not even list.
+The DT 770 PRO are well-known studio headphones, and so are all the other entries in Beyerdynamic&rsquo;s studio line.
+Only their gaming line of products features headsets.
+So how could I possibly be using a device that does not seem to exist?
+The solution is unspectacular if one is aware of &ldquo;detachable microphones&rdquo;.
+To turn a wired studio headphone into a headset all one needs to do is to make it possible to attach such a microphone.
+This post illustrates
+
+how replacing the integrated headphone cable by an audio jack achieves this,
+the concrete implementation using my DT 770 PRO as a test object.
+" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://bohlender.pro/blog/turning-studio-headphones-into-a-headset/" />
+
+<meta property="og:image" content="https://bohlender.pro/blog/turning-studio-headphones-into-a-headset/gfx/DSC05510.jpg" />
+
+<meta property="og:image" content="https://bohlender.pro/blog/turning-studio-headphones-into-a-headset/gfx/DSC05513.jpg" />
+
+<meta property="og:image" content="https://bohlender.pro/blog/turning-studio-headphones-into-a-headset/gfx/DSC05514.jpg" />
+
+<meta property="og:image" content="https://bohlender.pro/blog/turning-studio-headphones-into-a-headset/gfx/DSC05519.jpg" />
+
+<meta property="og:image" content="https://bohlender.pro/blog/turning-studio-headphones-into-a-headset/gfx/DSC05520.jpg" />
+
+<meta property="og:image" content="https://bohlender.pro/blog/turning-studio-headphones-into-a-headset/gfx/DSC05521.jpg" />
+<meta property="article:published_time" content="2023-01-29T00:00:00+00:00" />
+<meta property="article:modified_time" content="2023-01-21T13:38:05+01:00" />
+	
+	<title>Turning Studio Headphones Into a Headset | bohlender.pro</title>
+</head>
+    <body class="blog">
+        <header>
+	<nav>
+		<label for="show-menu" class="show-menu">
+			<img class="icon" src="/gfx/fa-icons.svg#bars" alt="Toggle menu"/>
+		</label>
+		<input type="checkbox" id="show-menu" role="button" aria-pressed="true">
+		<ul class="dropdown">
+			<li><a href="/">Home</a></li>
+			<li><a href="/cv/">CV</a></li>
+			<li><a href="/projects/">Projects</a></li>
+			<li><a href="/blog/">Blog</a></li>
+			<li><a href="/photography/">Photography</a></li>
+		</ul>
+	</nav>
+</header>
+        <div class="container">
+        <div class="content">
+<div class="banner">
+	
+    
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="443" height="350" viewBox="0 0 443 350">
+        <image xlink:href="/gfx/cup-rss.png" width="443" height="350"/>
+        <a href="https://bohlender.pro/blog/index.xml" target="_top">
+            <circle style="fill: transparent" cx="187" cy="165" r="110"/>
+        </a>
+    </svg>
+</div>
+<div class="notepad-wrapper">
+	
+	<main class="notepad">
+		<article>
+			<header>
+				<h1>Turning Studio Headphones Into a Headset</h1>
+				<div class="metadata">
+    <time datetime="2023-01-29">January 29, 2023</time>
+    <ul>
+        <li><a class="tag-block" href="/tags/tinkering">Tinkering</a></li>
+    </ul>
+</div>
+			</header>
+			<p>In a recent virtual meeting a new colleague was surprised to see me using a <a href="https://beyerdynamic.com/dt-770-pro.html">Beyerdynamic DT 770 PRO</a> <em>headset</em> &ndash; a product Beyerdynamic does not even list.
+The DT 770 PRO are well-known studio <em>headphones</em>, and so are all the other entries in Beyerdynamic&rsquo;s <q>studio</q> line.
+Only their <q>gaming</q> line of products features headsets.
+So how could I possibly be using a device that does not seem to exist?</p>
+<p>The solution is unspectacular if one is aware of &ldquo;detachable microphones&rdquo;.
+To turn a wired studio headphone into a headset all one needs to do is to make it possible to attach such a microphone.
+This post illustrates</p>
+<ul>
+<li>how replacing the integrated headphone cable by an <a href="https://en.wikipedia.org/wiki/Phone_connector_(audio)">audio jack</a> achieves this,</li>
+<li>the concrete implementation using my DT 770 PRO as a test object.</li>
+</ul>
+<h2 id="introduction"><a href="#introduction">Introduction</a></h2><p>I&rsquo;ve owned <a href="https://beyerdynamic.com/dt-770-pro.html">Beyerdynamic DT 770 PRO</a> studio headphones for ages.
+However in the past I could not use them to participate in virtual meetings or for voice chat in multiplayer games.
+Instead, I resorted to various headsets even though I was always left dissatisfied with their wear comfort and sound.</p>
+
+<aside >
+    <p>
+    I was aware of &ldquo;attachable microphones&rdquo;, such as the <a href="https://antlionaudio.com/collections/microphones">Antlion ModMic</a>, but neither did I want to put an adhesive pad of questionable reliability on my headphones nor did I want to have to deal with an additional cable just for the microphone.
+    </p>
+</aside>
+<p>Using a professional microphone and audio interface for these use cases felt like overkill.
+I was rather saying to myself that, once my headphones would break, I would eventually see to find to a model with an audio jack.
+This would enable me to plug in some &ldquo;detachable microphone&rdquo;, like the <a href="https://beyerdynamic.com/custom-headset-gear-2-generation.html">Beyerdynamic CUSTOM Headset Gear</a> or <a href="https://www.v-moda.com/us/en/products/boompro-microphone">V-MODA BoomPro</a>.
+With this &ldquo;solution&rdquo; sketched out I didn&rsquo;t really look into the issue anymore.</p>
+<p>About a year ago, when it was once again time to replace the ear pads, it occurred to me that &ndash; while I was at it &ndash; I could also simply replace the integrated headphone cable by a 3.5mm <a href="https://en.wikipedia.org/wiki/Phone_connector_(audio)">audio jack</a>.
+It was only when I started looking for suitable components that I noticed my tinkering project to actually be a <a href="https://duckduckgo.com/?q=studio+headphones+detachable+cable+mod">pretty standard modification</a>.
+It is a trivial mod, but I figured I should spread the word.
+Had I been aware of it, I wouldn&rsquo;t have spent all these years with regular headsets.</p>
+<h2 id="the-modification-in-theory"><a href="#the-modification-in-theory">The Modification in Theory</a></h2><p>To better understand the initial situation, consider the following sketch of the wiring in the unmodified headphones.
+The scale of some parts is a bit exaggerated to make relevant details more visible.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="wiring-in-the-unmodified-headphones">
+    <figure class="figure-inner">
+        <img src="gfx/sketch1.svg" width="600"/> 
+                <figcaption>
+                    Wiring in the unmodified headphones
+                </figcaption>
+        
+    </figure>
+    
+</figure>
+<p>The depicted audio plug is a <a href="https://en.wikipedia.org/wiki/TRS_connector">TRS connector</a>.
+It exposes three conductors which the integrated cable connects to a small <a href="https://en.wikipedia.org/wiki/Printed_circuit_board">PCB</a> inside the headphone housing.
+This PCB, in turn, is wired to the left and right loudspeaker.
+Aside from the obligatory <a href="https://en.wikipedia.org/wiki/Ground_(electricity)">ground</a> reference point the conductors are designed to transmit the left and right audio channel signals.</p>
+
+<aside  id="test-note" >
+    <p>
+    The wire colours in the sketch are picked so that they match the colours present in <em>my</em> headphones.
+They might differ in yours so &ndash; if you plan to follow along &ndash; make sure to <a href="https://en.wikipedia.org/wiki/Continuity_test">test</a> which part of the TRS connector each of the PCB wires connects to.
+    </p>
+</aside>
+<p>It should be easy to see that the integrated cable can readily be turned into a detachable one by cutting through it and attaching matching connectors to both ends.
+It is advisable to cut the wires <em>inside</em> the housing &ndash; in contrast to cutting the cable outside &ndash; as this enables fitting the jack into the housing.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="wiring-in-the-modified-headphones">
+    <figure class="figure-inner">
+        <img src="gfx/sketch2.svg" width="600"/> 
+                <figcaption>
+                    Wiring in the modified headphones
+                </figcaption>
+        
+    </figure>
+    
+</figure>
+
+<aside >
+    <p>
+    A jack features three contacts and &ndash; unlike in the sketch &ndash; it&rsquo;s not visible which conductor each contact is designed for.
+While the middle contact will typically connect to the sleeve, make sure to check the data sheet of the jack you&rsquo;re getting to not end up with swapped audio channels.
+    </p>
+</aside>
+<p>That&rsquo;s already it.
+At this point one can just plug in a detachable microphone into the headphones to turn them into a headset, or stick to the detachable cable when no mic is needed.
+To make it obvious why and how this works, let&rsquo;s put the wiring of a detachable microphone in the context of the modified headphone.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="wiring-in-the-modified-headphones-and-detachable-microphone">
+    <figure class="figure-inner">
+        <img src="gfx/sketch3.svg" width="600"/> 
+                <figcaption>
+                    Wiring in the modified headphones and detachable microphone
+                </figcaption>
+        
+    </figure>
+    
+</figure>
+<p>The detachable microphone looks a lot like the detachable cable from the previous sketch, with the exception that this one has an additional wire for the microphone signal.
+A quick look at the wiring confirms that a detachable microphone is essentially just a cable housing two decoupled products: a mono microphone and a stereo phone cable.
+They just happen to share the ground wire.
+The headphones couldn&rsquo;t care less whether the detachable microphone is plugged in or the detachable cable &ndash; it&rsquo;s the same TRS connector and the same signals in both cases.</p>
+<p>The <a href="https://en.wikipedia.org/wiki/Phone_connector_(audio)#TRRS_standards">TRRS connector</a> on the other end is what goes into the computer.
+It&rsquo;s the standard way of supporting both headphones and headsets on the same jack.</p>
+
+<aside >
+    <p>
+    Unlike mobile devices, desktop computers often don&rsquo;t feature TRRS jacks but distinct TRS jacks for headphones and microphone.
+For this case, detachable microphones usually come with a TRRS splitter to separate the signals accordingly.
+    </p>
+</aside>
+<h2 id="the-modification-in-practice"><a href="#the-modification-in-practice">The Modification in Practice</a></h2><p>Replacing the integrated headphone cable by an audio jack resolves a real annoyance for me.
+I figured it might do so for others and did therefore document every (mis)step of the process.</p>
+<p>Overall the modification requires</p>
+<ul>
+<li>a drill to turn the rectangular hole for the integrated cable into a circular hole for the jack,</li>
+<li>something like a small, flat screwdriver to lever up some parts,</li>
+<li>something to cut the cable and remove insulation from wires &ndash; a knife or scalpel will do,</li>
+<li>matching TRS connectors, i.e. a jack (<a href="https://www.kenable.co.uk/en/audio-/audio-connectors/audio-adapters/9494-35mm-aux-stereo-socket-input-panel-mount-audio-solder-adapter-2-pack-009494-5055383494941.html">PMA-009494</a>) and a plug (<a href="https://www.rean-connectors.com/en/product/nys231-1">NYS231BG</a>),</li>
+<li>small pliers to screw the jack into the housing,</li>
+<li>a soldering iron to make the electrical connections permanent.</li>
+</ul>
+
+<aside >
+    <p>
+    If you can&rsquo;t get ahold of the same jack, you can give the <a href="https://www.farnell.com/datasheets/3144941.pdf">MJ-0073H</a> a try.
+It&rsquo;s the same thing, except that &ldquo;Contact C&rdquo; is 6.5mm long instead of 5mm.
+You should probably avoid <a href="https://aliexpress.com/item/1005003621329893.html">PJ-392A</a> though since that one will stick out a bit further from the headphone housing.
+    </p>
+</aside>
+<h3 id="step-1-opening-the-housing"><a href="#step-1-opening-the-housing">Step 1: Opening the Housing</a></h3><p>To replace the integrated audio cable, we must cut through it <em>inside</em> the headphone housing.
+For this, we first need to open the housing.
+This amounts to peeling off the ear pad and removing the clamping ring.</p>
+
+<aside >
+    <p>
+    There&rsquo;s even <a href="https://support.beyerdynamic.com/hc/en-us/articles/360017577334-Caring-and-replacing-the-ear-pads">official documentation</a> on how one is supposed to open the housing, e.g. to replace the ear pads.
+    </p>
+</aside>
+<div class="gallery" style="grid-template-rows: auto; gap: 10px;">
+    
+    
+
+
+
+
+
+
+
+
+
+    
+        
+        
+            
+            
+        
+        
+    
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="">
+    <figure class="figure-inner"><a class="perfundo__link js-perfundo-link" href="#dsc05510jpg">
+        <img src="/blog/turning-studio-headphones-into-a-headset/gfx/DSC05510_hu25860f30f2daccfe70a336b709c73c74_194194_650x0_resize_q75_lanczos.jpg"
+             alt="The unmodified headphones"/> </a>
+    </figure>
+    
+    <div id="dsc05510jpg" class="perfundo__overlay js-perfundo-overlay">
+        <figure class="perfundo__content perfundo__figure">
+            <div class="perfundo__image" style="width: 1000px; padding-top: 56.25%; background-image: url(/blog/turning-studio-headphones-into-a-headset/gfx/DSC05510.jpg);"></div>
+            <figcaption>
+                <p>The unmodified headphones
+                </p>
+            </figcaption>
+        </figure>
+        <a href="#perfundo-untarget" class="perfundo__close perfundo__control js-perfundo-close">Close</a>
+        
+        
+          
+          <a class="perfundo__next perfundo__control js-perfundo-next" href="#dsc05513jpg">Next</a>
+        
+    </div>
+    
+</figure>
+    
+
+
+
+
+
+
+
+
+
+    
+        
+        
+            
+            
+        
+        
+    
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="">
+    <figure class="figure-inner"><a class="perfundo__link js-perfundo-link" href="#dsc05513jpg">
+        <img src="/blog/turning-studio-headphones-into-a-headset/gfx/DSC05513_hu9803f45d2f1a55774532046b621ac58c_208013_650x0_resize_q75_lanczos.jpg"
+             alt="A bit of pulling suffices to peel the ear pad off the housing"/> </a>
+    </figure>
+    
+    <div id="dsc05513jpg" class="perfundo__overlay js-perfundo-overlay">
+        <figure class="perfundo__content perfundo__figure">
+            <div class="perfundo__image" style="width: 1000px; padding-top: 56.25%; background-image: url(/blog/turning-studio-headphones-into-a-headset/gfx/DSC05513.jpg);"></div>
+            <figcaption>
+                <p>A bit of pulling suffices to peel the ear pad off the housing
+                </p>
+            </figcaption>
+        </figure>
+        <a href="#perfundo-untarget" class="perfundo__close perfundo__control js-perfundo-close">Close</a>
+        
+          
+          <a class="perfundo__prev perfundo__control js-perfundo-prev" href="#dsc05510jpg">Prev</a>
+        
+        
+          
+          <a class="perfundo__next perfundo__control js-perfundo-next" href="#dsc05514jpg">Next</a>
+        
+    </div>
+    
+</figure>
+    
+
+
+
+
+
+
+
+
+
+    
+        
+        
+            
+            
+        
+        
+    
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="">
+    <figure class="figure-inner"><a class="perfundo__link js-perfundo-link" href="#dsc05514jpg">
+        <img src="/blog/turning-studio-headphones-into-a-headset/gfx/DSC05514_hu4e7490c5eb993c38e5f800eae8db0520_205480_650x0_resize_q75_lanczos.jpg"
+             alt="This ear pad was already yellowing and really needed to be replaced"/> </a>
+    </figure>
+    
+    <div id="dsc05514jpg" class="perfundo__overlay js-perfundo-overlay">
+        <figure class="perfundo__content perfundo__figure">
+            <div class="perfundo__image" style="width: 1000px; padding-top: 56.25%; background-image: url(/blog/turning-studio-headphones-into-a-headset/gfx/DSC05514.jpg);"></div>
+            <figcaption>
+                <p>This ear pad was already yellowing and really needed to be replaced
+                </p>
+            </figcaption>
+        </figure>
+        <a href="#perfundo-untarget" class="perfundo__close perfundo__control js-perfundo-close">Close</a>
+        
+          
+          <a class="perfundo__prev perfundo__control js-perfundo-prev" href="#dsc05513jpg">Prev</a>
+        
+        
+          
+          <a class="perfundo__next perfundo__control js-perfundo-next" href="#dsc05519jpg">Next</a>
+        
+    </div>
+    
+</figure>
+    
+
+
+
+
+
+
+
+
+
+    
+        
+        
+            
+            
+        
+        
+    
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="">
+    <figure class="figure-inner"><a class="perfundo__link js-perfundo-link" href="#dsc05519jpg">
+        <img src="/blog/turning-studio-headphones-into-a-headset/gfx/DSC05519_hub9c2def0f93c8c42ce52d207bc3ca154_205288_650x0_resize_q75_lanczos.jpg"
+             alt="The clamping ring is held by a few clips and can be levered up with a flat screwdriver. I recommend inserting the screwdriver as shown here, i.e. on the outside of the ring. Poking around with it on the inside of the ring risks accidentially piercing into the white paper sheet that sits right under the black foam pad."/> </a>
+    </figure>
+    
+    <div id="dsc05519jpg" class="perfundo__overlay js-perfundo-overlay">
+        <figure class="perfundo__content perfundo__figure">
+            <div class="perfundo__image" style="width: 1000px; padding-top: 56.25%; background-image: url(/blog/turning-studio-headphones-into-a-headset/gfx/DSC05519.jpg);"></div>
+            <figcaption>
+                <p>The clamping ring is held by a few clips and can be levered up with a flat screwdriver. I recommend inserting the screwdriver as shown here, i.e. on the outside of the ring. Poking around with it on the inside of the ring risks accidentially piercing into the white paper sheet that sits right under the black foam pad.
+                </p>
+            </figcaption>
+        </figure>
+        <a href="#perfundo-untarget" class="perfundo__close perfundo__control js-perfundo-close">Close</a>
+        
+          
+          <a class="perfundo__prev perfundo__control js-perfundo-prev" href="#dsc05514jpg">Prev</a>
+        
+        
+          
+          <a class="perfundo__next perfundo__control js-perfundo-next" href="#dsc05520jpg">Next</a>
+        
+    </div>
+    
+</figure>
+    
+
+
+
+
+
+
+
+
+
+    
+        
+        
+            
+            
+        
+        
+    
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="">
+    <figure class="figure-inner"><a class="perfundo__link js-perfundo-link" href="#dsc05520jpg">
+        <img src="/blog/turning-studio-headphones-into-a-headset/gfx/DSC05520_hu81f96fb215dfa2913f0195096584c158_196394_650x0_resize_q75_lanczos.jpg"
+             alt="The speaker is attached to the back of this paper sheet"/> </a>
+    </figure>
+    
+    <div id="dsc05520jpg" class="perfundo__overlay js-perfundo-overlay">
+        <figure class="perfundo__content perfundo__figure">
+            <div class="perfundo__image" style="width: 1000px; padding-top: 56.25%; background-image: url(/blog/turning-studio-headphones-into-a-headset/gfx/DSC05520.jpg);"></div>
+            <figcaption>
+                <p>The speaker is attached to the back of this paper sheet
+                </p>
+            </figcaption>
+        </figure>
+        <a href="#perfundo-untarget" class="perfundo__close perfundo__control js-perfundo-close">Close</a>
+        
+          
+          <a class="perfundo__prev perfundo__control js-perfundo-prev" href="#dsc05519jpg">Prev</a>
+        
+        
+          
+          <a class="perfundo__next perfundo__control js-perfundo-next" href="#dsc05521jpg">Next</a>
+        
+    </div>
+    
+</figure>
+    
+
+
+
+
+
+
+
+
+
+    
+        
+        
+            
+            
+        
+        
+    
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="">
+    <figure class="figure-inner"><a class="perfundo__link js-perfundo-link" href="#dsc05521jpg">
+        <img src="/blog/turning-studio-headphones-into-a-headset/gfx/DSC05521_hu686d82bd369bca507f84b3b2ac4d8b4a_227767_650x0_resize_q75_lanczos.jpg"
+             alt="Here we can see the blue, red and copper wires from the above diagrams"/> </a>
+    </figure>
+    
+    <div id="dsc05521jpg" class="perfundo__overlay js-perfundo-overlay">
+        <figure class="perfundo__content perfundo__figure">
+            <div class="perfundo__image" style="width: 1000px; padding-top: 56.25%; background-image: url(/blog/turning-studio-headphones-into-a-headset/gfx/DSC05521.jpg);"></div>
+            <figcaption>
+                <p>Here we can see the blue, red and copper wires from the above diagrams
+                </p>
+            </figcaption>
+        </figure>
+        <a href="#perfundo-untarget" class="perfundo__close perfundo__control js-perfundo-close">Close</a>
+        
+          
+          <a class="perfundo__prev perfundo__control js-perfundo-prev" href="#dsc05520jpg">Prev</a>
+        
+        
+    </div>
+    
+</figure> 
+
+</div>
+<h3 id="step-2-cutting-the-integrated-cable"><a href="#step-2-cutting-the-integrated-cable">Step 2: Cutting the Integrated Cable</a></h3><p>Instead of adding an additional hole to the housing, the plan is to repurpose the one occupied by the integrated cable.
+That is, the cable must must be removed to make place for a jack.
+It is advantageous to cut through the wires as far from the PCB as possible since we&rsquo;ll later have to solder them to the jack.</p>
+
+<aside >
+    <p>
+    As suggested <a href="#test-note">earlier</a>, you better <a href="https://en.wikipedia.org/wiki/Continuity_test">test</a> which part of the TRS connector each of the wires connects to.
+In my case, the T, R and S conductors connect to the blue, red &amp; copper wire, respectively.
+    </p>
+</aside>
+<div class="gallery" style="grid-template-rows: auto; gap: 10px;">
+    
+    
+
+
+
+
+
+
+
+
+
+    
+        
+        
+            
+            
+        
+        
+    
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="">
+    <figure class="figure-inner"><a class="perfundo__link js-perfundo-link" href="#dsc05533jpg">
+        <img src="/blog/turning-studio-headphones-into-a-headset/gfx/DSC05533_hu7b83a78cfe027a651a5afe11b06c029e_214750_650x0_resize_q75_lanczos.jpg"
+             alt="This clip must be levered up to unclamp the cable"/> </a>
+    </figure>
+    
+    <div id="dsc05533jpg" class="perfundo__overlay js-perfundo-overlay">
+        <figure class="perfundo__content perfundo__figure">
+            <div class="perfundo__image" style="width: 1000px; padding-top: 56.25%; background-image: url(/blog/turning-studio-headphones-into-a-headset/gfx/DSC05533.jpg);"></div>
+            <figcaption>
+                <p>This clip must be levered up to unclamp the cable
+                </p>
+            </figcaption>
+        </figure>
+        <a href="#perfundo-untarget" class="perfundo__close perfundo__control js-perfundo-close">Close</a>
+        
+        
+          
+          <a class="perfundo__next perfundo__control js-perfundo-next" href="#dsc05538jpg">Next</a>
+        
+    </div>
+    
+</figure> 
+    
+
+
+
+
+
+
+
+
+
+    
+        
+        
+            
+            
+        
+        
+    
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="">
+    <figure class="figure-inner"><a class="perfundo__link js-perfundo-link" href="#dsc05538jpg">
+        <img src="/blog/turning-studio-headphones-into-a-headset/gfx/DSC05538_hu33b20cd63a5da11c5b387cf071de1860_218532_650x0_resize_q75_lanczos.jpg"
+             alt="With the clip removed the cable can be moved freely"/> </a>
+    </figure>
+    
+    <div id="dsc05538jpg" class="perfundo__overlay js-perfundo-overlay">
+        <figure class="perfundo__content perfundo__figure">
+            <div class="perfundo__image" style="width: 1000px; padding-top: 56.25%; background-image: url(/blog/turning-studio-headphones-into-a-headset/gfx/DSC05538.jpg);"></div>
+            <figcaption>
+                <p>With the clip removed the cable can be moved freely
+                </p>
+            </figcaption>
+        </figure>
+        <a href="#perfundo-untarget" class="perfundo__close perfundo__control js-perfundo-close">Close</a>
+        
+          
+          <a class="perfundo__prev perfundo__control js-perfundo-prev" href="#dsc05533jpg">Prev</a>
+        
+        
+          
+          <a class="perfundo__next perfundo__control js-perfundo-next" href="#dsc05541jpg">Next</a>
+        
+    </div>
+    
+</figure> 
+    
+
+
+
+
+
+
+
+
+
+    
+        
+        
+            
+            
+        
+        
+    
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="">
+    <figure class="figure-inner"><a class="perfundo__link js-perfundo-link" href="#dsc05541jpg">
+        <img src="/blog/turning-studio-headphones-into-a-headset/gfx/DSC05541_hu124b5c623c82ec39c81985ba3f8f9bea_204051_650x0_resize_q75_lanczos.jpg"
+             alt="Pulling the cable out makes the wires easily accessible"/> </a>
+    </figure>
+    
+    <div id="dsc05541jpg" class="perfundo__overlay js-perfundo-overlay">
+        <figure class="perfundo__content perfundo__figure">
+            <div class="perfundo__image" style="width: 1000px; padding-top: 56.25%; background-image: url(/blog/turning-studio-headphones-into-a-headset/gfx/DSC05541.jpg);"></div>
+            <figcaption>
+                <p>Pulling the cable out makes the wires easily accessible
+                </p>
+            </figcaption>
+        </figure>
+        <a href="#perfundo-untarget" class="perfundo__close perfundo__control js-perfundo-close">Close</a>
+        
+          
+          <a class="perfundo__prev perfundo__control js-perfundo-prev" href="#dsc05538jpg">Prev</a>
+        
+        
+          
+          <a class="perfundo__next perfundo__control js-perfundo-next" href="#dsc05545jpg">Next</a>
+        
+    </div>
+    
+</figure> 
+    
+
+
+
+
+
+
+
+
+
+    
+        
+        
+            
+            
+        
+        
+    
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="">
+    <figure class="figure-inner"><a class="perfundo__link js-perfundo-link" href="#dsc05545jpg">
+        <img src="/blog/turning-studio-headphones-into-a-headset/gfx/DSC05545_huf072203777bf0052760cf290fdef2796_226935_650x0_resize_q75_lanczos.jpg"
+             alt="The optimal cut maximises the wire lengh"/> </a>
+    </figure>
+    
+    <div id="dsc05545jpg" class="perfundo__overlay js-perfundo-overlay">
+        <figure class="perfundo__content perfundo__figure">
+            <div class="perfundo__image" style="width: 1000px; padding-top: 56.25%; background-image: url(/blog/turning-studio-headphones-into-a-headset/gfx/DSC05545.jpg);"></div>
+            <figcaption>
+                <p>The optimal cut maximises the wire lengh
+                </p>
+            </figcaption>
+        </figure>
+        <a href="#perfundo-untarget" class="perfundo__close perfundo__control js-perfundo-close">Close</a>
+        
+          
+          <a class="perfundo__prev perfundo__control js-perfundo-prev" href="#dsc05541jpg">Prev</a>
+        
+        
+          
+          <a class="perfundo__next perfundo__control js-perfundo-next" href="#dsc05548jpg">Next</a>
+        
+    </div>
+    
+</figure> 
+    
+
+
+
+
+
+
+
+
+
+    
+        
+        
+            
+            
+        
+        
+    
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="">
+    <figure class="figure-inner"><a class="perfundo__link js-perfundo-link" href="#dsc05548jpg">
+        <img src="/blog/turning-studio-headphones-into-a-headset/gfx/DSC05548_huc1011adf81b6b22ab850fe21a66bc671_185120_650x0_resize_q75_lanczos.jpg"/> </a>
+    </figure>
+    
+    <div id="dsc05548jpg" class="perfundo__overlay js-perfundo-overlay">
+        <figure class="perfundo__content perfundo__figure">
+            <div class="perfundo__image" style="width: 1000px; padding-top: 56.25%; background-image: url(/blog/turning-studio-headphones-into-a-headset/gfx/DSC05548.jpg);"></div>
+            <figcaption>
+                
+            </figcaption>
+        </figure>
+        <a href="#perfundo-untarget" class="perfundo__close perfundo__control js-perfundo-close">Close</a>
+        
+          
+          <a class="perfundo__prev perfundo__control js-perfundo-prev" href="#dsc05545jpg">Prev</a>
+        
+        
+    </div>
+    
+</figure> 
+
+</div>
+<h3 id="step-3-attaching-a-plug-to-the-cable"><a href="#step-3-attaching-a-plug-to-the-cable">Step 3: Attaching a Plug to the Cable</a></h3><p>By attaching another plug to the cut cable one can easily turn it into a detachable cable, rather than throwing it away.</p>
+<div class="gallery" style="grid-template-rows: auto; gap: 10px;">
+    
+    
+
+
+
+
+
+
+
+
+
+    
+        
+        
+            
+            
+        
+        
+    
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="">
+    <figure class="figure-inner"><a class="perfundo__link js-perfundo-link" href="#dsc05551jpg">
+        <img src="/blog/turning-studio-headphones-into-a-headset/gfx/DSC05551_hu859bf34f4a31f52a37df8c21f492febb_153663_650x0_resize_q75_lanczos.jpg"
+             alt="This segment can be cut"/> </a>
+    </figure>
+    
+    <div id="dsc05551jpg" class="perfundo__overlay js-perfundo-overlay">
+        <figure class="perfundo__content perfundo__figure">
+            <div class="perfundo__image" style="width: 1000px; padding-top: 56.25%; background-image: url(/blog/turning-studio-headphones-into-a-headset/gfx/DSC05551.jpg);"></div>
+            <figcaption>
+                <p>This segment can be cut
+                </p>
+            </figcaption>
+        </figure>
+        <a href="#perfundo-untarget" class="perfundo__close perfundo__control js-perfundo-close">Close</a>
+        
+        
+          
+          <a class="perfundo__next perfundo__control js-perfundo-next" href="#dsc05558jpg">Next</a>
+        
+    </div>
+    
+</figure> 
+    
+
+
+
+
+
+
+
+
+
+    
+        
+        
+            
+            
+        
+        
+    
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="">
+    <figure class="figure-inner"><a class="perfundo__link js-perfundo-link" href="#dsc05558jpg">
+        <img src="/blog/turning-studio-headphones-into-a-headset/gfx/DSC05558_hua975c96d12121f8b850d018d86f2f23e_153341_650x0_resize_q75_lanczos.jpg"
+             alt="To get to the wires, a bit of the cable jacket needs to be removed"/> </a>
+    </figure>
+    
+    <div id="dsc05558jpg" class="perfundo__overlay js-perfundo-overlay">
+        <figure class="perfundo__content perfundo__figure">
+            <div class="perfundo__image" style="width: 1000px; padding-top: 56.25%; background-image: url(/blog/turning-studio-headphones-into-a-headset/gfx/DSC05558.jpg);"></div>
+            <figcaption>
+                <p>To get to the wires, a bit of the cable jacket needs to be removed
+                </p>
+            </figcaption>
+        </figure>
+        <a href="#perfundo-untarget" class="perfundo__close perfundo__control js-perfundo-close">Close</a>
+        
+          
+          <a class="perfundo__prev perfundo__control js-perfundo-prev" href="#dsc05551jpg">Prev</a>
+        
+        
+          
+          <a class="perfundo__next perfundo__control js-perfundo-next" href="#dsc05563jpg">Next</a>
+        
+    </div>
+    
+</figure> 
+    
+
+
+
+
+
+
+
+
+
+    
+        
+        
+            
+            
+        
+        
+    
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="">
+    <figure class="figure-inner"><a class="perfundo__link js-perfundo-link" href="#dsc05563jpg">
+        <img src="/blog/turning-studio-headphones-into-a-headset/gfx/DSC05563_hu27102d169727b31c486d045d0194fb41_162741_650x0_resize_q75_lanczos.jpg"
+             alt="To prepare the wires for soldering, the insulators must be removed."/> </a>
+    </figure>
+    
+    <div id="dsc05563jpg" class="perfundo__overlay js-perfundo-overlay">
+        <figure class="perfundo__content perfundo__figure">
+            <div class="perfundo__image" style="width: 1000px; padding-top: 56.25%; background-image: url(/blog/turning-studio-headphones-into-a-headset/gfx/DSC05563.jpg);"></div>
+            <figcaption>
+                <p>To prepare the wires for soldering, the insulators must be removed.
+                </p>
+            </figcaption>
+        </figure>
+        <a href="#perfundo-untarget" class="perfundo__close perfundo__control js-perfundo-close">Close</a>
+        
+          
+          <a class="perfundo__prev perfundo__control js-perfundo-prev" href="#dsc05558jpg">Prev</a>
+        
+        
+          
+          <a class="perfundo__next perfundo__control js-perfundo-next" href="#dsc05564jpg">Next</a>
+        
+    </div>
+    
+</figure> 
+    
+
+
+
+
+
+
+
+
+
+    
+        
+        
+            
+            
+        
+        
+    
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="">
+    <figure class="figure-inner"><a class="perfundo__link js-perfundo-link" href="#dsc05564jpg">
+        <img src="/blog/turning-studio-headphones-into-a-headset/gfx/DSC05564_huf05fae5970c39e155921faf48a46ad09_177041_650x0_resize_q75_lanczos.jpg"/> </a>
+    </figure>
+    
+    <div id="dsc05564jpg" class="perfundo__overlay js-perfundo-overlay">
+        <figure class="perfundo__content perfundo__figure">
+            <div class="perfundo__image" style="width: 1000px; padding-top: 56.25%; background-image: url(/blog/turning-studio-headphones-into-a-headset/gfx/DSC05564.jpg);"></div>
+            <figcaption>
+                
+            </figcaption>
+        </figure>
+        <a href="#perfundo-untarget" class="perfundo__close perfundo__control js-perfundo-close">Close</a>
+        
+          
+          <a class="perfundo__prev perfundo__control js-perfundo-prev" href="#dsc05563jpg">Prev</a>
+        
+        
+          
+          <a class="perfundo__next perfundo__control js-perfundo-next" href="#dsc05572jpg">Next</a>
+        
+    </div>
+    
+</figure> 
+    
+
+
+
+
+
+
+
+
+
+    
+        
+        
+            
+            
+        
+        
+    
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="">
+    <figure class="figure-inner"><a class="perfundo__link js-perfundo-link" href="#dsc05572jpg">
+        <img src="/blog/turning-studio-headphones-into-a-headset/gfx/DSC05572_hu8ef9bd5c1f13337c81d0f7e371852b66_138054_650x0_resize_q75_lanczos.jpg"
+             alt="Before installing the TRS connector, the boot and tube must be slid onto the cable"/> </a>
+    </figure>
+    
+    <div id="dsc05572jpg" class="perfundo__overlay js-perfundo-overlay">
+        <figure class="perfundo__content perfundo__figure">
+            <div class="perfundo__image" style="width: 1000px; padding-top: 56.25%; background-image: url(/blog/turning-studio-headphones-into-a-headset/gfx/DSC05572.jpg);"></div>
+            <figcaption>
+                <p>Before installing the TRS connector, the boot and tube must be slid onto the cable
+                </p>
+            </figcaption>
+        </figure>
+        <a href="#perfundo-untarget" class="perfundo__close perfundo__control js-perfundo-close">Close</a>
+        
+          
+          <a class="perfundo__prev perfundo__control js-perfundo-prev" href="#dsc05564jpg">Prev</a>
+        
+        
+          
+          <a class="perfundo__next perfundo__control js-perfundo-next" href="#dsc05575jpg">Next</a>
+        
+    </div>
+    
+</figure> 
+    
+
+
+
+
+
+
+
+
+
+    
+        
+        
+            
+            
+        
+        
+    
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="">
+    <figure class="figure-inner"><a class="perfundo__link js-perfundo-link" href="#dsc05575jpg">
+        <img src="/blog/turning-studio-headphones-into-a-headset/gfx/DSC05575_huafaad0790d470b3e719b6452f3637927_182436_650x0_resize_q75_lanczos.jpg"
+             alt="The wires are positioned in such a way that the plugs&#39; same-named contacts end up connected, i.e. T to T, R to R, and S to S. The clamp secures the cable."/> </a>
+    </figure>
+    
+    <div id="dsc05575jpg" class="perfundo__overlay js-perfundo-overlay">
+        <figure class="perfundo__content perfundo__figure">
+            <div class="perfundo__image" style="width: 1000px; padding-top: 56.25%; background-image: url(/blog/turning-studio-headphones-into-a-headset/gfx/DSC05575.jpg);"></div>
+            <figcaption>
+                <p>The wires are positioned in such a way that the plugs' same-named contacts end up connected, i.e. T to T, R to R, and S to S. The clamp secures the cable.
+                </p>
+            </figcaption>
+        </figure>
+        <a href="#perfundo-untarget" class="perfundo__close perfundo__control js-perfundo-close">Close</a>
+        
+          
+          <a class="perfundo__prev perfundo__control js-perfundo-prev" href="#dsc05572jpg">Prev</a>
+        
+        
+          
+          <a class="perfundo__next perfundo__control js-perfundo-next" href="#dsc05578jpg">Next</a>
+        
+    </div>
+    
+</figure> 
+    
+
+
+
+
+
+
+
+
+
+    
+        
+        
+            
+            
+        
+        
+    
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="">
+    <figure class="figure-inner"><a class="perfundo__link js-perfundo-link" href="#dsc05578jpg">
+        <img src="/blog/turning-studio-headphones-into-a-headset/gfx/DSC05578_hu680a9c5b794d08263c7ebf2ff64d9799_173730_650x0_resize_q75_lanczos.jpg"
+             alt="Soldering the wires creates a permanent electrical connection"/> </a>
+    </figure>
+    
+    <div id="dsc05578jpg" class="perfundo__overlay js-perfundo-overlay">
+        <figure class="perfundo__content perfundo__figure">
+            <div class="perfundo__image" style="width: 1000px; padding-top: 56.25%; background-image: url(/blog/turning-studio-headphones-into-a-headset/gfx/DSC05578.jpg);"></div>
+            <figcaption>
+                <p>Soldering the wires creates a permanent electrical connection
+                </p>
+            </figcaption>
+        </figure>
+        <a href="#perfundo-untarget" class="perfundo__close perfundo__control js-perfundo-close">Close</a>
+        
+          
+          <a class="perfundo__prev perfundo__control js-perfundo-prev" href="#dsc05575jpg">Prev</a>
+        
+        
+          
+          <a class="perfundo__next perfundo__control js-perfundo-next" href="#dsc05583jpg">Next</a>
+        
+    </div>
+    
+</figure> 
+    
+
+
+
+
+
+
+
+
+
+    
+        
+        
+            
+            
+        
+        
+    
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="">
+    <figure class="figure-inner"><a class="perfundo__link js-perfundo-link" href="#dsc05583jpg">
+        <img src="/blog/turning-studio-headphones-into-a-headset/gfx/DSC05583_hu442a500e3387a08444b83fe76a08f339_135680_650x0_resize_q75_lanczos.jpg"/> </a>
+    </figure>
+    
+    <div id="dsc05583jpg" class="perfundo__overlay js-perfundo-overlay">
+        <figure class="perfundo__content perfundo__figure">
+            <div class="perfundo__image" style="width: 1000px; padding-top: 56.25%; background-image: url(/blog/turning-studio-headphones-into-a-headset/gfx/DSC05583.jpg);"></div>
+            <figcaption>
+                
+            </figcaption>
+        </figure>
+        <a href="#perfundo-untarget" class="perfundo__close perfundo__control js-perfundo-close">Close</a>
+        
+          
+          <a class="perfundo__prev perfundo__control js-perfundo-prev" href="#dsc05578jpg">Prev</a>
+        
+        
+          
+          <a class="perfundo__next perfundo__control js-perfundo-next" href="#dsc05584jpg">Next</a>
+        
+    </div>
+    
+</figure> 
+    
+
+
+
+
+
+
+
+
+
+    
+        
+        
+            
+            
+        
+        
+    
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="">
+    <figure class="figure-inner"><a class="perfundo__link js-perfundo-link" href="#dsc05584jpg">
+        <img src="/blog/turning-studio-headphones-into-a-headset/gfx/DSC05584_hu59fa31d225d4ea539b9f1078b0f735fd_165043_650x0_resize_q75_lanczos.jpg"
+             alt="The finished detachable cable"/> </a>
+    </figure>
+    
+    <div id="dsc05584jpg" class="perfundo__overlay js-perfundo-overlay">
+        <figure class="perfundo__content perfundo__figure">
+            <div class="perfundo__image" style="width: 1000px; padding-top: 56.25%; background-image: url(/blog/turning-studio-headphones-into-a-headset/gfx/DSC05584.jpg);"></div>
+            <figcaption>
+                <p>The finished detachable cable
+                </p>
+            </figcaption>
+        </figure>
+        <a href="#perfundo-untarget" class="perfundo__close perfundo__control js-perfundo-close">Close</a>
+        
+          
+          <a class="perfundo__prev perfundo__control js-perfundo-prev" href="#dsc05583jpg">Prev</a>
+        
+        
+    </div>
+    
+</figure> 
+
+</div>
+<h3 id="step-4-attaching-a-jack-to-the-headphone"><a href="#step-4-attaching-a-jack-to-the-headphone">Step 4: Attaching a Jack to the Headphone</a></h3><p>The jack doesn&rsquo;t quite fit into the rectangular hole of the integrated cable.
+The hole must be enlarged a little bit to make it possible to screw the jack into the housing.
+Then the wires can be soldered to the jack.</p>
+
+<aside >
+    <p>
+    The data sheet of the jack should state which of its contacts correspond to T, R and S.
+Alternatively, to play it safe, you can simply plug your new detachable cable into the jack and <a href="https://en.wikipedia.org/wiki/Continuity_test">test</a> which contacts of the jack connect to the T, R and S conductors of the plug.
+    </p>
+</aside>
+<div class="gallery" style="grid-template-rows: auto; gap: 10px;">
+    
+    
+
+
+
+
+
+
+
+
+
+    
+        
+        
+            
+            
+        
+        
+    
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="">
+    <figure class="figure-inner"><a class="perfundo__link js-perfundo-link" href="#dsc05591jpg">
+        <img src="/blog/turning-studio-headphones-into-a-headset/gfx/DSC05591_hudcb72ded72a3b58460d487e61d94f082_262775_650x0_resize_q75_lanczos.jpg"
+             alt="To prepare the wires for soldering, the insulators must be peeled off"/> </a>
+    </figure>
+    
+    <div id="dsc05591jpg" class="perfundo__overlay js-perfundo-overlay">
+        <figure class="perfundo__content perfundo__figure">
+            <div class="perfundo__image" style="width: 1000px; padding-top: 56.25%; background-image: url(/blog/turning-studio-headphones-into-a-headset/gfx/DSC05591.jpg);"></div>
+            <figcaption>
+                <p>To prepare the wires for soldering, the insulators must be peeled off
+                </p>
+            </figcaption>
+        </figure>
+        <a href="#perfundo-untarget" class="perfundo__close perfundo__control js-perfundo-close">Close</a>
+        
+        
+          
+          <a class="perfundo__next perfundo__control js-perfundo-next" href="#dsc05595jpg">Next</a>
+        
+    </div>
+    
+</figure> 
+    
+
+
+
+
+
+
+
+
+
+    
+        
+        
+            
+            
+        
+        
+    
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="">
+    <figure class="figure-inner"><a class="perfundo__link js-perfundo-link" href="#dsc05595jpg">
+        <img src="/blog/turning-studio-headphones-into-a-headset/gfx/DSC05595_hue07f23e62e10e843a9ecf4f561a36cfa_190400_650x0_resize_q75_lanczos.jpg"
+             alt="The jack does not fit in yet"/> </a>
+    </figure>
+    
+    <div id="dsc05595jpg" class="perfundo__overlay js-perfundo-overlay">
+        <figure class="perfundo__content perfundo__figure">
+            <div class="perfundo__image" style="width: 1000px; padding-top: 56.25%; background-image: url(/blog/turning-studio-headphones-into-a-headset/gfx/DSC05595.jpg);"></div>
+            <figcaption>
+                <p>The jack does not fit in yet
+                </p>
+            </figcaption>
+        </figure>
+        <a href="#perfundo-untarget" class="perfundo__close perfundo__control js-perfundo-close">Close</a>
+        
+          
+          <a class="perfundo__prev perfundo__control js-perfundo-prev" href="#dsc05591jpg">Prev</a>
+        
+        
+          
+          <a class="perfundo__next perfundo__control js-perfundo-next" href="#dsc05599jpg">Next</a>
+        
+    </div>
+    
+</figure> 
+    
+
+
+
+
+
+
+
+
+
+    
+        
+        
+            
+            
+        
+        
+    
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="">
+    <figure class="figure-inner"><a class="perfundo__link js-perfundo-link" href="#dsc05599jpg">
+        <img src="/blog/turning-studio-headphones-into-a-headset/gfx/DSC05599_hu57954d39273d7b24853c23d1e2b72b63_261503_650x0_resize_q75_lanczos.jpg"
+             alt="A 6mm rotary burr produces an opening of just the right size"/> </a>
+    </figure>
+    
+    <div id="dsc05599jpg" class="perfundo__overlay js-perfundo-overlay">
+        <figure class="perfundo__content perfundo__figure">
+            <div class="perfundo__image" style="width: 1000px; padding-top: 56.25%; background-image: url(/blog/turning-studio-headphones-into-a-headset/gfx/DSC05599.jpg);"></div>
+            <figcaption>
+                <p>A 6mm rotary burr produces an opening of just the right size
+                </p>
+            </figcaption>
+        </figure>
+        <a href="#perfundo-untarget" class="perfundo__close perfundo__control js-perfundo-close">Close</a>
+        
+          
+          <a class="perfundo__prev perfundo__control js-perfundo-prev" href="#dsc05595jpg">Prev</a>
+        
+        
+          
+          <a class="perfundo__next perfundo__control js-perfundo-next" href="#dsc05609jpg">Next</a>
+        
+    </div>
+    
+</figure> 
+    
+
+
+
+
+
+
+
+
+
+    
+        
+        
+            
+            
+        
+        
+    
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="">
+    <figure class="figure-inner"><a class="perfundo__link js-perfundo-link" href="#dsc05609jpg">
+        <img src="/blog/turning-studio-headphones-into-a-headset/gfx/DSC05609_hu09c14b556b9f166855f2190619aa7af7_184175_650x0_resize_q75_lanczos.jpg"
+             alt="At first the jack can be screwn in with the fingers &amp;hellip;"/> </a>
+    </figure>
+    
+    <div id="dsc05609jpg" class="perfundo__overlay js-perfundo-overlay">
+        <figure class="perfundo__content perfundo__figure">
+            <div class="perfundo__image" style="width: 1000px; padding-top: 56.25%; background-image: url(/blog/turning-studio-headphones-into-a-headset/gfx/DSC05609.jpg);"></div>
+            <figcaption>
+                <p>At first the jack can be screwn in with the fingers &hellip;
+                </p>
+            </figcaption>
+        </figure>
+        <a href="#perfundo-untarget" class="perfundo__close perfundo__control js-perfundo-close">Close</a>
+        
+          
+          <a class="perfundo__prev perfundo__control js-perfundo-prev" href="#dsc05599jpg">Prev</a>
+        
+        
+          
+          <a class="perfundo__next perfundo__control js-perfundo-next" href="#dsc05611jpg">Next</a>
+        
+    </div>
+    
+</figure> 
+    
+
+
+
+
+
+
+
+
+
+    
+        
+        
+            
+            
+        
+        
+    
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="">
+    <figure class="figure-inner"><a class="perfundo__link js-perfundo-link" href="#dsc05611jpg">
+        <img src="/blog/turning-studio-headphones-into-a-headset/gfx/DSC05611_huf5cb2c0e3ef487abd66a93304df0ee3a_181306_650x0_resize_q75_lanczos.jpg"
+             alt="&amp;hellip; but to get it really tight pliers are needed."/> </a>
+    </figure>
+    
+    <div id="dsc05611jpg" class="perfundo__overlay js-perfundo-overlay">
+        <figure class="perfundo__content perfundo__figure">
+            <div class="perfundo__image" style="width: 1000px; padding-top: 56.25%; background-image: url(/blog/turning-studio-headphones-into-a-headset/gfx/DSC05611.jpg);"></div>
+            <figcaption>
+                <p>&hellip; but to get it really tight pliers are needed.
+                </p>
+            </figcaption>
+        </figure>
+        <a href="#perfundo-untarget" class="perfundo__close perfundo__control js-perfundo-close">Close</a>
+        
+          
+          <a class="perfundo__prev perfundo__control js-perfundo-prev" href="#dsc05609jpg">Prev</a>
+        
+        
+          
+          <a class="perfundo__next perfundo__control js-perfundo-next" href="#dsc05617jpg">Next</a>
+        
+    </div>
+    
+</figure> 
+    
+
+
+
+
+
+
+
+
+
+    
+        
+        
+            
+            
+        
+        
+    
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="">
+    <figure class="figure-inner"><a class="perfundo__link js-perfundo-link" href="#dsc05617jpg">
+        <img src="/blog/turning-studio-headphones-into-a-headset/gfx/DSC05617_hu7c19cc81b9d0193ce962098f380ee89f_223940_650x0_resize_q75_lanczos.jpg"
+             alt="In particular, pliers are needed to fasten the nut."/> </a>
+    </figure>
+    
+    <div id="dsc05617jpg" class="perfundo__overlay js-perfundo-overlay">
+        <figure class="perfundo__content perfundo__figure">
+            <div class="perfundo__image" style="width: 1000px; padding-top: 56.25%; background-image: url(/blog/turning-studio-headphones-into-a-headset/gfx/DSC05617.jpg);"></div>
+            <figcaption>
+                <p>In particular, pliers are needed to fasten the nut.
+                </p>
+            </figcaption>
+        </figure>
+        <a href="#perfundo-untarget" class="perfundo__close perfundo__control js-perfundo-close">Close</a>
+        
+          
+          <a class="perfundo__prev perfundo__control js-perfundo-prev" href="#dsc05611jpg">Prev</a>
+        
+        
+          
+          <a class="perfundo__next perfundo__control js-perfundo-next" href="#dsc05623jpg">Next</a>
+        
+    </div>
+    
+</figure> 
+    
+
+
+
+
+
+
+
+
+
+    
+        
+        
+            
+            
+        
+        
+    
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="">
+    <figure class="figure-inner"><a class="perfundo__link js-perfundo-link" href="#dsc05623jpg">
+        <img src="/blog/turning-studio-headphones-into-a-headset/gfx/DSC05623_hu33a7d3a3ea0cf36850bd73c517335be7_267707_650x0_resize_q75_lanczos.jpg"
+             alt="Originally, these wires were connected to the three conductors (T, R, S) of the plug. They are now soldered to the corresponding T, R and S contacts of the jack."/> </a>
+    </figure>
+    
+    <div id="dsc05623jpg" class="perfundo__overlay js-perfundo-overlay">
+        <figure class="perfundo__content perfundo__figure">
+            <div class="perfundo__image" style="width: 1000px; padding-top: 56.25%; background-image: url(/blog/turning-studio-headphones-into-a-headset/gfx/DSC05623.jpg);"></div>
+            <figcaption>
+                <p>Originally, these wires were connected to the three conductors (T, R, S) of the plug. They are now soldered to the corresponding T, R and S contacts of the jack.
+                </p>
+            </figcaption>
+        </figure>
+        <a href="#perfundo-untarget" class="perfundo__close perfundo__control js-perfundo-close">Close</a>
+        
+          
+          <a class="perfundo__prev perfundo__control js-perfundo-prev" href="#dsc05617jpg">Prev</a>
+        
+        
+          
+          <a class="perfundo__next perfundo__control js-perfundo-next" href="#dsc05639jpg">Next</a>
+        
+    </div>
+    
+</figure> 
+    
+
+
+
+
+
+
+
+
+
+    
+        
+        
+            
+            
+        
+        
+    
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="">
+    <figure class="figure-inner"><a class="perfundo__link js-perfundo-link" href="#dsc05639jpg">
+        <img src="/blog/turning-studio-headphones-into-a-headset/gfx/DSC05639_hu4240580aa6c37c36355972d656315559_210406_650x0_resize_q75_lanczos.jpg"
+             alt="Due to the (avoidable) drilling mistake mentioned a few pictures back, the jack occupied more vertical space than the integrated cable did previously. I had to grind off the upper part of the nut to recover the necessary room for seating the other components."/> </a>
+    </figure>
+    
+    <div id="dsc05639jpg" class="perfundo__overlay js-perfundo-overlay">
+        <figure class="perfundo__content perfundo__figure">
+            <div class="perfundo__image" style="width: 1000px; padding-top: 56.25%; background-image: url(/blog/turning-studio-headphones-into-a-headset/gfx/DSC05639.jpg);"></div>
+            <figcaption>
+                <p>Due to the (avoidable) drilling mistake mentioned a few pictures back, the jack occupied more vertical space than the integrated cable did previously. I had to grind off the upper part of the nut to recover the necessary room for seating the other components.
+                </p>
+            </figcaption>
+        </figure>
+        <a href="#perfundo-untarget" class="perfundo__close perfundo__control js-perfundo-close">Close</a>
+        
+          
+          <a class="perfundo__prev perfundo__control js-perfundo-prev" href="#dsc05623jpg">Prev</a>
+        
+        
+    </div>
+    
+</figure>
+
+</div>
+<h3 id="step-5-closing-the-housing"><a href="#step-5-closing-the-housing">Step 5: Closing the Housing</a></h3><p>Before putting the headphones back together again, plug them into some audio source to make sure they still work after the modification.
+If they don&rsquo;t, there&rsquo;s probably a loose connection somewhere.</p>
+<div class="gallery" style="grid-template-rows: auto; gap: 10px;">
+    
+    
+
+
+
+
+
+
+
+
+
+    
+        
+        
+            
+            
+        
+        
+    
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="">
+    <figure class="figure-inner"><a class="perfundo__link js-perfundo-link" href="#dsc05628jpg">
+        <img src="/blog/turning-studio-headphones-into-a-headset/gfx/DSC05628_hucd859c45341a8847eb1aac8257edc4f7_157765_650x0_resize_q75_lanczos.jpg"
+             alt="Unless the jack has been mounted too high, the paper sheet should fit just as it did originally"/> </a>
+    </figure>
+    
+    <div id="dsc05628jpg" class="perfundo__overlay js-perfundo-overlay">
+        <figure class="perfundo__content perfundo__figure">
+            <div class="perfundo__image" style="width: 1000px; padding-top: 56.25%; background-image: url(/blog/turning-studio-headphones-into-a-headset/gfx/DSC05628.jpg);"></div>
+            <figcaption>
+                <p>Unless the jack has been mounted too high, the paper sheet should fit just as it did originally
+                </p>
+            </figcaption>
+        </figure>
+        <a href="#perfundo-untarget" class="perfundo__close perfundo__control js-perfundo-close">Close</a>
+        
+        
+          
+          <a class="perfundo__next perfundo__control js-perfundo-next" href="#dsc05642jpg">Next</a>
+        
+    </div>
+    
+</figure> 
+    
+
+
+
+
+
+
+
+
+
+    
+        
+        
+            
+            
+        
+        
+    
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="">
+    <figure class="figure-inner"><a class="perfundo__link js-perfundo-link" href="#dsc05642jpg">
+        <img src="/blog/turning-studio-headphones-into-a-headset/gfx/DSC05642_hu31e3410d2fdf09413b3427fc6899ca66_174815_650x0_resize_q75_lanczos.jpg"
+             alt="The clamping ring on top of the foam pad should click into place"/> </a>
+    </figure>
+    
+    <div id="dsc05642jpg" class="perfundo__overlay js-perfundo-overlay">
+        <figure class="perfundo__content perfundo__figure">
+            <div class="perfundo__image" style="width: 1000px; padding-top: 56.25%; background-image: url(/blog/turning-studio-headphones-into-a-headset/gfx/DSC05642.jpg);"></div>
+            <figcaption>
+                <p>The clamping ring on top of the foam pad should click into place
+                </p>
+            </figcaption>
+        </figure>
+        <a href="#perfundo-untarget" class="perfundo__close perfundo__control js-perfundo-close">Close</a>
+        
+          
+          <a class="perfundo__prev perfundo__control js-perfundo-prev" href="#dsc05628jpg">Prev</a>
+        
+        
+          
+          <a class="perfundo__next perfundo__control js-perfundo-next" href="#dsc05646jpg">Next</a>
+        
+    </div>
+    
+</figure> 
+    
+
+
+
+
+
+
+
+
+
+    
+        
+        
+            
+            
+        
+        
+    
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="">
+    <figure class="figure-inner"><a class="perfundo__link js-perfundo-link" href="#dsc05646jpg">
+        <img src="/blog/turning-studio-headphones-into-a-headset/gfx/DSC05646_hu257abcdd157dc37506b8ff59f8611474_210530_650x0_resize_q75_lanczos.jpg"
+             alt="The modified headphones can now be used with detachable cables"/> </a>
+    </figure>
+    
+    <div id="dsc05646jpg" class="perfundo__overlay js-perfundo-overlay">
+        <figure class="perfundo__content perfundo__figure">
+            <div class="perfundo__image" style="width: 1000px; padding-top: 56.25%; background-image: url(/blog/turning-studio-headphones-into-a-headset/gfx/DSC05646.jpg);"></div>
+            <figcaption>
+                <p>The modified headphones can now be used with detachable cables
+                </p>
+            </figcaption>
+        </figure>
+        <a href="#perfundo-untarget" class="perfundo__close perfundo__control js-perfundo-close">Close</a>
+        
+          
+          <a class="perfundo__prev perfundo__control js-perfundo-prev" href="#dsc05642jpg">Prev</a>
+        
+        
+          
+          <a class="perfundo__next perfundo__control js-perfundo-next" href="#dsc05648jpg">Next</a>
+        
+    </div>
+    
+</figure> 
+
+</div>
+
+
+
+
+
+
+
+
+
+
+    
+        
+        
+            
+            
+        
+        
+    
+
+
+
+<figure class="perfundo js-perfundo figure-outer" id="inserting-a-detachable-microphone-turns-the-headphones-into-a-headset">
+    <figure class="figure-inner"><a class="perfundo__link js-perfundo-link" href="#dsc05648jpg">
+        <img src="/blog/turning-studio-headphones-into-a-headset/gfx/DSC05648_hu039d8d58f6de96340cfad707d6a2a34e_105826_650x0_resize_q75_lanczos.jpg"/> </a>
+                <figcaption>
+                    Inserting a detachable microphone turns the headphones into a headset
+                </figcaption>
+        
+    </figure>
+    
+    <div id="dsc05648jpg" class="perfundo__overlay js-perfundo-overlay">
+        <figure class="perfundo__content perfundo__figure">
+            <div class="perfundo__image" style="width: 1000px; padding-top: 56.25%; background-image: url(/blog/turning-studio-headphones-into-a-headset/gfx/DSC05648.jpg);"></div>
+            <figcaption>
+                Inserting a detachable microphone turns the headphones into a headset
+            </figcaption>
+        </figure>
+        <a href="#perfundo-untarget" class="perfundo__close perfundo__control js-perfundo-close">Close</a>
+        
+          
+          <a class="perfundo__prev perfundo__control js-perfundo-prev" href="#dsc05646jpg">Prev</a>
+        
+        
+    </div>
+    
+</figure>
+<p>I&rsquo;ve been using the modified headphones for about a year without any issues, and I expect to do so for many years to come.</p>
+		</article>
+	</main>
+	
+</div>
+
+        </div>
+        </div>
+        <footer>
+	<p>© Dimitri Bohlender</p>
+	<p><a href="/legal">Legal Notice</a></p>
+</footer>
+
+<script src="/perfundo/perfundo.min.js"></script>
+<script>
+	perfundo('.perfundo', {
+		disableHistory: true,
+		swipe: true
+	});
+</script>
+    </body>
+</html>

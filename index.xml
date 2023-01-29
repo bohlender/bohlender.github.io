@@ -11,6 +11,25 @@
     <copyright>© Dimitri Bohlender</copyright>
     <lastBuildDate>Sat, 17 Aug 2019 22:52:06 +0200</lastBuildDate><atom:link href="https://bohlender.pro/index.xml" rel="self" type="application/rss+xml" />
     <item>
+      <title>Turning Studio Headphones Into a Headset</title>
+      <link>https://bohlender.pro/blog/turning-studio-headphones-into-a-headset/</link>
+      <pubDate>Sat, 21 Jan 2023 13:38:05 +0100</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.pro/blog/turning-studio-headphones-into-a-headset/</guid>
+      <description>&lt;p&gt;In a recent virtual meeting a new colleague was surprised to see me using a &lt;a href=&#34;https://beyerdynamic.com/dt-770-pro.html&#34;&gt;Beyerdynamic DT 770 PRO&lt;/a&gt; &lt;em&gt;headset&lt;/em&gt; &amp;ndash; a product Beyerdynamic does not even list.
+The DT 770 PRO are well-known studio &lt;em&gt;headphones&lt;/em&gt;, and so are all the other entries in Beyerdynamic&amp;rsquo;s &lt;q&gt;studio&lt;/q&gt; line.
+Only their &lt;q&gt;gaming&lt;/q&gt; line of products features headsets.
+So how could I possibly be using a device that does not seem to exist?&lt;/p&gt;
+&lt;p&gt;The solution is unspectacular if one is aware of &amp;ldquo;detachable microphones&amp;rdquo;.
+To turn a wired studio headphone into a headset all one needs to do is to make it possible to attach such a microphone.
+This post illustrates&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;how replacing the integrated headphone cable by an &lt;a href=&#34;https://en.wikipedia.org/wiki/Phone_connector_(audio)&#34;&gt;audio jack&lt;/a&gt; achieves this,&lt;/li&gt;
+&lt;li&gt;the concrete implementation using my DT 770 PRO as a test object.&lt;/li&gt;
+&lt;/ul&gt;</description>
+    </item>
+    
+    <item>
       <title>Solving the &#34;Seven Segment Search&#34; Puzzle with Z3</title>
       <link>https://bohlender.pro/blog/aoc-seven-segment-search-with-z3/</link>
       <pubDate>Sat, 22 Jan 2022 15:06:54 +0100</pubDate>

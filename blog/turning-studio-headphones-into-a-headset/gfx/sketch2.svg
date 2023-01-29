@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="375px" height="320px" viewBox="0 0 375 320" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+        <linearGradient x1="23.4846136%" y1="50%" x2="96.8697213%" y2="50%" id="linearGradient-1">
+            <stop stop-color="#F9D26E" offset="0%"></stop>
+            <stop stop-color="#FAFAFA" offset="68.8872466%"></stop>
+            <stop stop-color="#F9D26E" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="96.8697213%" y1="50%" x2="23.4846136%" y2="50%" id="linearGradient-2">
+            <stop stop-color="#808080" offset="0%"></stop>
+            <stop stop-color="#FAFAFA" offset="49.572424%"></stop>
+            <stop stop-color="#808080" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="96.8697213%" y1="50%" x2="23.4846136%" y2="50%" id="linearGradient-3">
+            <stop stop-color="#808080" offset="0%"></stop>
+            <stop stop-color="#FAFAFA" offset="49.572424%"></stop>
+            <stop stop-color="#808080" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="23.4846136%" y1="50%" x2="96.8697213%" y2="50%" id="linearGradient-4">
+            <stop stop-color="#808080" offset="0%"></stop>
+            <stop stop-color="#FAFAFA" offset="68.8872466%"></stop>
+            <stop stop-color="#808080" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="23.4846136%" y1="50%" x2="96.8697213%" y2="50%" id="linearGradient-5">
+            <stop stop-color="#808080" offset="0%"></stop>
+            <stop stop-color="#FAFAFA" offset="68.8872466%"></stop>
+            <stop stop-color="#808080" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="23.4846136%" y1="50%" x2="96.8697213%" y2="50%" id="linearGradient-6">
+            <stop stop-color="#D6805A" offset="0%"></stop>
+            <stop stop-color="#FAFAFA" offset="68.8872466%"></stop>
+            <stop stop-color="#D6805A" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="23.4846136%" y1="50%" x2="96.8697213%" y2="50%" id="linearGradient-7">
+            <stop stop-color="#B01E41" offset="0%"></stop>
+            <stop stop-color="#FAFAFA" offset="68.8872466%"></stop>
+            <stop stop-color="#B01E41" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="23.4846136%" y1="50%" x2="96.8697213%" y2="50%" id="linearGradient-8">
+            <stop stop-color="#164D61" offset="0%"></stop>
+            <stop stop-color="#FAFAFA" offset="68.8872466%"></stop>
+            <stop stop-color="#164D61" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="23.4846136%" y1="50%" x2="96.8697213%" y2="50%" id="linearGradient-9">
+            <stop stop-color="#F9D26E" offset="0%"></stop>
+            <stop stop-color="#FAFAFA" offset="68.8872466%"></stop>
+            <stop stop-color="#F9D26E" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="23.4846136%" y1="50%" x2="96.8697213%" y2="50%" id="linearGradient-10">
+            <stop stop-color="#F9D26E" offset="0%"></stop>
+            <stop stop-color="#FAFAFA" offset="68.8872466%"></stop>
+            <stop stop-color="#F9D26E" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="23.4846136%" y1="50%" x2="96.8697213%" y2="50%" id="linearGradient-11">
+            <stop stop-color="#F9D26E" offset="0%"></stop>
+            <stop stop-color="#FAFAFA" offset="68.8872466%"></stop>
+            <stop stop-color="#F9D26E" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="23.4846136%" y1="50%" x2="96.8697213%" y2="50%" id="linearGradient-12">
+            <stop stop-color="#F9D26E" offset="0%"></stop>
+            <stop stop-color="#FAFAFA" offset="68.8872466%"></stop>
+            <stop stop-color="#F9D26E" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="23.4846136%" y1="50%" x2="96.8697213%" y2="50%" id="linearGradient-13">
+            <stop stop-color="#F9D26E" offset="0%"></stop>
+            <stop stop-color="#FAFAFA" offset="68.8872466%"></stop>
+            <stop stop-color="#F9D26E" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="23.4846136%" y1="50%" x2="96.8697213%" y2="50%" id="linearGradient-14">
+            <stop stop-color="#F9D26E" offset="0%"></stop>
+            <stop stop-color="#FAFAFA" offset="68.8872466%"></stop>
+            <stop stop-color="#F9D26E" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="28.625135%" y1="50%" x2="96.8697213%" y2="50%" id="linearGradient-15">
+            <stop stop-color="#808080" offset="0%"></stop>
+            <stop stop-color="#FAFAFA" offset="49.3823902%"></stop>
+            <stop stop-color="#808080" offset="85.0058066%"></stop>
+            <stop stop-color="#808080" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="23.4846136%" y1="50%" x2="96.8697213%" y2="50%" id="linearGradient-16">
+            <stop stop-color="#808080" offset="0%"></stop>
+            <stop stop-color="#FAFAFA" offset="68.8872466%"></stop>
+            <stop stop-color="#808080" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="23.4846136%" y1="50%" x2="96.8697213%" y2="50%" id="linearGradient-17">
+            <stop stop-color="#808080" offset="0%"></stop>
+            <stop stop-color="#FAFAFA" offset="68.8872466%"></stop>
+            <stop stop-color="#808080" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="Artboard" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="driver-L-wiring" transform="translate(48.000000, 209.000000)" stroke-linecap="square" stroke-linejoin="round" stroke-width="2">
+            <polyline id="driver-L-gnd" stroke="#D6805A" points="3 7 3 3 9 3"></polyline>
+            <polyline id="driver-L-channel" stroke="#164D61" points="0 7 0 0 8 0"></polyline>
+        </g>
+        <path d="M66,171 C66.5522847,171 67,171.447715 67,172 L67,250 C67,250.552285 66.5522847,251 66,251 L61,251 C60.4477153,251 60,250.552285 60,250 L60,228 L58,228 C57.4477153,228 57,227.552285 57,227 L57,195 C57,194.447715 57.4477153,194 58,194 L60,194 L60,172 C60,171.447715 60.4477153,171 61,171 L66,171 Z" id="driver-L" stroke="#808080" stroke-width="0.5" fill="#FFFFFF"></path>
+        <g id="driver-R-wiring" transform="translate(45.000000, 8.000000)" stroke-width="2">
+            <path d="M276.5,205 C284.5,205 288.5,205 288.5,205 C288.5,205 288.5,131.013514 288.5,130" id="channel" stroke="#B01E41" stroke-linejoin="round"></path>
+            <path d="M1,131 C1,56 68.3903499,0 144.76608,0 C221.14181,0 288.532159,56 288.5,130.498258" id="channel" stroke="#B01E41"></path>
+            <line x1="1" y1="208" x2="1" y2="131" id="channel" stroke="#B01E41"></line>
+            <path d="M276.5,202 C280.5,202 282.5,202 282.5,202 C282.5,202 282.5,130.972973 282.5,130" id="gnd" stroke="#D6805A" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M6,131 C6,58.8625954 70.7598805,5 144.154412,5 C217.548943,5 282.531507,58.8451871 282.5,130.5" id="gnd" stroke="#D6805A"></path>
+            <line x1="6" y1="204" x2="6" y2="131" id="gnd" stroke="#D6805A" stroke-linecap="round"></line>
+        </g>
+        <path d="M320,171 C320.552285,171 321,171.447715 321,172 L321,250 C321,250.552285 320.552285,251 320,251 L315,251 C314.447715,251 314,250.552285 314,250 L314,228 L312,228 C311.447715,228 311,227.552285 311,227 L311,195 C311,194.447715 311.447715,194 312,194 L314,194 L314,172 C314,171.447715 314.447715,171 315,171 L320,171 Z" id="driver-R" stroke="#808080" stroke-width="0.5" fill="#FFFFFF" transform="translate(316.000000, 211.000000) scale(-1, 1) translate(-316.000000, -211.000000) "></path>
+        <g id="Jack" transform="translate(39.000000, 241.000000)" stroke="#808080">
+            <path d="M0,40 L0,38 L0,38 L1.5,38 L1.5,30.5 L2.5,29.5 L2.5,12 L15.5,12 L15.5,29.5 L16.5,30.5 L16.5,38 L18,38 L18,40 C18,41.1045695 17.1045695,42 16,42 L2,42 C0.8954305,42 1.3527075e-16,41.1045695 0,40 Z" id="insulator" fill="#25292C"></path>
+            <polygon id="S" fill="url(#linearGradient-1)" opacity="0.899181548" points="4.13043478 38.8965517 4.71867008 38.8965517 4.71867008 37.0344828 4.13043478 37.0344828 4.13043478 33 14.1304348 33 14.1304348 37.0344828 13.5421995 37.0344828 13.5421995 38.8965517 14.1304348 38.8965517 14.1304348 42 4.13043478 42">
+                <animate attributeName="opacity" values="0; 0; 1; 1; 0" dur="10s" repeatCount="indefinite"/>
+            </polygon>
+            <polygon id="R" fill="#FFFFFF" points="4 16 14.1304348 16 14.1304348 33 4.13043478 33"></polygon>
+            <path d="M5,7 L5.57142857,7 L5.57142857,25.7670956 C5.57142857,25.9935601 5.64829732,26.2133185 5.78945533,26.3904076 L6.58572583,27.3893651 C6.83671849,27.7042468 6.87436088,28.1389534 6.68123126,28.4922928 L5.99417591,29.7492918 C5.90969037,29.9038619 5.74758115,30 5.57142857,30 C5.47784866,30 5.40198714,29.9241385 5.40198714,29.8305586 C5.40198714,29.8021579 5.40912592,29.7742128 5.42274733,29.7492918 L6.10980269,28.4922928 C6.30293231,28.1389534 6.26528992,27.7042468 6.01429726,27.3893651 L5.21802676,26.3904076 C5.07686874,26.2133185 5,25.9935601 5,25.7670956 L5,7 L5,7 Z" id="R" stroke-width="0.25" fill="url(#linearGradient-2)"></path>
+            <path d="M11.25,7 L12.05,7 L12.05,22.0316153 C12.05,22.2578044 12.1266823,22.4773124 12.2675266,22.6542994 L12.7970697,23.3197305 C13.0670854,23.6590359 13.087651,24.1337009 12.8479938,24.4950887 L12.2284753,25.4292833 C12.1124419,25.6042543 11.9442814,25.7382669 11.7478284,25.8123266 L11.65,25.8492063 C11.5701839,25.8792958 11.4810878,25.8389843 11.4509984,25.7591682 C11.4348041,25.7162105 11.4385595,25.668275 11.4612461,25.6283633 L12.1158816,24.4766898 C12.3177241,24.1215965 12.2833233,23.6794406 12.0289877,23.3598391 L11.4675266,22.6542994 C11.3266823,22.4773124 11.25,22.2578044 11.25,22.0316153 L11.25,7 L11.25,7 Z" id="R" stroke-width="0.25" fill="url(#linearGradient-3)" transform="translate(12.250000, 16.500000) scale(-1, 1) translate(-12.250000, -16.500000) "></path>
+            <path d="M11.1304348,0 L11.1304348,11.5 L7.13043478,11.5 L7.13043478,0 L11.1304348,0 Z M9.13043478,1.17948718 C8.8148435,1.17948718 8.55900621,1.44352438 8.55900621,1.76923077 C8.55900621,2.09493716 8.8148435,2.35897436 9.13043478,2.35897436 C9.44602607,2.35897436 9.70186335,2.09493716 9.70186335,1.76923077 C9.70186335,1.44352438 9.44602607,1.17948718 9.13043478,1.17948718 Z" id="Combined-Shape" stroke-width="0.25" fill="url(#linearGradient-4)"></path>
+            <polygon id="R" stroke-width="0.25" fill="url(#linearGradient-5)" points="7.13043478 16.5 11.1304348 16.5 11.1304348 32.5 7.13043478 32.5"></polygon>
+        </g>
+        <g id="Wires" transform="translate(40.000000, 216.000000)">
+            <g id="pcb" stroke-width="0.5">
+                <path d="M2.5638852,-1.03584031e-16 L13.4361148,1.03584031e-16 C14.3276335,-6.01853049e-17 14.6509198,0.0928256111 14.9768457,0.267132704 C15.3027716,0.441439796 15.5585602,0.697228371 15.7328673,1.0231543 C15.9071744,1.34908022 16,1.67236646 16,2.5638852 L16,7.4361148 C16,8.32763354 15.9071744,8.65091978 15.7328673,8.9768457 C15.5585602,9.30277163 15.3027716,9.5585602 14.9768457,9.7328673 C14.6509198,9.90717439 14.3276335,10 13.4361148,10 L2.5638852,10 C1.67236646,10 1.34908022,9.90717439 1.0231543,9.7328673 C0.697228371,9.5585602 0.441439796,9.30277163 0.267132704,8.9768457 C0.0928256111,8.65091978 4.01235366e-17,8.32763354 -6.90560205e-17,7.4361148 L6.90560205e-17,2.5638852 C-4.01235366e-17,1.67236646 0.0928256111,1.34908022 0.267132704,1.0231543 C0.441439796,0.697228371 0.697228371,0.441439796 1.0231543,0.267132704 C1.34908022,0.0928256111 1.67236646,6.01853049e-17 2.5638852,-1.03584031e-16 Z" id="Rectangle" stroke="#BA9C7A" fill="#418156"></path>
+                <circle id="Oval" stroke="#6E6F69" fill="#B7B5B3" cx="5" cy="3" r="2"></circle>
+                <circle id="Oval" stroke="#6E6F69" fill="#B7B5B3" cx="11" cy="3" r="2"></circle>
+                <circle id="Oval" stroke="#6E6F69" fill="#B7B5B3" cx="8" cy="7" r="2"></circle>
+            </g>
+            <path d="M8,27 C8,22.3333333 8.5,18.6666667 9.5,16 C10.5,13.3333333 11,9 11,3" id="S" stroke="#D6805A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M4.5,32 C4.5,26.3333333 4.5,21.3333333 4.5,17 C4.5,12.6666667 4.66666667,8 5,3" id="R" stroke="#B01E41" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M12,32 C12.1161261,27.0591215 11.478491,23.0739019 10.0870946,20.0443411 C8.69569819,17.0147804 8,12.6666667 8,7" id="T" stroke="#164D61" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+        </g>
+        <g id="Headphone" opacity="0.7" transform="translate(13.000000, 6.000000)">
+            <g id="Earphone-L" transform="translate(0.000000, 127.000000)">
+                <path d="M44,6 C50.627417,6 56,11.372583 56,18 L56,134 C56,140.627417 50.627417,146 44,146 L22.6567168,146.002421 C8.90900238,130.240484 0,104.977295 0,76.5 C0,47.4133451 9.2943528,21.6798201 23.5458478,5.99886633 L44,6 Z" id="shell" stroke="#979797" fill="#25292C"></path>
+                <rect id="pad" stroke="#979797" fill="#D8D8D8" x="45" y="0" width="30" height="152" rx="13"></rect>
+                <polygon id="L" fill="#808080" fill-rule="nonzero" points="37.5830078 32 37.5830078 28.8652344 35.9423828 28.8652344 35.7958984 30.4960938 30.8544922 30.4960938 30.8544922 19.2949219 32.4462891 19.0214844 32.4462891 17.78125 27.3388672 17.78125 27.3388672 19.0214844 28.9306641 19.2949219 28.9306641 30.4960938 27.3388672 30.7695312 27.3388672 32"></polygon>
+            </g>
+            <g id="Earphone-R" transform="translate(314.500000, 203.000000) scale(-1, 1) translate(-314.500000, -203.000000) translate(277.000000, 127.000000)">
+                <path d="M44,6 C50.627417,6 56,11.372583 56,18 L56,134 C56,140.627417 50.627417,146 44,146 L22.6567168,146.002421 C8.90900238,130.240484 0,104.977295 0,76.5 C0,47.4133451 9.2943528,21.6798201 23.5458478,5.99886633 L44,6 Z" id="shell" stroke="#979797" fill="#25292C"></path>
+                <rect id="pad" stroke="#979797" fill="#D8D8D8" x="45" y="0" width="30" height="152" rx="13"></rect>
+                <path d="M30.5332031,32 L30.5332031,30.7695312 L28.9414062,30.4960938 L28.9414062,25.6523438 L32.0273438,25.6523438 C32.7825521,25.6523438 33.3847656,25.8867188 33.8339844,26.3554688 C34.2832031,26.8242188 34.5078125,27.4459635 34.5078125,28.2207031 L34.5078125,28.2207031 L34.5078125,29.3242188 C34.5078125,30.0664062 34.6656901,30.6979167 34.9814453,31.21875 C35.2972005,31.7395833 35.8294271,32 36.578125,32 L36.578125,32 L37.6132812,32 L37.6132812,30.7402344 L37.1445312,30.6816406 C36.890625,30.6425781 36.7083333,30.5188802 36.5976562,30.3105469 C36.4869792,30.1022135 36.4316406,29.7799479 36.4316406,29.34375 L36.4316406,29.34375 L36.4316406,28.2011719 C36.4316406,27.3613281 36.2607422,26.6549479 35.9189453,26.0820312 C35.5771484,25.5091146 35.0188802,25.0957031 34.2441406,24.8417969 C34.9602865,24.5358073 35.5104167,24.1158854 35.8945312,23.5820312 C36.2786458,23.0481771 36.4707031,22.4361979 36.4707031,21.7460938 C36.4707031,20.4830729 36.0572917,19.508138 35.2304688,18.8212891 C34.4036458,18.1344401 33.2154948,17.7910156 31.6660156,17.7910156 L31.6660156,17.7910156 L25.4257812,17.7910156 L25.4257812,19.0214844 L27.0175781,19.2949219 L27.0175781,30.4960938 L25.4257812,30.7695312 L25.4257812,32 L30.5332031,32 Z M31.4707031,24.1386719 L28.9414062,24.1386719 L28.9414062,19.2949219 L31.6660156,19.2949219 C32.6490885,19.2949219 33.375,19.5130208 33.84375,19.9492188 C34.3125,20.3854167 34.546875,20.9778646 34.546875,21.7265625 C34.546875,22.5143229 34.3027344,23.1132812 33.8144531,23.5234375 C33.3261719,23.9335938 32.5449219,24.1386719 31.4707031,24.1386719 L31.4707031,24.1386719 Z" id="R" fill="#808080" fill-rule="nonzero" transform="translate(31.519531, 24.895508) scale(-1, 1) translate(-31.519531, -24.895508) "></path>
+            </g>
+            <path d="M176,0 C256.633573,0 322,59.5461283 322,133 L312,133 L312,133 C312,64.5772154 251.110726,9.10958904 176,9.10958904 C100.889274,9.10958904 40,64.5772154 40,133 L30,133 L30,133 C30,59.5461283 95.3664265,0 176,0 Z" id="headband" stroke="#979797" fill="#25292C"></path>
+            <animate attributeName="opacity" values="1; 1; 0.1; 0.1; 1" dur="10s" repeatCount="indefinite"/>
+        </g>
+        <g id="TRS-Connector-R" transform="translate(227.500000, 220.500000) rotate(-180.000000) translate(-227.500000, -220.500000) translate(216.000000, 164.000000)">
+            <g id="Outside" transform="translate(0.000000, 58.000000)">
+                <g id="Separators" transform="translate(7.000000, 31.000000)" fill="#25292C">
+                    <rect id="Rectangle" x="0" y="0" width="9" height="3.05555556"></rect>
+                    <rect id="Rectangle" x="0" y="7.94444444" width="9" height="3.05555556"></rect>
+                </g>
+                <g id="Coloured" transform="translate(6.837838, 15.954545)" stroke="#808080">
+                    <rect id="S-coloured" fill="url(#linearGradient-6)" x="0" y="8.8817842e-15" width="9.32432432" height="14.7272727"></rect>
+                    <rect id="R-coloured" fill="url(#linearGradient-7)" x="0" y="17.7954545" width="9.32432432" height="4.90909091"></rect>
+                    <polygon id="T-coloured" fill="url(#linearGradient-8)" points="4.15283423e-15 25.7727273 9.32432432 25.7727273 9.32432432 26.7144796 8.08108108 27.9204545 8.7027027 35.5909091 6.21621622 38.0454545 3.10810811 38.0454545 0.621621622 35.5909091 1.24324324 27.9204545 4.15283423e-15 26.7144796"></polygon>
+                </g>
+                <g id="Gold" transform="translate(6.837838, 15.954545)" stroke="#808080">
+                    <rect id="S" fill="url(#linearGradient-9)" x="0" y="8.8817842e-15" width="9.32432432" height="14.7272727"></rect>
+                    <rect id="R" fill="url(#linearGradient-10)" x="0" y="17.7954545" width="9.32432432" height="4.90909091"></rect>
+                    <polygon id="T" fill="url(#linearGradient-11)" points="1.83636889e-14 25.7727273 9.32432432 25.7727273 9.32432432 26.7144796 8.08108108 27.9204545 8.7027027 35.5909091 6.21621622 38.0454545 3.10810811 38.0454545 0.621621622 35.5909091 1.24324324 27.9204545 1.83636889e-14 26.7144796"></polygon>
+                    <animate attributeName="opacity" values="1; 1; 0; 0; 1" dur="10s" repeatCount="indefinite"/>
+                </g>
+                <g id="S-rest" stroke="#808080">
+                    <rect id="Rectangle" fill="url(#linearGradient-12)" x="1.86486486" y="3.06818182" width="19.2702703" height="4.29545455"></rect>
+                    <rect id="Rectangle" fill="url(#linearGradient-13)" x="3.10810811" y="7.36363636" width="16.7837838" height="8.59090909"></rect>
+                    <rect id="Rectangle" fill="url(#linearGradient-14)" x="0" y="-2.08721929e-14" width="23" height="4.29545455"></rect>
+                </g>
+            </g>
+            <g id="Inside" transform="translate(2.000000, 0.000000)">
+                <path d="M5.5,7 L4,7 C2.34314575,7 1,5.65685425 1,4 L1,3.5 C1,1.84314575 2.34314575,0.5 4,0.5 L15,0.5 C16.6568542,0.5 18,1.84314575 18,3.5 L18,4 C18,5.65685425 16.6568542,7 15,7 L14,7 L14,7 L14,29 L14,51.4090909 L5.5,43.5 L5.5,7 Z" id="S" stroke="#808080" stroke-width="0.25" fill="url(#linearGradient-15)"></path>
+                <path d="M6.03568493,7.36959714 C6.01189498,9.78986571 5.33333333,12.3333333 4,15 C2,19 2.5,23.5 2.5,23.5" id="R-wire" stroke="#B01E41" stroke-width="2" stroke-linecap="round"></path>
+                <path d="M12.0356849,7.36959714 C12.011895,17.4565324 12,22.5 12,22.5" id="S-wire" stroke="#D6805A" stroke-width="2" stroke-linecap="round"></path>
+                <rect id="R" stroke="#808080" stroke-width="0.25" fill="url(#linearGradient-16)" x="1" y="21" width="3" height="23"></rect>
+                <path d="M9.03568493,7.36959714 C9.03568493,7.36959714 9,33 9,33" id="T-wire" stroke="#164D61" stroke-width="2" stroke-linecap="round"></path>
+                <polygon id="T" stroke="#808080" stroke-width="0.25" fill="url(#linearGradient-17)" points="7 29 10.8378378 33 11 43.7272727 7 43.7272727"></polygon>
+                <rect id="insulator" stroke="#808080" fill="#25292C" x="0" y="43.2727273" width="19" height="14.7272727"></rect>
+            </g>
+        </g>
+        <g id="TRS-Connector-L" transform="translate(143.500000, 220.500000) scale(-1, 1) rotate(-180.000000) translate(-143.500000, -220.500000) translate(132.000000, 164.000000)">
+            <g id="Outside" transform="translate(11.500000, 85.500000) scale(-1, 1) translate(-11.500000, -85.500000) translate(0.000000, 58.000000)">
+                <g id="Separators" transform="translate(7.000000, 31.000000)" fill="#25292C">
+                    <rect id="Rectangle" x="0" y="0" width="9" height="3.05555556"></rect>
+                    <rect id="Rectangle" x="0" y="7.94444444" width="9" height="3.05555556"></rect>
+                </g>
+                <g id="Coloured" transform="translate(6.837838, 15.954545)" stroke="#808080">
+                    <rect id="S-coloured" fill="url(#linearGradient-6)" x="0" y="8.8817842e-15" width="9.32432432" height="14.7272727"></rect>
+                    <rect id="R-coloured" fill="url(#linearGradient-7)" x="0" y="17.7954545" width="9.32432432" height="4.90909091"></rect>
+                    <polygon id="T-coloured" fill="url(#linearGradient-8)" points="4.15283423e-15 25.7727273 9.32432432 25.7727273 9.32432432 26.7144796 8.08108108 27.9204545 8.7027027 35.5909091 6.21621622 38.0454545 3.10810811 38.0454545 0.621621622 35.5909091 1.24324324 27.9204545 4.15283423e-15 26.7144796"></polygon>
+                </g>
+                <g id="Gold" transform="translate(6.837838, 15.954545)" stroke="#808080">
+                    <rect id="S" fill="url(#linearGradient-9)" x="0" y="8.8817842e-15" width="9.32432432" height="14.7272727"></rect>
+                    <rect id="R" fill="url(#linearGradient-10)" x="0" y="17.7954545" width="9.32432432" height="4.90909091"></rect>
+                    <polygon id="T" fill="url(#linearGradient-11)" points="1.83636889e-14 25.7727273 9.32432432 25.7727273 9.32432432 26.7144796 8.08108108 27.9204545 8.7027027 35.5909091 6.21621622 38.0454545 3.10810811 38.0454545 0.621621622 35.5909091 1.24324324 27.9204545 1.83636889e-14 26.7144796"></polygon>
+                    <animate attributeName="opacity" values="1; 1; 0; 0; 1" dur="10s" repeatCount="indefinite"/>
+                </g>
+                <g id="S-rest" stroke="#808080">
+                    <rect id="Rectangle" fill="url(#linearGradient-12)" x="1.86486486" y="3.06818182" width="19.2702703" height="4.29545455"></rect>
+                    <rect id="Rectangle" fill="url(#linearGradient-13)" x="3.10810811" y="7.36363636" width="16.7837838" height="8.59090909"></rect>
+                    <rect id="Rectangle" fill="url(#linearGradient-14)" x="0" y="-2.08721929e-14" width="23" height="4.29545455"></rect>
+                </g>
+            </g>
+            <g id="Inside" transform="translate(2.000000, 0.000000)">
+                <path d="M5.5,7 L4,7 C2.34314575,7 1,5.65685425 1,4 L1,3.5 C1,1.84314575 2.34314575,0.5 4,0.5 L15,0.5 C16.6568542,0.5 18,1.84314575 18,3.5 L18,4 C18,5.65685425 16.6568542,7 15,7 L14,7 L14,7 L14,29 L14,51.4090909 L5.5,43.5 L5.5,7 Z" id="S" stroke="#808080" stroke-width="0.25" fill="url(#linearGradient-15)"></path>
+                <path d="M6.03568493,7.36959714 C6.01189498,9.78986571 5.33333333,12.3333333 4,15 C2,19 2.5,23.5 2.5,23.5" id="R-wire" stroke="#B01E41" stroke-width="2" stroke-linecap="round"></path>
+                <path d="M12.0356849,7.36959714 C12.011895,17.4565324 12,22.5 12,22.5" id="S-wire" stroke="#D6805A" stroke-width="2" stroke-linecap="round"></path>
+                <rect id="R" stroke="#808080" stroke-width="0.25" fill="url(#linearGradient-16)" x="1" y="21" width="3" height="23"></rect>
+                <path d="M9.03568493,7.36959714 C9.03568493,7.36959714 9,33 9,33" id="T-wire" stroke="#164D61" stroke-width="2" stroke-linecap="round"></path>
+                <polygon id="T" stroke="#808080" stroke-width="0.25" fill="url(#linearGradient-17)" points="7 29 10.8378378 33 11 43.7272727 7 43.7272727"></polygon>
+                <rect id="insulator" stroke="#808080" fill="#25292C" x="0" y="43.2727273" width="19" height="14.7272727"></rect>
+            </g>
+        </g>
+        <g id="Wires" transform="translate(140.000000, 269.000000)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+            <polyline id="S" stroke="#D6805A" points="85 0.5 85 25 6 25 6 0.5"></polyline>
+            <polyline id="R" stroke="#B01E41" points="91 0.5 91 31 0 31 0 0.5"></polyline>
+            <polyline id="T" stroke="#164D61" points="88 0.5 88 28 3 28 3 0.5"></polyline>
+        </g>
+        <path d="M223,302 L146.023219,301.999868 C146.01549,301.999956 146.00775,302 146,302 L140,302 C138.895431,302 138,301.104569 138,300 L138,269 L148,269 L148,291.999 L223,292 L223,269 L233,269 L233,300 C233,301.054362 232.184122,301.918165 231.149262,301.994514 L231,302 L231,302 L223,302 Z" id="jacket" stroke="#808080" fill="#25292C" opacity="0.70219494">
+            <animate attributeName="opacity" values="1; 1; 0.1; 0.1; 1" dur="10s" repeatCount="indefinite"/>
+        </path>
+        <path d="M217.563885,216 L237.436115,216 C238.327634,216 238.65092,216.092826 238.976846,216.267133 C239.302772,216.44144 239.55856,216.697228 239.732867,217.023154 C239.907174,217.34908 240,217.672366 240,218.563885 L240,275.436115 C240,276.327634 239.907174,276.65092 239.732867,276.976846 C239.55856,277.302772 239.302772,277.55856 238.976846,277.732867 C238.65092,277.907174 238.327634,278 237.436115,278 L217.563885,278 C216.672366,278 216.34908,277.907174 216.023154,277.732867 C215.697228,277.55856 215.44144,277.302772 215.267133,276.976846 C215.092826,276.65092 215,276.327634 215,275.436115 L215,218.563885 C215,217.672366 215.092826,217.34908 215.267133,217.023154 C215.44144,216.697228 215.697228,216.44144 216.023154,216.267133 C216.34908,216.092826 216.672366,216 217.563885,216 Z" id="boot-R" stroke="#979797" fill="#25292C" opacity="0.7" transform="translate(227.500000, 247.000000) rotate(-180.000000) translate(-227.500000, -247.000000) ">
+            <animate attributeName="opacity" values="1; 1; 0.1; 0.1; 1" dur="10s" repeatCount="indefinite"/>
+        </path>
+        <path d="M133.563885,216 L153.436115,216 C154.327634,216 154.65092,216.092826 154.976846,216.267133 C155.302772,216.44144 155.55856,216.697228 155.732867,217.023154 C155.907174,217.34908 156,217.672366 156,218.563885 L156,275.436115 C156,276.327634 155.907174,276.65092 155.732867,276.976846 C155.55856,277.302772 155.302772,277.55856 154.976846,277.732867 C154.65092,277.907174 154.327634,278 153.436115,278 L133.563885,278 C132.672366,278 132.34908,277.907174 132.023154,277.732867 C131.697228,277.55856 131.44144,277.302772 131.267133,276.976846 C131.092826,276.65092 131,276.327634 131,275.436115 L131,218.563885 C131,217.672366 131.092826,217.34908 131.267133,217.023154 C131.44144,216.697228 131.697228,216.44144 132.023154,216.267133 C132.34908,216.092826 132.672366,216 133.563885,216 Z" id="boot-L" stroke="#979797" fill="#25292C" opacity="0.7" transform="translate(143.500000, 247.000000) scale(-1, 1) rotate(-180.000000) translate(-143.500000, -247.000000) ">
+            <animate attributeName="opacity" values="1; 1; 0.1; 0.1; 1" dur="10s" repeatCount="indefinite"/>
+        </path>
+    </g>
+</svg>
