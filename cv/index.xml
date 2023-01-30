@@ -11,6 +11,15 @@
     <copyright>© Dimitri Bohlender</copyright>
     <lastBuildDate>Tue, 27 Aug 2019 00:14:04 +0200</lastBuildDate><atom:link href="https://bohlender.pro/cv/index.xml" rel="self" type="application/rss+xml" />
     <item>
+      <title>Extending Datalog by Rank Operations</title>
+      <link>https://bohlender.pro/cv/work/supervision/2022-ba/</link>
+      <pubDate>Sun, 02 Oct 2022 00:00:00 +0000</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.pro/cv/work/supervision/2022-ba/</guid>
+      <description>Original title is &amp;ldquo;Erweiterung von Datalog um Berechnung von Rängen&amp;rdquo;</description>
+    </item>
+    
+    <item>
       <title>Leveraging Horn Clause Solving for Compositional Verification of PLC Software</title>
       <link>https://bohlender.pro/cv/publications/2019-deds/</link>
       <pubDate>Tue, 26 Nov 2019 00:00:00 +0000</pubDate>
