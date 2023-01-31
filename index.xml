@@ -39,6 +39,15 @@ This post illustrates&lt;/p&gt;
     </item>
     
     <item>
+      <title>Lead Software Engineer</title>
+      <link>https://bohlender.pro/cv/work/2022-se/</link>
+      <pubDate>Mon, 29 Aug 2022 00:00:00 +0000</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.pro/cv/work/2022-se/</guid>
+      <description>Having convinced the company of the need to evolve the fundamental technology, which revolves around a proprietary Datalog DSL, I&amp;rsquo;m currently leading the endeavour in a skunkworks-style R&amp;amp;D team created for this purpose. The work involves classic language design &amp;amp; implementation topics, such as the incremental replacement of misguided language concepts without breaking the existing huge code base.</description>
+    </item>
+    
+    <item>
       <title>Solving the &#34;Seven Segment Search&#34; Puzzle with Z3</title>
       <link>https://bohlender.pro/blog/aoc-seven-segment-search-with-z3/</link>
       <pubDate>Sat, 22 Jan 2022 15:06:54 +0100</pubDate>
@@ -67,6 +76,15 @@ This made me realise how hard generating &lt;q&gt;high-quality&lt;/q&gt; crosswo
 Trying to create a crossword from a set of words &amp;ndash; or a subset thereof &amp;ndash; I checked out several tools but found all of them to be based on heuristics and yield rather sparse crosswords.&lt;/p&gt;
 &lt;p&gt;In line with the general theme of my previous posts, this one illustrates how we can leverage &lt;a href=&#34;https://en.wikipedia.org/wiki/Boolean_satisfiability_problem&#34;&gt;SAT solving&lt;/a&gt; to solve this problem.
 In contrast to related approaches, which assume a fixed grid structure and search for fitting words, we consider word placement as part of the problem and eventually end up with an integrated solution to generating crosswords of adjustable quality.&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Software Engineer</title>
+      <link>https://bohlender.pro/cv/work/2020-se/</link>
+      <pubDate>Mon, 01 Jun 2020 00:00:00 +0000</pubDate>
+      <author>contact@bohlender.pro (Dimitri Bohlender)</author>
+      <guid>https://bohlender.pro/cv/work/2020-se/</guid>
+      <description>I was part of the core team of developers responsible for expressing customer-independent, fundamental concepts of the business domain in a JVM-embedded, proprietary Datalog DSL. The resulting &amp;ldquo;model&amp;rdquo; contained the logic of WorkforcePlus, and I was recruited help managing its increasing complexity. My analysis uncovered concrete deficiencies and misapprehensions in the home-made logic programming paradigm as the root cause. Thus, my main responsibilities were (re-)engineering of the most problematic business domain concepts at that time, and the introduction of modelling language constructs needed to enable more principled modelling.</description>
     </item>
     
     <item>
