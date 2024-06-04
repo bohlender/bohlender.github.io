@@ -515,7 +515,7 @@ However, they work well for most practical Mastermind variants and are a good pl
 
 <aside >
     <p>
-    I&rsquo;ve found this <a href="http://www.philos.rug.nl/~barteld/master.pdf">overview of Mastermind strategies</a> particularly helpful to get an understanding of the (explicit) standard approaches and their tradeoffs.
+    I&rsquo;ve found this <a href="https://web.archive.org/web/20181024143436/http://www.philos.rug.nl/~barteld/master.pdf">overview of Mastermind strategies</a> particularly helpful to get an understanding of the (explicit) standard approaches and their tradeoffs.
     </p>
 </aside>
 <p>In the following implementations, we represent secrets as tuples of integers.
@@ -784,7 +784,7 @@ Prior to the first guess there is no feedback, so initially all possible secrets
 Although the implementation always returns the first element, there is nothing wrong with picking a different one.</p>
 <p>Unless a guess happens to match the secret exactly, we will receive feedback $f$ that renders some elements of <code>self.candidates</code> inconsistent with $f$.
 Therefore, after every round, such candidates and the last (wrong) guess are removed from <code>self.candidates</code>.</p>
-<p>Even though the approach does not result in optimal play, and many instances can be won in less turns, it is computationally cheap and solves a classic Mastermind instance in $5.765$ turns on average.
+<p>Even though the approach does not result in optimal play, and many instances can be won in less turns, it is simple and solves a classic Mastermind instance in $5.765$ turns on average.
 This is surprisingly <a href="http://www.philos.rug.nl/~barteld/master.pdf">close to the theoretical minimum</a> of $4.34$ turns.</p>
 <h3 id="lazy-enumeration-of-consistent-candidates"><a href="#lazy-enumeration-of-consistent-candidates">Lazy Enumeration of Consistent Candidates</a></h3><p>A downside of the above method is that it keeps a list of <em>all</em> consistent candidates in memory.
 Since the number of possible secrets grows exponentially in the admissible length of secrets, this may already hinder us from solving slightly harder Mastermind variations, e.g. with $6^8$ possible secrets.</p>
@@ -1009,13 +1009,13 @@ It enumerates the consistent combinations but only needs one candidate to be exp
         <a href="https://bohlender.pro/blog/playing-hard-mastermind-games-with-a-sat-based-ai/mastermind.py">mastermind.py</a>
     </figcaption>
 </figure>
-<h3 id="minimax-based-guessing"><a href="#minimax-based-guessing">Minimax-based Guessing</a></h3><p>Since my original motivation for looking into the topic was to learn how to play the Mastermind games in <a href="https://en.wikipedia.org/wiki/Mansions_of_Madness">Mansions of Madness</a> optimally, I feel like I should outline how to do this, too.
+<h3 id="minimax-based-guessing"><a href="#minimax-based-guessing">Minimax-based Guessing</a></h3><p>Since my original motivation for looking into the topic was to learn how to play the Mastermind games in <a href="https://en.wikipedia.org/wiki/Mansions_of_Madness">Mansions of Madness</a> optimally, I feel like I should outline how the typical approach to this, too.
 Even though the central topic of this post is the (symbolic) computation of consistent guesses for hard Mastermind instances.</p>
 <p>Instead of just picking some consistent candidate, one can also analyse how promising the various candidates are and pick the <q>best</q> one &ndash; depending on some heuristic or notion of quality.</p>
 <p>The first and probably most popular way for picking a &ldquo;good&rdquo; candidate was suggested by <a href="https://www.cs.uni.edu/~wallingf/teaching/cs3530/resources/knuth-mastermind.pdf">Knuth</a> in 1977.
 The general idea is that the best guess should minimise the set of consistent candidates &ndash; no matter the feedback.
-By assuming the least helpful feedback to be returned for each guess, and picking the (not necessarily consistent) guess in this setting that will yield the smallest set of consistent candidates, Knuth effectively implements a shallow <a href="https://en.wikipedia.org/wiki/Minimax">Minimax</a> rule.
-While a tree-like illustration is most helpful for Minimax on longer games, I found the table-oriented argument from <a href="http://www.philos.rug.nl/~barteld/master.pdf">the overview</a> to be more apt in the case of Mastermind.</p>
+By assuming the least helpful feedback to be returned for each guess, and picking the (not necessarily consistent) guess in this setting that will yield the smallest set of consistent candidates, Knuth effectively implements a &ldquo;shallow&rdquo; <a href="https://en.wikipedia.org/wiki/Minimax">Minimax</a> rule.</p>
+<p>While a tree-like illustration is most helpful for Minimax on longer games, I found the table-oriented argument from <a href="http://www.philos.rug.nl/~barteld/master.pdf">the overview</a> to be more apt for the shallow Minimax typically used in the case of Mastermind.</p>
 <p>Consider committing some candidate $c$ and, in turn, receiving some feedback $f$.
 The following table illustrates the possible outcomes depending on the chosen $c$ and the codemaker&rsquo;s feedback $f$ for the very <em>first guess</em>:</p>
 <table>
@@ -1485,6 +1485,14 @@ That&rsquo;s why we also keep the inconsistent candidates (<code>self.not_candid
 <p>The Minimax-based approach solves any classic Mastermind instance <strong>within five guesses</strong>, and needs $4.476$ rounds on average.
 Unfortunately, the runtime complexity of this and similar methods that optimise rigorously is quadratic in the number of candidates.
 Considering that even iterating over all possible secrets of a hard Mastermind instance takes too long for a game AI, aiming for optimal guesses is quite a stretch.</p>
+
+<aside >
+    <p>
+    In fact, by implementing a Minimax rule of limited depth, this approach does actually <em>not</em> play optimally &ndash; the guesses are merely locally optimal.
+Nevertheless, it&rsquo;s not much worse than the performance of optimal play.
+With exhaustive exploration of the game tree, classic Mastermind instances can be solved within $4.34$ rounds on average.
+    </p>
+</aside>
 <h2 id="sat-based-approach"><a href="#sat-based-approach">SAT-based Approach</a></h2><p>So far we&rsquo;ve seen that the Minimax-based approach is well-suited for Mastermind instances with small numbers of possible secrets, and that the lazy enumeration of consistent candidates is not optimal, but cheaper to compute, and on average not much worse.
 However, despite the small memory footprint, the core problem is that enumerative methods don&rsquo;t scale to larger Mastermind instances.</p>
 <p>It would be nice if we could at manage to compute consistent candidates for the hard instances, but even this problem <a href="https://arxiv.org/abs/cs/0512049">is known</a> to be <a href="https://en.wikipedia.org/wiki/NP-complete">NP-complete</a>.
