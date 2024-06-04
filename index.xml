@@ -39,12 +39,12 @@ This post illustrates&lt;/p&gt;
     </item>
     
     <item>
-      <title>Lead Software Engineer</title>
+      <title>Lead Software Engineer / Software Architect</title>
       <link>https://bohlender.pro/cv/work/2022-se/</link>
       <pubDate>Mon, 29 Aug 2022 00:00:00 +0000</pubDate>
       <author>contact@bohlender.pro (Dimitri Bohlender)</author>
       <guid>https://bohlender.pro/cv/work/2022-se/</guid>
-      <description>Having convinced the company of the need to evolve the fundamental technology, which revolves around a proprietary Datalog DSL, I&amp;rsquo;m currently leading the endeavour in a skunkworks-style R&amp;amp;D team created for this purpose. The work involves classic language design &amp;amp; implementation topics, such as the incremental replacement of misguided language concepts without breaking the existing huge code base.</description>
+      <description>Having convinced the company of the need to evolve the fundamental technology, which revolves around a proprietary Datalog DSL, I&amp;rsquo;m currently leading the endeavour in a skunkworks-style R&amp;amp;D team created for this purpose. The work involves classic language design &amp;amp; implementation topics, such as the incremental replacement of misguided language concepts without breaking the existing huge code base, and tool development to automate the error-prone workflows of developers and consultants using the language.</description>
     </item>
     
     <item>
