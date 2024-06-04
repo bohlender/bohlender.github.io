@@ -1014,8 +1014,8 @@ Even though the central topic of this post is the (symbolic) computation of cons
 <p>Instead of just picking some consistent candidate, one can also analyse how promising the various candidates are and pick the <q>best</q> one &ndash; depending on some heuristic or notion of quality.</p>
 <p>The first and probably most popular way for picking a &ldquo;good&rdquo; candidate was suggested by <a href="https://www.cs.uni.edu/~wallingf/teaching/cs3530/resources/knuth-mastermind.pdf">Knuth</a> in 1977.
 The general idea is that the best guess should minimise the set of consistent candidates &ndash; no matter the feedback.
-By assuming the least helpful feedback to be returned for each guess, and picking the (not necessarily consistent) guess in this setting that will yield the smallest set of consistent candidates, Knuth effectively implements a &ldquo;shallow&rdquo; <a href="https://en.wikipedia.org/wiki/Minimax">Minimax</a> rule.</p>
-<p>While a tree-like illustration is most helpful for Minimax on longer games, I found the table-oriented argument from <a href="http://www.philos.rug.nl/~barteld/master.pdf">the overview</a> to be more apt for the shallow Minimax typically used in the case of Mastermind.</p>
+By assuming the least helpful feedback to be returned for each guess, and picking the (not necessarily consistent) guess in this setting that will yield the smallest set of consistent candidates, Knuth effectively implements a &ldquo;shallow&rdquo; <a href="https://en.wikipedia.org/wiki/Minimax">Minimax</a> rule.
+While a tree-like illustration is most helpful for Minimax on longer games, here, I find the table-oriented argument from <a href="http://www.philos.rug.nl/~barteld/master.pdf">the overview</a> to be more apt.</p>
 <p>Consider committing some candidate $c$ and, in turn, receiving some feedback $f$.
 The following table illustrates the possible outcomes depending on the chosen $c$ and the codemaker&rsquo;s feedback $f$ for the very <em>first guess</em>:</p>
 <table>

@@ -2090,6 +2090,14 @@ Z3 provides <a href="https://theory.stanford.edu/~nikolaj/programmingz3.html#sec
         <a href="https://bohlender.pro/blog/generating-crosswords-with-sat-smt/crossword.py">crossword.py</a>
     </figcaption>
 </figure>
+
+<aside >
+    <p>
+    A reader noticed that nowadays <code>exportCNF</code> fails to produce a CNF.
+I suspect that some of the tactics' semantics have changed in recent versions and the sequence does not guarantee the goal to be in CNF anymore.
+Sticking to what was the latest version at the time of writing, i.e. Z3 4.11.2.0, is guaranteed to work though.
+    </p>
+</aside>
 <h2 id="experiments"><a href="#experiments">Experiments</a></h2><p>Now that we got the crossword generation pipeline up an running it is interesting to see how long it takes to assemble <a href="#the-problem-statement">the words from our example</a> into crosswords of size 12 with varying quality requirements.
 Following the proposed approach, I generated crosswords of increasing quality and measured the time needed to solve the SAT instances with various solvers.
 Since not all steps of the SAT encoding and solving are fully deterministic, some repetitions are necessary to get a better overview of the solvers' average performance.

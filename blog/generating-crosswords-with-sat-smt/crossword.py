@@ -2,7 +2,7 @@ from collections import namedtuple
 from itertools import *
 from timeit import default_timer as timer
 
-from z3 import *  # Provided by `pip install z3-solver`
+from z3 import *  # Provided by `pip install z3-solver==`4.11.2.0`
 
 
 # Decorator for tracking progress and runtime
