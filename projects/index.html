@@ -49,6 +49,61 @@ Some of them are <span style="padding-bottom: 1px; border-bottom-width: 3px; bor
         </header>
         <article class="personal">
             <header>
+                <h2 id="mastermind-solver"><a href="#mastermind-solver">Mastermind Solver</a></h2>
+                <div class="metadata">
+                    <time datetime="2024-11-08">2024</time>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a class="source" href="https://clojurescript.org/">ClojureScript</a>
+                        </li>
+                        
+                        <li>
+                            <a class="source" href="https://isocpp.org/">C&#43;&#43;</a>
+                        </li>
+                        
+                        <li>
+                            <a class="source" href="https://emscripten.org/">Emscripten</a>
+                        </li>
+                        
+                        <li>
+                            <a class="source" href="https://github.com/arminbiere/kissat">kissat</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </div>
+            </header>
+            <div class="flex-wrapper">
+                <div class="project-description">
+                    <p>I was curious to explore what <a href="https://clojurescript.org/">ClojureScript</a> and <a href="https://github.com/reagent-project/reagent">Reagent</a> are all about and used this opportunity to create <a href="https://mastermind-solver.bohlender.pro">a web frontend</a> for <a href="/blog/playing-hard-mastermind-games-with-a-sat-based-ai/">the SAT-based Mastermind solver from one of my posts</a>.</p>
+<p>All computation is kept client-side to avoid server costs.
+I had to <a href="https://github.com/bohlender/mastermind-solver">port</a> the approach to C/C++ and <a href="https://github.com/arminbiere/kissat">kissat</a> to obtain a reasonably small and performant WASM library.
+Ultimately, this library is what the thin ClojureScript frontend wraps.</p>
+
+                </div>
+                
+                <div class="figures">
+                    
+                        <figure class="figure-inner">
+                            <a class="perfundo__link" href="#perfundo-dcc3744154bc1d6381725a9f595dbfba4d5b78ca">
+                                <img class="thumbnail-shadow" src="/projects/mastermind-solver/initial_version_hu875947b343b26955ff241233d736d490_47559_500x0_resize_lanczos_3.png">
+                            </a>
+                            <figcaption>Testing the example from the blog post</figcaption></figure>
+                        <div id="perfundo-dcc3744154bc1d6381725a9f595dbfba4d5b78ca" class="perfundo__overlay">
+                            <figure class="perfundo__content perfundo__figure">
+                                <div class="perfundo__image" style="height: 456px; width: 861px; background-image: url(/projects/mastermind-solver/initial_version.png);"></div>
+                                <figcaption>Testing the example from the blog post</figcaption></figure>
+                            <a href="#perfundo-untarget" class="perfundo__close perfundo__control">Close</a>
+                        </div>
+                    
+                </div>
+                
+            </div>
+        </article>
+        <article class="personal">
+            <header>
                 <h2 id="personal-website"><a href="#personal-website">Personal Website</a></h2>
                 <div class="metadata">
                     <time datetime="2019-09-05">2019</time>

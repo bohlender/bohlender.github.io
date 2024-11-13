@@ -81,6 +81,11 @@ This post illustrates the problem with standard approaches, and how finding cons
 Although it is difficult for a human player to make <em>optimal guesses</em> of the secret code, or at least guesses that do not conflict with the provided clues, the setting is usually simple enough for an AI to find such candidates via explicit exploration of the <a href="https://en.wikipedia.org/wiki/Game_tree">game tree</a>.</p>
 <p>However, such approaches become unfeasible when the number of possibilities for secret codes grows into the millions.
 This post illustrates the problem with standard approaches, and how finding consistent candidates can be approached with <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">SAT</a> solving &ndash; yielding an AI that can handle orders-of-magnitude harder Mastermind instances.</p>
+<aside >
+    <p>
+    Update: Since writing this post, I&rsquo;ve also built the approach into <a href="https://mastermind-solver.bohlender.pro">a web app</a>.
+    </p>
+</aside>
 <h2 id="introduction"><a href="#introduction">Introduction</a></h2><p>Every now and then, my friends and I gather to play <a href="https://en.wikipedia.org/wiki/Mansions_of_Madness">Mansions of Madness</a> &ndash; a cooperative boardgame.
 In line with its Lovecraftian setting, the game is often unforgiving so we try to optimise our every move.
 Besides the core gameplay, solving various puzzles is often needed to advance.
